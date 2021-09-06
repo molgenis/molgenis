@@ -47,7 +47,7 @@ import org.springframework.security.acls.domain.GrantedAuthoritySid;
 import org.springframework.security.acls.domain.ObjectIdentityImpl;
 import org.springframework.security.acls.domain.PrincipalSid;
 import org.springframework.security.acls.model.Acl;
-import org.springframework.security.acls.model.AclService;
+import org.springframework.security.acls.model.MutableAclService;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
 import org.springframework.security.acls.model.SidRetrievalStrategy;
@@ -67,7 +67,7 @@ class PermissionsControllerTest extends AbstractMolgenisSpringTest {
   @Mock private ObjectIdentityService objectIdentityService;
   @Mock private UserRoleTools userRoleTools;
   @Mock private EntityHelper entityHelper;
-  @Mock private AclService aclService;
+  @Mock private MutableAclService aclService;
   @Mock private SidRetrievalStrategy sidRetrievalStrategy;
   @Mock private Acl acl1;
   @Mock private Acl acl2;

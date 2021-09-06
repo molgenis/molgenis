@@ -33,6 +33,7 @@ import org.molgenis.api.permissions.exceptions.UnsupportedPermissionQueryExcepti
 import org.molgenis.api.permissions.exceptions.UserAndRoleException;
 import org.molgenis.api.permissions.exceptions.rsql.PermissionQueryParseException;
 import org.molgenis.api.permissions.model.request.DeletePermissionRequest;
+import org.molgenis.api.permissions.model.request.NewOwnerRequest;
 import org.molgenis.api.permissions.model.request.ObjectPermissionsRequest;
 import org.molgenis.api.permissions.model.request.PermissionRequest;
 import org.molgenis.api.permissions.model.request.SetObjectPermissionRequest;
@@ -55,9 +56,14 @@ import org.molgenis.data.security.permission.model.LabelledType;
 import org.molgenis.data.security.permission.model.Permission;
 import org.molgenis.security.acl.ObjectIdentityService;
 import org.molgenis.security.core.PermissionSet;
+import org.molgenis.security.core.SidUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.acls.domain.ObjectIdentityImpl;
-import org.springframework.security.acls.model.AclService;
+import org.springframework.security.acls.model.Acl;
+import org.springframework.security.acls.model.MutableAcl;
+import org.springframework.security.acls.model.MutableAclService;
+import org.springframework.security.acls.model.NotFoundException;
+import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
 import org.springframework.security.acls.model.SidRetrievalStrategy;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -98,7 +104,7 @@ public class PermissionsController extends ApiController {
   private final UserRoleTools userRoleTools;
   private final EntityHelper entityHelper;
   private final SidRetrievalStrategy sidRetrievalStrategy;
-  private final AclService aclService;
+  private final MutableAclService aclService;
 
   public PermissionsController(
       PermissionService permissionService,
@@ -107,7 +113,7 @@ public class PermissionsController extends ApiController {
       UserRoleTools userRoleTools,
       EntityHelper entityHelper,
       SidRetrievalStrategy sidRetrievalStrategy,
-      AclService aclService) {
+      MutableAclService aclService) {
     super(PERMISSION_API_IDENTIFIER, 1);
     this.permissionService = requireNonNull(permissionService);
     this.rsqlParser = requireNonNull(rsqlParser);
@@ -189,16 +195,13 @@ public class PermissionsController extends ApiController {
         permissionService.getObjects(typeId, page, pageSize).stream()
             .map(
                 labelledObject -> {
-                  Sid owner =
-                      aclService
-                          .readAclById(new ObjectIdentityImpl(typeId, labelledObject.getId()))
-                          .getOwner();
+                  var owner = getOwner(new ObjectIdentityImpl(typeId, labelledObject.getId()));
                   return ObjectResponse.create(
                       labelledObject.getId(),
                       labelledObject.getLabel(),
-                      UserRoleTools.getRolename(owner).orElse(null),
-                      UserRoleTools.getUsername(owner).orElse(null),
-                      Optional.ofNullable(owner).map(sids::contains).orElse(false));
+                      owner.flatMap(UserRoleTools::getRolename).orElse(null),
+                      owner.flatMap(UserRoleTools::getUsername).orElse(null),
+                      owner.map(sids::contains).orElse(false));
                 })
             .collect(Collectors.toSet());
     int totalItems = objectIdentityService.getNrOfObjectIdentities(typeId);
@@ -284,6 +287,7 @@ public class PermissionsController extends ApiController {
       @RequestBody SetObjectPermissionRequest request) {
     Set<Permission> permissions = convertRequests(request.getPermissions(), typeId, identifier);
     permissionService.updatePermissions(permissions);
+    updateObjectOwner(entityHelper.getObjectIdentity(typeId, identifier), request);
     return ResponseEntity.noContent().build();
   }
 
@@ -297,7 +301,35 @@ public class PermissionsController extends ApiController {
       @RequestBody SetTypePermissionsRequest request) {
     Set<Permission> permissions = convertRequests(request.getObjects(), typeId);
     permissionService.updatePermissions(permissions);
+    for (ObjectPermissionsRequest object : request.getObjects()) {
+      ObjectIdentity objectIdentity = entityHelper.getObjectIdentity(typeId, object.getObjectId());
+      updateObjectOwner(objectIdentity, object);
+    }
     return ResponseEntity.noContent().build();
+  }
+
+  private void updateObjectOwner(ObjectIdentity objectIdentity, NewOwnerRequest request) {
+    getSid(request)
+        .ifPresent(
+            (owner) -> {
+              var acl = (MutableAcl) (aclService.readAclById(objectIdentity));
+              acl.setOwner(owner);
+              aclService.updateAcl(acl);
+            });
+  }
+
+  private Optional<Sid> getSid(NewOwnerRequest request) {
+    String user = request.getOwnedByUser();
+    if (user != null) {
+      userRoleTools.checkUserExists(user);
+      return Optional.of(SidUtils.createUserSid(user));
+    }
+    String role = request.getOwnedByRole();
+    if (role != null) {
+      userRoleTools.checkRoleExists(role);
+      return Optional.of(SidUtils.createRoleSid(role));
+    }
+    return Optional.empty();
   }
 
   @PostMapping(value = "{" + TYPE_ID + "}")
@@ -448,14 +480,14 @@ public class PermissionsController extends ApiController {
         }
         LabelledPermissionResponse labelledResponse;
         if (permission.getLabelledObjectIdentity() != null) {
-          Sid owner = aclService.readAclById(permission.getLabelledObjectIdentity()).getOwner();
+          var owner = getOwner(permission.getLabelledObjectIdentity());
           ObjectResponse objectResponse =
               ObjectResponse.create(
                   permission.getLabelledObjectIdentity().getIdentifier().toString(),
                   permission.getLabelledObjectIdentity().getIdentifierLabel(),
-                  UserRoleTools.getRolename(owner).orElse(null),
-                  UserRoleTools.getUsername(owner).orElse(null),
-                  Optional.ofNullable(owner).map(userSids::contains).orElse(false));
+                  owner.flatMap(UserRoleTools::getRolename).orElse(null),
+                  owner.flatMap(UserRoleTools::getUsername).orElse(null),
+                  owner.map(userSids::contains).orElse(false));
           TypeResponse typeResponse =
               TypeResponse.create(
                   permission.getLabelledObjectIdentity().getType(),
@@ -485,23 +517,36 @@ public class PermissionsController extends ApiController {
     return permissionResponses;
   }
 
+  private Optional<Sid> getOwner(ObjectIdentity objectIdentity) {
+    try {
+      return Optional.of(aclService.readAclById(objectIdentity)).map(Acl::getOwner);
+    } catch (NotFoundException ignore) {
+      return Optional.empty();
+    }
+  }
+
   private Set<Permission> convertRequests(
       List<PermissionRequest> requests, String typeId, String identifier) {
     Set<Permission> permissions = new HashSet<>();
-    for (PermissionRequest permissionRequest : requests) {
-      permissions.add(
-          Permission.create(
-              entityHelper.getObjectIdentity(typeId, identifier),
-              getSid(permissionRequest.getUser(), permissionRequest.getRole()),
-              PermissionSetUtils.paramValueToPermissionSet(permissionRequest.getPermission())));
+    if (requests != null) {
+      for (PermissionRequest permissionRequest : requests) {
+        permissions.add(
+            Permission.create(
+                entityHelper.getObjectIdentity(typeId, identifier),
+                getSid(permissionRequest.getUser(), permissionRequest.getRole()),
+                PermissionSetUtils.paramValueToPermissionSet(permissionRequest.getPermission())));
+      }
     }
     return permissions;
   }
 
   private Set<Permission> convertRequests(List<ObjectPermissionsRequest> requests, String typeId) {
     Set<Permission> permissions = new HashSet<>();
-    for (ObjectPermissionsRequest request : requests) {
-      permissions.addAll(convertRequests(request.getPermissions(), typeId, request.getObjectId()));
+    if (requests != null) {
+      for (ObjectPermissionsRequest request : requests) {
+        permissions.addAll(
+            convertRequests(request.getPermissions(), typeId, request.getObjectId()));
+      }
     }
     return permissions;
   }
