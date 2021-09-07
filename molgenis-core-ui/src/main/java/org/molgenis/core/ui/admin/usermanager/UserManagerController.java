@@ -1,9 +1,12 @@
 package org.molgenis.core.ui.admin.usermanager;
 
+import static java.util.Objects.requireNonNull;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.molgenis.core.ui.settings.FormSettings;
 import org.molgenis.web.PluginController;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -21,13 +24,13 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class UserManagerController extends PluginController {
   public static final String URI = PluginController.PLUGIN_URI_PREFIX + "usermanager";
   private final UserManagerService pluginUserManagerService;
+  private final FormSettings formSettings;
 
-  public UserManagerController(UserManagerService pluginUserManagerService) {
+  public UserManagerController(
+      UserManagerService pluginUserManagerService, FormSettings formSettings) {
     super(URI);
-    if (pluginUserManagerService == null) {
-      throw new IllegalArgumentException("PluginUserManagerService is null");
-    }
-    this.pluginUserManagerService = pluginUserManagerService;
+    this.formSettings = requireNonNull(formSettings);
+    this.pluginUserManagerService = requireNonNull(pluginUserManagerService);
   }
 
   @ApiOperation("Return user manager view")
@@ -38,6 +41,7 @@ public class UserManagerController extends PluginController {
         "activeSessionCount", this.pluginUserManagerService.getActiveSessionsCount());
     model.addAttribute("users", this.pluginUserManagerService.getAllUsers());
     model.addAttribute("activeUsers", this.pluginUserManagerService.getActiveSessionUserNames());
+    model.addAttribute("formSettings", this.formSettings);
 
     return "view-usermanager";
   }
