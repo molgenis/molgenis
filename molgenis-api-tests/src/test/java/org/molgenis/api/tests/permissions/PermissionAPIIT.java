@@ -101,7 +101,7 @@ class PermissionAPIIT extends AbstractApiTests {
     String response1 =
         "{data={permissions=[{permission=WRITEMETA, user=admin}, {permission=READ, user="
             + testUserName
-            + "}], id=perm1_entity1, label=entity1}}";
+            + "}], id=perm1_entity1, label=entity1, ownedByUser=admin, yours=true}}";
 
     Response actual =
         given()
@@ -125,7 +125,7 @@ class PermissionAPIIT extends AbstractApiTests {
     String response2 =
         "{data={permissions=[{permission=WRITEMETA, user=admin}, {permission=WRITE, user="
             + testUserName
-            + "}], id=perm1_entity1, label=entity1}}";
+            + "}], id=perm1_entity1, label=entity1, ownedByUser=admin, yours=true}}";
     Response actual2 =
         given()
             .get(PermissionsController.BASE_URI + "/entityType/perm1_entity1")
@@ -146,7 +146,7 @@ class PermissionAPIIT extends AbstractApiTests {
         .statusCode(204);
 
     String response3 =
-        "{data={permissions=[{permission=WRITEMETA, user=admin}], id=perm1_entity1, label=entity1}}";
+        "{data={permissions=[{permission=WRITEMETA, user=admin}], id=perm1_entity1, label=entity1, ownedByUser=admin, yours=true}}";
     Response actual3 =
         given()
             .get(PermissionsController.BASE_URI + "/entityType/perm1_entity1")
@@ -179,9 +179,9 @@ class PermissionAPIIT extends AbstractApiTests {
         .statusCode(201);
 
     String response =
-        "{data={permissions=[{permission=WRITEMETA, user=admin, inheritedPermissions=[{type={entityType=sys_md_Package, id=package, label=Package}, inheritedPermissions=[{role=perm1_MANAGER, permission=WRITEMETA, inheritedPermissions=[{role=perm1_EDITOR, permission=WRITE, inheritedPermissions=[{role=perm1_VIEWER, permission=READ, inheritedPermissions=[]}]}]}], object={id=perm1, label=perm1}}]}, {user="
+        "{data={permissions=[{permission=WRITEMETA, user=admin, inheritedPermissions=[{type={entityType=sys_md_Package, id=package, label=Package}, inheritedPermissions=[{role=perm1_MANAGER, permission=WRITEMETA, inheritedPermissions=[{role=perm1_EDITOR, permission=WRITE, inheritedPermissions=[{role=perm1_VIEWER, permission=READ, inheritedPermissions=[]}]}]}], object={id=perm1, label=perm1, yours=false}}]}, {user="
             + testUserName
-            + ", inheritedPermissions=[{permission=READ, type={entityType=sys_md_Package, id=package, label=Package}, inheritedPermissions=[], object={id=perm1, label=perm1}}]}, {role=perm1_EDITOR, inheritedPermissions=[{permission=WRITE, type={entityType=sys_md_Package, id=package, label=Package}, inheritedPermissions=[{role=perm1_VIEWER, permission=READ, inheritedPermissions=[]}], object={id=perm1, label=perm1}}]}, {role=perm1_MANAGER, inheritedPermissions=[{permission=WRITEMETA, type={entityType=sys_md_Package, id=package, label=Package}, inheritedPermissions=[{role=perm1_EDITOR, permission=WRITE, inheritedPermissions=[{role=perm1_VIEWER, permission=READ, inheritedPermissions=[]}]}], object={id=perm1, label=perm1}}]}, {role=perm1_VIEWER, inheritedPermissions=[{permission=READ, type={entityType=sys_md_Package, id=package, label=Package}, inheritedPermissions=[], object={id=perm1, label=perm1}}]}], id=perm1_entity1, label=entity1}}";
+            + ", inheritedPermissions=[{permission=READ, type={entityType=sys_md_Package, id=package, label=Package}, inheritedPermissions=[], object={id=perm1, label=perm1, yours=false}}]}, {role=perm1_EDITOR, inheritedPermissions=[{permission=WRITE, type={entityType=sys_md_Package, id=package, label=Package}, inheritedPermissions=[{role=perm1_VIEWER, permission=READ, inheritedPermissions=[]}], object={id=perm1, label=perm1, yours=false}}]}, {role=perm1_MANAGER, inheritedPermissions=[{permission=WRITEMETA, type={entityType=sys_md_Package, id=package, label=Package}, inheritedPermissions=[{role=perm1_EDITOR, permission=WRITE, inheritedPermissions=[{role=perm1_VIEWER, permission=READ, inheritedPermissions=[]}]}], object={id=perm1, label=perm1, yours=false}}]}, {role=perm1_VIEWER, inheritedPermissions=[{permission=READ, type={entityType=sys_md_Package, id=package, label=Package}, inheritedPermissions=[], object={id=perm1, label=perm1, yours=false}}]}], id=perm1_entity1, label=entity1, ownedByUser=admin, yours=true}}";
 
     Response actual =
         given()
@@ -199,8 +199,8 @@ class PermissionAPIIT extends AbstractApiTests {
         "{data={permissions=[{user="
             + testUserName
             + ", "
-            + "inheritedPermissions=[{permission=READ, type={entityType=sys_md_Package, id=package, label=Package}, inheritedPermissions=[], object={id=perm1, label=perm1}}]}], "
-            + "id=perm1_entity1, label=entity1}}";
+            + "inheritedPermissions=[{permission=READ, type={entityType=sys_md_Package, id=package, label=Package}, inheritedPermissions=[], object={id=perm1, label=perm1, yours=false}}]}], "
+            + "id=perm1_entity1, label=entity1, ownedByUser=admin, yours=true}}";
     Response actual2 =
         given()
             .get(
@@ -258,17 +258,17 @@ class PermissionAPIIT extends AbstractApiTests {
             + testUserName2
             + "}, {permission=WRITE, user="
             + testUserName
-            + "}], id=perm1_entity2, label=entity2}, {permissions=[{permission=WRITEMETA, user="
+            + "}], id=perm1_entity2, label=entity2, ownedByUser=admin, yours=true}, {permissions=[{permission=WRITEMETA, user="
             + testUserName
-            + "}], id=perm2_entity3, label=entity3}, {permissions=[{permission=READ, user="
+            + "}], id=perm2_entity3, label=entity3, ownedByUser=admin, yours=true}, {permissions=[{permission=READ, user="
             + testUserName2
             + "}, {permission=READ, user="
             + testUserName
-            + "}], id=sys_sec_Role, label=Role}, {permissions=[{permission=READ, user="
+            + "}], ownedByRole=SYSTEM, id=sys_sec_Role, label=Role, yours=false}, {permissions=[{permission=READ, user="
             + testUserName2
             + "}, {permission=READ, user="
             + testUserName
-            + "}], id=sys_sec_RoleMembership, label=Role Membership}], id=entityType, label=Entity type}";
+            + "}], ownedByRole=SYSTEM, id=sys_sec_RoleMembership, label=Role Membership, yours=false}], id=entityType, label=Entity type}";
 
     Response actual =
         given()
@@ -308,7 +308,9 @@ class PermissionAPIIT extends AbstractApiTests {
             .extract()
             .response();
     JsonPath path = actual.getBody().jsonPath();
-    assertEquals("[{id=1, label=1}, {id=2, label=2}]", path.getJsonObject("data").toString());
+    assertEquals(
+        "[{id=2, label=2, ownedByUser=admin, yours=true}, {id=1, label=1, ownedByUser=admin, yours=true}]",
+        path.getJsonObject("data").toString());
   }
 
   @Test
@@ -359,7 +361,7 @@ class PermissionAPIIT extends AbstractApiTests {
         .statusCode(201);
 
     String response =
-        "{\"data\":{\"id\":\"perm1_entity2\",\"label\":\"entity2\",\"permissions\":[{\"user\":\""
+        "{\"data\":{\"id\":\"perm1_entity2\",\"label\":\"entity2\",\"ownedByUser\":\"admin\",\"yours\":false,\"permissions\":[{\"user\":\""
             + testUserName
             + "\",\"permission\":\"READ\"}]}}";
     given(testUserToken)
