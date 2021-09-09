@@ -10,7 +10,9 @@ public abstract class UserResponse {
 
   public abstract String getUsername();
 
+  public abstract boolean isSuperuser();
+
   static UserResponse fromEntity(User user) {
-    return new AutoValue_UserResponse(user.getId(), user.getUsername());
+    return new AutoValue_UserResponse(user.getId(), user.getUsername(), user.isSuperuser());
   }
 }
