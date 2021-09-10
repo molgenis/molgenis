@@ -204,6 +204,7 @@
             <systemProperties>
               <molgenis.home>${project.build.testOutputDirectory}/home</molgenis.home>
             </systemProperties>
+            <output>cargo.out</output>
           </container>
           <configuration>
             <configfiles>

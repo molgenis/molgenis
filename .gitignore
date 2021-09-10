@@ -34,3 +34,5 @@ pom.xml.releaseBackup
 molgenis-app/dev-env/.env
 molgenis-platform-integration-tests/integ-test-env/.env
 audit.log
+
+cargo.out
