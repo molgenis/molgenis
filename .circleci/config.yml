@@ -35,6 +35,14 @@ jobs:
             - maven-repo-v1-{{ .Branch }}-
             - maven-repo-v1-
       - run: mvn --batch-mode clean install -DskipTests -T 1C
+      - run:
+          name: Save war file
+          command: |
+            mkdir -p ~/artifacts/war/
+            cp molgenis-app/target/*.war ~/artifacts/war/
+          when: always
+      - store_artifacts:
+          path: ~/artifacts/war/
       - persist_to_workspace:
          root: ~/.m2
          paths:
@@ -50,6 +58,16 @@ jobs:
           at: ~/.m2
       - checkout
       - run: mvn verify --batch-mode -pl molgenis-api-tests -Dit_db_user=molgenis -Dit_db_password=molgenis -Dit_db_name=molgenis -Dit_db_port=5432 -P\!create-it-db,\!create-it-es
+      - run:
+          name: Save test results
+          command: |
+            mkdir -p ~/test-results/junit/
+            find . -type f -regex ".*/target/failsafe-reports/.*xml" -exec cp {} ~/test-results/junit/ \;
+          when: always
+      - store_test_results:
+          path: ~/test-results
+      - store_artifacts:
+          path: ~/test-results/junit
       - save_cache:
           paths:
             - ~/.m2
@@ -61,6 +79,16 @@ jobs:
           at: ~/.m2
       - checkout
       - run: mvn verify -pl molgenis-platform-integration-tests -Dit_db_user=molgenis -Dit_db_password=molgenis -Dit_db_name=molgenis -Dit_db_port=5432 -P\!create-it-db,\!create-it-es
+      - run:
+          name: Save test results
+          command: |
+            mkdir -p ~/test-results/junit/
+            find . -type f -regex ".*/target/failsafe-reports/.*xml" -exec cp {} ~/test-results/junit/ \;
+          when: always
+      - store_test_results:
+          path: ~/test-results
+      - store_artifacts:
+          path: ~/test-results/junit
       - save_cache:
           paths:
             - ~/.m2
