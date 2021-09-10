@@ -1,4 +1,27 @@
-version: 2
+version: 2.1
+executors:
+  it-executor:
+    docker:
+      - image: molgenis/maven-jdk11:maven-jdk11-release-2019-05-07_09-20-11
+        environment:
+          MINIO_ACCESS_KEY: molgenis
+          MINIO_SECRET_KEY: molgenis
+      - image: postgres:11-alpine
+        environment:
+          POSTGRES_USER: molgenis
+          POSTGRES_PASSWORD: molgenis
+          POSTGRES_DB: molgenis
+      - image: molgenis/molgenis-elasticsearch:1.0.0
+        environment:
+          cluster.name: molgenis
+          bootstrap.memory_lock: true
+          ES_JAVA_OPTS: -Xms512m -Xmx512m
+          discovery.type: single-node
+      - image: minio/minio:RELEASE.2019-03-20T22-38-47Z
+        environment:
+          MINIO_ACCESS_KEY: molgenis
+          MINIO_SECRET_KEY: molgenis
+        command: server /data
 jobs:
   build:
     docker:
@@ -21,27 +44,7 @@ jobs:
             - ~/.m2
           key: maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
   apitest:
-    docker:
-      - image: molgenis/maven-jdk11:maven-jdk11-release-2019-05-07_09-20-11
-        environment:
-          MINIO_ACCESS_KEY: molgenis
-          MINIO_SECRET_KEY: molgenis
-      - image: postgres:11-alpine
-        environment:
-          POSTGRES_USER: molgenis
-          POSTGRES_PASSWORD: molgenis
-          POSTGRES_DB: molgenis
-      - image: molgenis/molgenis-elasticsearch:1.0.0
-        environment:
-          cluster.name: molgenis
-          bootstrap.memory_lock: true
-          ES_JAVA_OPTS: -Xms512m -Xmx512m
-          discovery.type: single-node
-      - image: minio/minio:RELEASE.2019-03-20T22-38-47Z
-        environment:
-          MINIO_ACCESS_KEY: molgenis
-          MINIO_SECRET_KEY: molgenis
-        command: server /data
+    executor: it-executor
     steps:
       - attach_workspace:
           at: ~/.m2
@@ -52,27 +55,7 @@ jobs:
             - ~/.m2
           key: maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
   integrationtest:
-    docker:
-      - image: molgenis/maven-jdk11:maven-jdk11-release-2019-05-07_09-20-11
-        environment:
-          MINIO_ACCESS_KEY: molgenis
-          MINIO_SECRET_KEY: molgenis
-      - image: postgres:11-alpine
-        environment:
-          POSTGRES_USER: molgenis
-          POSTGRES_PASSWORD: molgenis
-          POSTGRES_DB: molgenis
-      - image: molgenis/molgenis-elasticsearch:1.0.0
-        environment:
-          cluster.name: molgenis
-          bootstrap.memory_lock: true
-          ES_JAVA_OPTS: -Xms512m -Xmx512m
-          discovery.type: single-node
-      - image: minio/minio:RELEASE.2019-03-20T22-38-47Z
-        environment:
-          MINIO_ACCESS_KEY: molgenis
-          MINIO_SECRET_KEY: molgenis
-        command: server /data
+    executor: it-executor
     steps:
       - attach_workspace:
           at: ~/.m2
