@@ -255,7 +255,7 @@
                   <properties>
                     <context>ROOT</context>
                   </properties>
-                  <pingUrlPath>/menu/main/home</pingUrlPath>
+                  <pingUrlPath>/api/v1/version</pingUrlPath>
                   <pingTimeout>120000</pingTimeout>
                 </deployable>
               </deployables>
