@@ -1,0 +1,107 @@
+version: 2.1
+executors:
+  it-executor:
+    docker:
+      - image: molgenis/maven-jdk11:maven-jdk11-release-2019-05-07_09-20-11
+        environment:
+          MINIO_ACCESS_KEY: molgenis
+          MINIO_SECRET_KEY: molgenis
+      - image: postgres:11-alpine
+        environment:
+          POSTGRES_USER: molgenis
+          POSTGRES_PASSWORD: molgenis
+          POSTGRES_DB: molgenis
+      - image: molgenis/molgenis-elasticsearch:1.0.0
+        environment:
+          cluster.name: molgenis
+          bootstrap.memory_lock: true
+          ES_JAVA_OPTS: -Xms512m -Xmx512m
+          discovery.type: single-node
+      - image: minio/minio:RELEASE.2019-03-20T22-38-47Z
+        environment:
+          MINIO_ACCESS_KEY: molgenis
+          MINIO_SECRET_KEY: molgenis
+        command: server /data
+jobs:
+  build:
+    docker:
+      - image: molgenis/maven-jdk11:maven-jdk11-release-2019-05-07_09-20-11
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            # when lock file changes, use increasingly general patterns to restore cache
+            - maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
+            - maven-repo-v1-{{ .Branch }}-
+            - maven-repo-v1-
+      - run: mvn --batch-mode clean install -DskipTests -T 1C
+      - run:
+          name: Save war file
+          command: |
+            mkdir -p ~/artifacts/war/
+            cp molgenis-app/target/*.war ~/artifacts/war/
+          when: always
+      - store_artifacts:
+          path: ~/artifacts/war/
+      - persist_to_workspace:
+         root: ~/.m2
+         paths:
+           - repository
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
+  apitest:
+    executor: it-executor
+    steps:
+      - attach_workspace:
+          at: ~/.m2
+      - checkout
+      - run: mvn verify --batch-mode -pl molgenis-api-tests -Dit_db_user=molgenis -Dit_db_password=molgenis -Dit_db_name=molgenis -Dit_db_port=5432 -P\!create-it-db,\!create-it-es
+      - run:
+          name: Save test results
+          command: |
+            mkdir -p ~/test-results/junit/
+            find . -type f -regex ".*/target/failsafe-reports/.*xml" -exec cp {} ~/test-results/junit/ \;
+          when: always
+      - store_test_results:
+          path: ~/test-results
+      - store_artifacts:
+          path: ~/test-results/junit
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
+  integrationtest:
+    executor: it-executor
+    steps:
+      - attach_workspace:
+          at: ~/.m2
+      - checkout
+      - run: mvn verify -pl molgenis-platform-integration-tests -Dit_db_user=molgenis -Dit_db_password=molgenis -Dit_db_name=molgenis -Dit_db_port=5432 -P\!create-it-db,\!create-it-es
+      - run:
+          name: Save test results
+          command: |
+            mkdir -p ~/test-results/junit/
+            find . -type f -regex ".*/target/failsafe-reports/.*xml" -exec cp {} ~/test-results/junit/ \;
+          when: always
+      - store_test_results:
+          path: ~/test-results
+      - store_artifacts:
+          path: ~/test-results/junit
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build
+      - integrationtest:
+          requires:
+            - build
+      - apitest:
+          requires:
+            - build
