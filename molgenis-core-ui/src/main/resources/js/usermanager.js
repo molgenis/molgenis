@@ -12,6 +12,7 @@
       mode: 'create',
       entity: 'sys' + molgenis.packageSeparator + 'sec' + molgenis.packageSeparator + type,
       modal: true,
+      formSettings: self.formSettings,
       onSubmitSuccess: function (e) {
 
         api.getAsync(e.location, null, function () {
@@ -30,6 +31,7 @@
       entityInstance: id,
       mode: 'edit',
       modal: true,
+      formSettings: self.formSettings,
       onSubmitSuccess: function () {
         location.reload()
       }

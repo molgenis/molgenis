@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.molgenis.core.ui.settings.FormSettings;
 import org.molgenis.data.DataService;
 import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,8 @@ class UserManagerControllerTest extends AbstractMockitoSpringContextTests {
   @Autowired private UserManagerController userManagerController;
 
   @Autowired private UserManagerService pluginUserManagerService;
+
+  @Autowired private FormSettings formSettings;
 
   private MockMvc mockMvc;
 
@@ -61,6 +64,7 @@ class UserManagerControllerTest extends AbstractMockitoSpringContextTests {
         .andExpect(model().attribute("activeSessionCount", 7L))
         .andExpect(model().attribute("users", userViewData))
         .andExpect(model().attribute("activeUsers", Collections.singletonList("Suzi")))
+        .andExpect(model().attribute("formSettings", formSettings))
         .andExpect(view().name("view-usermanager"));
   }
 
@@ -68,8 +72,13 @@ class UserManagerControllerTest extends AbstractMockitoSpringContextTests {
   static class Config {
 
     @Bean
-    UserManagerController userManagerController() {
-      return new UserManagerController(userManagerService());
+    FormSettings formSettings() {
+      return mock(FormSettings.class);
+    }
+
+    @Bean
+    UserManagerController userManagerController(FormSettings formSettings) {
+      return new UserManagerController(userManagerService(), formSettings);
     }
 
     @Bean

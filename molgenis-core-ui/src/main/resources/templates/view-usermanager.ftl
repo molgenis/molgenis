@@ -49,4 +49,11 @@
         </div>
     </div>
 </div>
+<script>
+    molgenis.usermanager.formSettings = {
+        addBooleanNullOption: ${formSettings.addBooleanNullOption?c},
+        addCategoricalNullOption: ${formSettings.addCategoricalNullOption?c},
+        addEnumNullOption: ${formSettings.addEnumNullOption?c}
+    }
+</script>
 <@footer/>
