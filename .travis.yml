@@ -1,8 +1,8 @@
 language: java
 os: linux
 jdk:
-  - openjdk11
-  - openjdk14
+  - openjdk15
+  - openjdk16
 # Ubuntu 18.04 LTS
 dist: bionic
 # Caches downloaded libraries between builds
