@@ -4,6 +4,7 @@ import static com.google.common.collect.Streams.stream;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
 import static org.molgenis.util.i18n.LanguageService.getCurrentUserLanguageCode;
 
+import com.google.common.collect.Streams;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.molgenis.data.DataService;
@@ -42,6 +43,7 @@ class AttributeResponseV2 {
   private String visibleExpression;
   private String validationExpression;
   private List<CategoricalOptionV2> categoricalOptions;
+  private List<TagResponseV2> tags;
 
   /**
    * Constructs AttributeResponseV2 using params
@@ -87,6 +89,17 @@ class AttributeResponseV2 {
     } else {
       this.refEntity = null;
     }
+
+    this.tags =
+        Streams.stream(attr.getTags())
+            .map(
+                tag ->
+                    TagResponseV2.create(
+                        tag.getRelationIri(),
+                        tag.getRelationLabel(),
+                        tag.getObjectIri(),
+                        tag.getLabel()))
+            .collect(Collectors.toList());
 
     Attribute mappedByAttr = attr.getMappedBy();
     this.mappedBy = mappedByAttr != null ? mappedByAttr.getName() : null;
@@ -288,5 +301,9 @@ class AttributeResponseV2 {
 
   public List<CategoricalOptionV2> getCategoricalOptions() {
     return categoricalOptions;
+  }
+
+  public List<TagResponseV2> getTags() {
+    return tags;
   }
 }
