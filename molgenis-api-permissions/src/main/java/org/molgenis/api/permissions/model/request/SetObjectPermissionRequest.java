@@ -8,7 +8,10 @@ import org.molgenis.util.AutoGson;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_SetObjectPermissionRequest.class)
-@SuppressWarnings("java:S1610") // Abstract classes without fields should be converted to interfaces
+@SuppressWarnings({
+  "java:S1610",
+  "java:S3038"
+}) // Abstract classes without fields should be converted to interfaces
 public abstract class SetObjectPermissionRequest implements NewOwnerRequest {
   @Nullable
   @CheckForNull

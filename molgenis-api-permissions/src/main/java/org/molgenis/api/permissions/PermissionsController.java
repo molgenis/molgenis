@@ -307,7 +307,7 @@ public class PermissionsController extends ApiController {
   private void updateObjectOwner(ObjectIdentity objectIdentity, NewOwnerRequest request) {
     getSid(request)
         .ifPresent(
-            (owner) -> {
+            owner -> {
               var acl = (MutableAcl) (aclService.readAclById(objectIdentity));
               acl.setOwner(owner);
               aclService.updateAcl(acl);
