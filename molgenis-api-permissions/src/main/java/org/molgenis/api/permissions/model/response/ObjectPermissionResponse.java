@@ -2,6 +2,8 @@ package org.molgenis.api.permissions.model.response;
 
 import com.google.auto.value.AutoValue;
 import java.util.Set;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.molgenis.util.AutoGson;
 
 @AutoValue
@@ -12,10 +14,26 @@ public abstract class ObjectPermissionResponse {
 
   public abstract String getLabel();
 
+  @Nullable
+  @CheckForNull
+  public abstract String getOwnedByRole();
+
+  @Nullable
+  @CheckForNull
+  public abstract String getOwnedByUser();
+
+  public abstract boolean isYours();
+
   public abstract Set<PermissionResponse> getPermissions();
 
   public static ObjectPermissionResponse create(
-      String id, String label, Set<PermissionResponse> objectPermissionResponses) {
-    return new AutoValue_ObjectPermissionResponse(id, label, objectPermissionResponses);
+      String id,
+      String label,
+      String ownedByRole,
+      String ownedByUser,
+      boolean yours,
+      Set<PermissionResponse> objectPermissionResponses) {
+    return new AutoValue_ObjectPermissionResponse(
+        id, label, ownedByRole, ownedByUser, yours, objectPermissionResponses);
   }
 }
