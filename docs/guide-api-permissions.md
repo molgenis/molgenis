@@ -59,8 +59,8 @@ List of ACL types available in the system.
 ##### Example 
 Response:
 ```json
-"data": {
-  [
+{
+  "data": [
       {
           "id": "entity-sys_ImportRun",
           "entityType": "sys_ImportRun",
@@ -264,15 +264,20 @@ Response:
     "data": [
         {
             "id": "Patient1",
-            "label": "Patient1"
+            "label": "Patient1",
+            "ownedByUser": "Cardiologist",
+            "yours": false
         },
         {
             "id": "Patient2",
-            "label": "Patient2"
+            "label": "Patient2",
+            "ownedByRole": "CARDIOLOGY",
+            "yours": true
         },
         {
             "id": "Patient3",
-            "label": "Patient3"
+            "label": "Patient3",
+            "yours": false
         }
     ]
 }
@@ -302,7 +307,7 @@ Query:
 |404 Not found | the type, object, user, role or permission does not exist |
 
 ##### Response body
-A list of permissions objects containing the identifier and the label for the resource, the user or role that has this permission if any, and a list of [inherited permissions](###Permission inheritance).
+A list of permissions objects containing the identifier and the label for the resource, the user or role that has this permission if any, and a list of [inherited permissions](#Permission inheritance).
 The user and role of a permission can be absent if permission is only derived from inherited permissions. 
 
 ##### Example
@@ -342,6 +347,7 @@ Response:
                       "object":{
                         "id": "hospital",
                         "label": "hospital"
+                        "yours": false
                       },
                       "type":{
                         "label": "Package",
@@ -382,7 +388,7 @@ Query:
 
 ##### Response body
 A list of permissions per resource is returned in the 'data' field.
-These lists of permissions contain object containing the 'identifier' and the 'label' for the resource, the user or role that has this permission if any, and a list of [inherited permissions](###Permission inheritance) if any.
+These lists of permissions contain object containing the 'identifier' and the 'label' for the resource, the user or role that has this permission if any, and a list of [inherited permissions](#Permission inheritance) if any.
 The 'user'/'role' and 'permission' of a permission can be absent if permission is only derived from inherited permissions. 
 A links object is returned with a URL for the current result page in the 'self' field. If available a 'previous' and 'next' page are returned with links to the previous and next page of results/
 Optionally a 'page' object is returned containing the size and number of the current page and a 'totalElements' field containing the total number of results and 'totalPages' containing the total number of queries.
@@ -406,10 +412,14 @@ Response:
         "self": "/api/permissions/entityType?q=user==Cardiologist,role==CARDIOLOGY&page=1&pageSize=10"
     },
     "data": {
+        "id": "entityType",
+        "label": "Entity type",
         "objects": [
             {
                 "id": "hospital_cardiology_patients",
-                "label": "patients",
+                "label": "Cardiology Patients",
+                "ownedByUser": "admin",
+                "yours": true,
                 "permissions": [
                     {
                         "role": "CARDIOLOGY",
@@ -419,7 +429,9 @@ Response:
             },
             {
                 "id": "hospital_cardiology_results",
-                "label": "results",
+                "label": "Cardiology Results",
+                "ownedByUser": "admin",
+                "yours": true,
                 "permissions": [
                     {
                         "user": "Cardiologist",
@@ -455,7 +467,7 @@ Query:
 ##### Response body
 A list of permissions on resources per resource type.
 For every resource type a object is returned containing the typeId, a label for the typeId, a label for the resource type and a list of permissions per resource.
-These lists of permissions contain object containing the identifier and the label for the resource, the user or role that has this permission if any, and a list of [inherited permissions](###Permission inheritance).
+These lists of permissions contain object containing the identifier and the label for the resource, the user or role that has this permission if any, and a list of [inherited permissions](#Permission inheritance).
 The user and role of a permission can be absent if permission is only derived from inherited permissions.
 
 
@@ -468,123 +480,124 @@ https://molgenis.mydomain.example/api/permissions?q=user==Cardiologist&inheritan
 Response:
 ```
 {
-"data": {
+  "data": {
     "permissions": [
-        {
-            "user": "Cardiologist",
-            "object":{
-              "id": "plugin",
-              "label": "Plugin"
-            },
-            "type":
-            {
-              "label": "dataexplorer",
-              "id": "dataexplorer"
-            },
-            "inheritedPermissions": [
-                {
-                    "role": "CARDIOLOGY",
-                    "permission": "READ",
-                    "inheritedPermissions": []
-                }
-            ]
+      {
+        "role": "CARDIOLOGY",
+        "object": {
+          "id": "hospital_cardiology_patients",
+          "label": "Cardiology Patients",
+          "yours": false
         },
-        {
+        "type": {
+          "id": "entityType",
+          "entityType": "sys_md_EntityType",
+          "label": "Entity type"
+        },
+        "permission": "READ"
+      },
+      {
+        "user": "Cardiologist",
+        "object": {
+          "id": "hospital_cardiology_patients",
+          "label": "Cardiology Patients",
+          "yours": false
+        },
+        "type": {
+          "id": "entityType",
+          "entityType": "sys_md_EntityType",
+          "label": "Entity type"
+        },
+        "inheritedPermissions": [
+          {
             "role": "CARDIOLOGY",
-            "object":{
-              "id": "plugin",
-              "label": "Plugin"
-            },
-            "type":
-            {
-              "label": "dataexplorer",
-              "id": "dataexplorer"
-            },
-            "permission": "READ"
+            "permission": "READ",
+            "inheritedPermissions": []
+          }
+        ]
+      },
+      {
+        "user": "Cardiologist",
+        "object": {
+          "id": "hospital_cardiology_results",
+          "label": "Results",
+          "yours": false
         },
-        {
-            "user": "Cardiologist",
-            "object":{
-              "id": "plugin",
-              "label": "Plugin"
-            },
-            "type":
-            {
-              "label": "home",
-              "id": "home"
-            },
-            "inheritedPermissions": [
-                {
-                    "role": "CARDIOLOGY",
-                    "permission": "READ",
-                    "inheritedPermissions": []
-                }
-            ]
+        "type": {
+          "id": "entityType",
+          "entityType": "sys_md_EntityType",
+          "label": "Entity type"
         },
-        {
-            "user": "Cardiologist",
-            "object":{
-              "id": "entityType",
-              "label": "Entity type"
-            },
-            "type": { 
-              "label": "hospital_cardiology_patients",
-              "id": "patients"
-            },
-            "permission": "WRITE",
-            "inheritedPermissions": [
-                {
-                    "role": "CARDIOLOGY",
-                    "permission": "READ",
-                    "inheritedPermissions": []
-                }
-            ]
+        "permission": "WRITE"
+      },
+      {
+        "role": "CARDIOLOGY",
+        "object": {
+          "id": "dataexplorer",
+          "label": "dataexplorer",
+          "yours": false
         },
-        {
+        "type": {
+          "id": "plugin",
+          "entityType": "sys_Plugin",
+          "label": "Plugin"
+        },
+        "permission": "READ"
+      },
+      {
+        "user": "Cardiologist",
+        "object": {
+          "id": "dataexplorer",
+          "label": "dataexplorer",
+          "yours": false
+        },
+        "type": {
+          "id": "plugin",
+          "entityType": "sys_Plugin",
+          "label": "Plugin"
+        },
+        "inheritedPermissions": [
+          {
             "role": "CARDIOLOGY",
-            "object":{
-              "id": "entityType",
-              "label": "Entity type"
-            },
-            "type":{
-              "label": "hospital_cardiology_patients",
-              "typeId": "patients"
-            },
-            "permission": "READ"
+            "permission": "READ",
+            "inheritedPermissions": []
+          }
+        ]
+      },
+      {
+        "role": "CARDIOLOGY",
+        "object": {
+          "id": "home",
+          "label": "home",
+          "yours": false
         },
-        {
-            "user": "Cardiologist",
-            "object": 
-            {
-              "id": "entityType",
-              "label": "Entity type"
-            },
-            "type":
-            {
-              "label": "hospital_cardiology_results",
-              "id": "results"
-            },
-            "permission": "WRITE",
-            "inheritedPermissions": [
-                {
-                    "role": "CARDIOLOGY",
-                    "permission": "READ",
-                    "inheritedPermissions": []
-                }
-            ]
+        "type": {
+          "id": "plugin",
+          "entityType": "sys_Plugin",
+          "label": "Plugin"
         },
-        {
+        "permission": "READ"
+      },
+      {
+        "user": "Cardiologist",
+        "object": {
+          "id": "home",
+          "label": "home",
+          "yours": false
+        },
+        "type": {
+          "id": "plugin",
+          "entityType": "sys_Plugin",
+          "label": "Plugin"
+        },
+        "inheritedPermissions": [
+          {
             "role": "CARDIOLOGY",
-            "object": {
-              "id": "entityType",
-              "label": "Entity type"
-            },
-            "type": {
-              "label": "hospital_cardiology_results",
-              "id": "results"
-            },
-            "permission": "READ"
-        }
+            "permission": "READ",
+            "inheritedPermissions": []
+          }
+        ]
+      }
     ]
   }
 }
@@ -635,7 +648,10 @@ POST https://molgenis.mydomain.example/api/permissions/{typeId}")
 ``` 
 
 ##### Request
-The endpoint expects a list of resources, each of which should contrain the identifier for the resource and a list of permissions, each of these permission should contain a 'permission' and a 'user' or a 'role'.
+The endpoint expects a list of resources, each of which should contrain the identifier for the
+resource and may contain a list of permissions, each of these permission should contain a
+'permission' and a 'user' or a 'role'.
+If you want to update ownership, you can also add an 'ownedByUser' or an 'ownedByRole' field.
 
 ##### Response 
 
@@ -654,26 +670,25 @@ https://molgenis.mydomain.example/api/permissions/entity-hospital_neurology_pati
 ```
 Body:
 ```json
-"data": {
-  {
-    objects:[{
-        id:Patient1,
-        permissions:[
+{ "data": {
+    "objects":[{
+        "id": "Patient1",
+        "permissions": [
         {
-          role:CARDIOLOGY,
-          permission:WRITE
+          "role": "CARDIOLOGY",
+          "permission": "WRITE"
         }
       ]
     },{
-        id:Patient2,
-        permissions:[
+        "id": "Patient2",
+        "permissions": [
         {
-          user:Cardiologist,
-          permission:WRITE
+          "user": "Cardiologist",
+          "permission": "WRITE"
         },
         {
-          user:CardioNurse,
-          permission:READ
+          "user": "CardioNurse",
+          "permission": "READ"
         }
       ]}
     ]
@@ -707,12 +722,12 @@ https://molgenis.mydomain.example/api/permissions/entityType/hospital_cardiology
 Body:
 ```json
 {
-  permissions:[{
-    permission:WRITE,
-    role:CARDIOLOGY
+  "permissions": [{
+    "permission": "WRITE",
+    "role": "CARDIOLOGY"
   },{
-    permission:WRITEMETA,
-    user:Cardiologist
+    "permission": "WRITEMETA",
+    "user": "Cardiologist"
   }]
 }
 ```
@@ -723,7 +738,10 @@ PATCH https://molgenis.mydomain.example/api/permissions/{typeId}")
 ``` 
 
 ##### Request
-The endpoint expects a list of resources, each of which should contrain the identifier for the resource and a list of permissions, each of these permission should contain a 'permission' and a 'user' or a 'role'.
+The endpoint expects a list of resources, each of which should contain the identifier for the
+resource and may contain a list of permissions. Each of these permission should contain a
+'permission' and a 'user' or a 'role'.
+If you want to update ownership, you can also add an 'ownedByUser' or an 'ownedByRole' field.
 
 ##### Response 
 
@@ -742,27 +760,33 @@ https://molgenis.mydomain.example/api/permissions/entity-hospital_neurology_pati
 Body:
 ```json
 {
-	objects:[{
-			id:Patient1,
-			permissions:[
-			{
-				role:CARDIOLOGY,
-				permission:WRITE
-			}
-		]
-	},{
-			id:Patient2,
-			permissions:[
-			{
-				user:Cardiologist,
-				permission:WRITE
-			},
-			{
-				user:CardioNurse,
-				permission:READ
-			}
-		]}
-	]
+    "objects": [
+      {
+        "id": "Patient1",
+        "ownedByRole": "CARDIOLOGY",
+        "permissions": [
+          {
+            "role": "CARDIOLOGY",
+            "permission": "WRITE"
+          }
+        ]
+      },
+      {
+        "id": "Patient2",
+        "label": "Patient2",
+        "ownedByUser": "Cardiologist",
+        "permissions": [
+          {
+            "user": "CardioNurse",
+            "permission": "READ"
+          },
+          {
+            "user": "Cardiologist",
+            "permission": "WRITE"
+          }
+        ]
+      }
+    ]
 }
 ```
 
@@ -798,6 +822,6 @@ https://molgenis.mydomain.example/api/permissions/entityType/hospital_cardiology
 Body 
 ```json
 {
-  user:Cardiologist
+  "user": "Cardiologist"
 }
 ```
