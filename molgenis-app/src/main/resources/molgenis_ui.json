@@ -126,6 +126,11 @@
         },
         {
           "type": "plugin",
+          "id": "data-row-permissions",
+          "label": "Row-level Permissions"
+        },
+        {
+          "type": "plugin",
           "id": "scheduledjobs",
           "label": "Scheduled Jobs"
         },
