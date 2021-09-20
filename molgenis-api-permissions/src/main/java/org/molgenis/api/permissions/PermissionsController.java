@@ -10,7 +10,6 @@ import static org.molgenis.security.core.SidUtils.createUserSid;
 import com.google.common.base.Strings;
 import cz.jirutka.rsql.parser.RSQLParser;
 import cz.jirutka.rsql.parser.RSQLParserException;
-import cz.jirutka.rsql.parser.ast.Node;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import java.net.URI;
@@ -19,7 +18,6 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -46,7 +44,6 @@ import org.molgenis.api.permissions.model.response.PermissionResponse;
 import org.molgenis.api.permissions.model.response.TypePermissionsResponse;
 import org.molgenis.api.permissions.model.response.TypeResponse;
 import org.molgenis.api.permissions.rsql.PermissionRsqlVisitor;
-import org.molgenis.api.permissions.rsql.PermissionsQuery;
 import org.molgenis.data.security.permission.EntityHelper;
 import org.molgenis.data.security.permission.PermissionService;
 import org.molgenis.data.security.permission.PermissionSetUtils;
@@ -55,7 +52,6 @@ import org.molgenis.data.security.permission.model.LabelledPermission;
 import org.molgenis.data.security.permission.model.LabelledType;
 import org.molgenis.data.security.permission.model.Permission;
 import org.molgenis.security.acl.ObjectIdentityService;
-import org.molgenis.security.core.PermissionSet;
 import org.molgenis.security.core.SidUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.acls.domain.ObjectIdentityImpl;
@@ -190,8 +186,8 @@ public class PermissionsController extends ApiController {
       page = DEFAULT_PAGE;
       pageSize = DEFAULT_PAGESIZE;
     }
-    var sids = getUserSids();
-    Set<ObjectResponse> data =
+    var userSids = getUserSids();
+    var data =
         permissionService.getObjects(typeId, page, pageSize).stream()
             .map(
                 labelledObject -> {
@@ -201,7 +197,7 @@ public class PermissionsController extends ApiController {
                       labelledObject.getLabel(),
                       owner.flatMap(UserRoleTools::getRolename).orElse(null),
                       owner.flatMap(UserRoleTools::getUsername).orElse(null),
-                      owner.map(sids::contains).orElse(false));
+                      owner.map(userSids::contains).orElse(false));
                 })
             .collect(Collectors.toSet());
     int totalItems = objectIdentityService.getNrOfObjectIdentities(typeId);
@@ -216,13 +212,13 @@ public class PermissionsController extends ApiController {
       @RequestParam(value = "q", required = false) String queryString,
       @RequestParam(value = "inheritance", defaultValue = "false", required = false)
           boolean inheritance) {
-    Set<Sid> sids = getSidsFromQuery(queryString);
+    var sids = getSidsFromQuery(queryString);
     var userSids = getUserSids();
 
-    Set<LabelledPermission> labelledObjectPermissions =
+    var labelledObjectPermissions =
         permissionService.getPermissionsForObject(
             entityHelper.getObjectIdentity(typeId, identifier), sids, inheritance);
-    ObjectPermissionResponse permissionResponse =
+    var permissionResponse =
         convertToObjectResponse(typeId, identifier, labelledObjectPermissions, userSids);
     return ApiResponse.create(permissionResponse);
   }
@@ -239,8 +235,8 @@ public class PermissionsController extends ApiController {
       @RequestParam(value = "inheritance", defaultValue = "false", required = false)
           boolean inheritance) {
     validateQueryParams(page, pageSize, inheritance);
-    Set<Sid> sids = getSidsFromQuery(queryString);
-    List<Sid> userSids = getUserSids();
+    var sids = getSidsFromQuery(queryString);
+    var userSids = getUserSids();
 
     PagedApiResponse response;
     TypePermissionsResponse permissionsResponse;
@@ -248,7 +244,7 @@ public class PermissionsController extends ApiController {
     if (page != null) {
       typePermission = permissionService.getPermissionsForType(typeId, sids, page, pageSize);
       permissionsResponse = convertToTypeResponse(typeId, typePermission, userSids);
-      Integer totalItems = objectIdentityService.getNrOfObjectIdentities(typeId, sids);
+      var totalItems = objectIdentityService.getNrOfObjectIdentities(typeId, sids);
       response =
           getPermissionResponse(queryString, page, pageSize, totalItems, permissionsResponse);
     } else {
@@ -271,8 +267,8 @@ public class PermissionsController extends ApiController {
       @RequestParam(value = "q", required = false) String queryString,
       @RequestParam(value = "inheritance", defaultValue = "false", required = false)
           boolean inheritance) {
-    Set<Sid> sids = getSidsFromQuery(queryString);
-    Set<LabelledPermission> permissions = permissionService.getPermissions(sids, inheritance);
+    var sids = getSidsFromQuery(queryString);
+    var permissions = permissionService.getPermissions(sids, inheritance);
     return ApiResponse.create(convertToAllPermissionsResponse(permissions));
   }
 
@@ -285,7 +281,7 @@ public class PermissionsController extends ApiController {
       @PathVariable(value = TYPE_ID) String typeId,
       @PathVariable(value = OBJECT_ID) String identifier,
       @RequestBody SetObjectPermissionRequest request) {
-    Set<Permission> permissions = convertRequests(request.getPermissions(), typeId, identifier);
+    var permissions = convertRequests(request.getPermissions(), typeId, identifier);
     permissionService.updatePermissions(permissions);
     updateObjectOwner(entityHelper.getObjectIdentity(typeId, identifier), request);
     return ResponseEntity.noContent().build();
@@ -299,10 +295,10 @@ public class PermissionsController extends ApiController {
   public ResponseEntity setTypePermissions(
       @PathVariable(value = TYPE_ID) String typeId,
       @RequestBody SetTypePermissionsRequest request) {
-    Set<Permission> permissions = convertRequests(request.getObjects(), typeId);
+    var permissions = convertRequests(request.getObjects(), typeId);
     permissionService.updatePermissions(permissions);
-    for (ObjectPermissionsRequest object : request.getObjects()) {
-      ObjectIdentity objectIdentity = entityHelper.getObjectIdentity(typeId, object.getObjectId());
+    for (var object : request.getObjects()) {
+      var objectIdentity = entityHelper.getObjectIdentity(typeId, object.getObjectId());
       updateObjectOwner(objectIdentity, object);
     }
     return ResponseEntity.noContent().build();
@@ -319,12 +315,12 @@ public class PermissionsController extends ApiController {
   }
 
   private Optional<Sid> getSid(NewOwnerRequest request) {
-    String user = request.getOwnedByUser();
+    var user = request.getOwnedByUser();
     if (user != null) {
       userRoleTools.checkUserExists(user);
       return Optional.of(SidUtils.createUserSid(user));
     }
-    String role = request.getOwnedByRole();
+    var role = request.getOwnedByRole();
     if (role != null) {
       userRoleTools.checkRoleExists(role);
       return Optional.of(SidUtils.createRoleSid(role));
@@ -341,7 +337,7 @@ public class PermissionsController extends ApiController {
       HttpServletRequest request,
       @PathVariable(value = TYPE_ID) String typeId,
       @RequestBody SetTypePermissionsRequest setTypePermissionsRequest) {
-    Set<Permission> permissions = convertRequests(setTypePermissionsRequest.getObjects(), typeId);
+    var permissions = convertRequests(setTypePermissionsRequest.getObjects(), typeId);
     permissionService.createPermissions(permissions);
     return ResponseEntity.created(getUriFromRequest(request)).build();
   }
@@ -356,7 +352,7 @@ public class PermissionsController extends ApiController {
       @PathVariable(value = TYPE_ID) String typeId,
       @PathVariable(value = OBJECT_ID) String identifier,
       @RequestBody SetObjectPermissionRequest setIdentityPermissionRequest) {
-    Set<Permission> permissions =
+    var permissions =
         convertRequests(setIdentityPermissionRequest.getPermissions(), typeId, identifier);
     permissionService.createPermissions(permissions);
     return ResponseEntity.created(getUriFromRequest(request)).build();
@@ -371,7 +367,7 @@ public class PermissionsController extends ApiController {
       @PathVariable(value = TYPE_ID) String typeId,
       @PathVariable(value = OBJECT_ID) String identifier,
       @RequestBody DeletePermissionRequest request) {
-    Sid sid = getSid(request.getUser(), request.getRole());
+    var sid = getSid(request.getUser(), request.getRole());
     permissionService.deletePermission(sid, entityHelper.getObjectIdentity(typeId, identifier));
     return ResponseEntity.noContent().build();
   }
@@ -380,8 +376,8 @@ public class PermissionsController extends ApiController {
     Set<Sid> sids = Collections.emptySet();
     if (!Strings.isNullOrEmpty(queryString)) {
       try {
-        Node node = rsqlParser.parse(queryString);
-        PermissionsQuery permissionsQuery = node.accept(new PermissionRsqlVisitor());
+        var node = rsqlParser.parse(queryString);
+        var permissionsQuery = node.accept(new PermissionRsqlVisitor());
         sids =
             new LinkedHashSet<>(
                 userRoleTools.getSids(permissionsQuery.getUsers(), permissionsQuery.getRoles()));
@@ -412,8 +408,8 @@ public class PermissionsController extends ApiController {
       String id,
       Set<LabelledPermission> labelledObjectPermissions,
       List<Sid> userSids) {
-    Set<PermissionResponse> permissions = convertToPermissions(labelledObjectPermissions);
-    String label = entityHelper.getLabel(typeId, id);
+    var permissions = convertToPermissions(labelledObjectPermissions);
+    var label = entityHelper.getLabel(typeId, id);
 
     var owner = aclService.readAclById(new ObjectIdentityImpl(typeId, id)).getOwner();
     return ObjectPermissionResponse.create(
@@ -428,10 +424,10 @@ public class PermissionsController extends ApiController {
   private TypePermissionsResponse convertToTypeResponse(
       String typeId, Map<String, Set<LabelledPermission>> typePermissions, List<Sid> userSids) {
     Set<ObjectPermissionResponse> objectPermissions = new LinkedHashSet<>();
-    for (Entry<String, Set<LabelledPermission>> entry : typePermissions.entrySet()) {
-      Set<LabelledPermission> permissions = entry.getValue();
+    for (var entry : typePermissions.entrySet()) {
+      var permissions = entry.getValue();
       if (!permissions.isEmpty()) {
-        LabelledPermission labelledObjectPermission =
+        var labelledObjectPermission =
             permissions.stream()
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("Empty set of permissions"));
@@ -443,12 +439,12 @@ public class PermissionsController extends ApiController {
                 userSids));
       }
     }
-    String label = entityHelper.getLabel(typeId);
+    var label = entityHelper.getLabel(typeId);
     return TypePermissionsResponse.create(typeId, label, objectPermissions);
   }
 
   private Set<PermissionResponse> convertToPermissions(Set<LabelledPermission> permissions) {
-    LinkedHashSet<PermissionResponse> result = new LinkedHashSet<>();
+    var result = new LinkedHashSet<PermissionResponse>();
     permissions.stream()
         .map(
             labelledPermission ->
@@ -468,12 +464,12 @@ public class PermissionsController extends ApiController {
 
   private Set<LabelledPermissionResponse> convertLabelledPermissions(
       Set<LabelledPermission> objectPermissionResponses) {
-    List<Sid> userSids = getUserSids();
+    var userSids = getUserSids();
     Set<LabelledPermissionResponse> permissionResponses = null;
     if (objectPermissionResponses != null) {
       permissionResponses = new LinkedHashSet<>();
-      for (LabelledPermission permission : objectPermissionResponses) {
-        PermissionSet permissionSet = permission.getPermission();
+      for (var permission : objectPermissionResponses) {
+        var permissionSet = permission.getPermission();
         String permissionString = null;
         if (permissionSet != null) {
           permissionString = PermissionSetUtils.getPermissionStringValue(permissionSet);
@@ -481,14 +477,14 @@ public class PermissionsController extends ApiController {
         LabelledPermissionResponse labelledResponse;
         if (permission.getLabelledObjectIdentity() != null) {
           var owner = getOwner(permission.getLabelledObjectIdentity());
-          ObjectResponse objectResponse =
+          var objectResponse =
               ObjectResponse.create(
                   permission.getLabelledObjectIdentity().getIdentifier().toString(),
                   permission.getLabelledObjectIdentity().getIdentifierLabel(),
                   owner.flatMap(UserRoleTools::getRolename).orElse(null),
                   owner.flatMap(UserRoleTools::getUsername).orElse(null),
                   owner.map(userSids::contains).orElse(false));
-          TypeResponse typeResponse =
+          var typeResponse =
               TypeResponse.create(
                   permission.getLabelledObjectIdentity().getType(),
                   permission.getLabelledObjectIdentity().getEntityTypeId(),
@@ -529,7 +525,7 @@ public class PermissionsController extends ApiController {
       List<PermissionRequest> requests, String typeId, String identifier) {
     Set<Permission> permissions = new HashSet<>();
     if (requests != null) {
-      for (PermissionRequest permissionRequest : requests) {
+      for (var permissionRequest : requests) {
         permissions.add(
             Permission.create(
                 entityHelper.getObjectIdentity(typeId, identifier),
@@ -543,7 +539,7 @@ public class PermissionsController extends ApiController {
   private Set<Permission> convertRequests(List<ObjectPermissionsRequest> requests, String typeId) {
     Set<Permission> permissions = new HashSet<>();
     if (requests != null) {
-      for (ObjectPermissionsRequest request : requests) {
+      for (var request : requests) {
         permissions.addAll(
             convertRequests(request.getPermissions(), typeId, request.getObjectId()));
       }
