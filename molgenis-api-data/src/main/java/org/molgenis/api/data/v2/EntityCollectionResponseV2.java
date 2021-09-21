@@ -9,7 +9,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.security.core.UserPermissionEvaluator;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
 class EntityCollectionResponseV2 {
   private final String href;
@@ -33,7 +33,7 @@ class EntityCollectionResponseV2 {
   }
 
   public EntityCollectionResponseV2(
-      ServletUriComponentsBuilder uriBuilder,
+      UriComponentsBuilder uriBuilder,
       EntityPager entityPager,
       List<Map<String, Object>> items,
       Fetch fetch,

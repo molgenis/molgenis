@@ -20,7 +20,7 @@ import org.molgenis.data.security.EntityTypePermission;
 import org.molgenis.data.util.EntityTypeUtils;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.UserPermissionEvaluator;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
 class EntityTypeResponseV2 {
   private final String href;
@@ -41,7 +41,7 @@ class EntityTypeResponseV2 {
 
   /** @param fetch set of lowercase attribute names to include in response */
   public EntityTypeResponseV2(
-      ServletUriComponentsBuilder uriBuilder,
+      UriComponentsBuilder uriBuilder,
       EntityType meta,
       Fetch fetch,
       UserPermissionEvaluator userPermissionEvaluator,
