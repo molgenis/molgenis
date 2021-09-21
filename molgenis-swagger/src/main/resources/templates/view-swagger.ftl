@@ -758,6 +758,10 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/CategoricalOptionV2"
+      tags:
+        type: array
+        items:
+          $ref: "#/definitions/TagResponseV2"
     required:
       - href
       - fieldType
@@ -787,6 +791,21 @@ definitions:
         type: object
       label:
         type: object
+  TagResponseV2:
+    type: object
+    properties:
+      relationIRI:
+        type: string
+      relationLabel:
+        type: string
+      objectIRI:
+        type: string
+      objectLabel:
+        type: string
+    required:
+      - relationIRI
+      - relationLabel
+      - objectLabel
   Error:
     type: object
     properties:
