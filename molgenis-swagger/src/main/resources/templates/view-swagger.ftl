@@ -788,9 +788,11 @@ definitions:
     type: object
     properties:
       id:
-        type: object
+        type:
+          - number
+          - string
       label:
-        type: object
+        type: string
   TagResponseV2:
     type: object
     properties:
