@@ -1,4 +1,3 @@
-<#include "resource-macros.ftl">
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 
@@ -14,12 +13,12 @@
 <div id="app"></div>
 
 <script type="text/javascript">
-        window.__INITIAL_STATE__ = {
-            baseUrl: '${baseUrl}',
-            lng: '${lng}',
-            fallbackLng: '${fallbackLng}',
-            isSuperUser: ${isSuperUser?c}
-        }
+  window.__INITIAL_STATE__ = {
+    baseUrl: '${baseUrl}',
+    lng: '${lng}',
+    fallbackLng: '${fallbackLng}',
+    isSuperUser: ${isSuperUser?c}
+  }
 </script>
 
 <script type=text/javascript src="/@molgenis-ui/data-row-permissions/dist/js/chunk-vendors.js"></script>

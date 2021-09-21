@@ -2,9 +2,8 @@ package org.molgenis.data.row.permissions;
 
 import static org.molgenis.data.row.permissions.DataRowPermissionsController.URI;
 
-import org.molgenis.settings.AppSettings;
 import org.molgenis.web.PluginController;
-import org.springframework.context.i18n.LocaleContextHolder;
+import org.molgenis.web.menu.MenuReaderService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,18 +17,16 @@ public class DataRowPermissionsController extends PluginController {
   public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
   public static final String VIEW_TEMPLATE = "view-data-row-permissions";
 
-  private final AppSettings appSettings;
+  private final MenuReaderService menuReaderService;
 
-  public DataRowPermissionsController(AppSettings appSettings) {
+  public DataRowPermissionsController(MenuReaderService menuReaderService) {
     super(URI);
-    this.appSettings = appSettings;
+    this.menuReaderService = menuReaderService;
   }
 
   @GetMapping("/**")
   public String init(Model model) {
-    model.addAttribute("baseUrl", URI);
-    model.addAttribute("lng", LocaleContextHolder.getLocale().getLanguage());
-    model.addAttribute("fallbackLng", appSettings.getLanguageCode());
+    model.addAttribute("baseUrl", menuReaderService.findMenuItemPath(ID));
     return VIEW_TEMPLATE;
   }
 }
