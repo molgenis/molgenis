@@ -97,7 +97,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
@@ -191,7 +190,7 @@ public class RestControllerV2 {
       @RequestParam(value = "attrs", required = false) AttributeFilter attributeFilter,
       @RequestParam(value = "includeCategories", defaultValue = "false")
           boolean includeCategories) {
-    ServletUriComponentsBuilder uriBuilder = createUriBuilder();
+    UriComponentsBuilder uriBuilder = createUriBuilder();
     return getEntityResponse(
         uriBuilder, entityTypeId, untypedId, attributeFilter, includeCategories);
   }
@@ -205,13 +204,13 @@ public class RestControllerV2 {
       @RequestParam(value = "attrs", required = false) AttributeFilter attributeFilter,
       @RequestParam(value = "includeCategories", defaultValue = "false")
           boolean includeCategories) {
-    ServletUriComponentsBuilder uriBuilder = createUriBuilder();
+    UriComponentsBuilder uriBuilder = createUriBuilder();
     return getEntityResponse(
         uriBuilder, entityTypeId, untypedId, attributeFilter, includeCategories);
   }
 
   private Map<String, Object> getEntityResponse(
-      ServletUriComponentsBuilder uriBuilder,
+      UriComponentsBuilder uriBuilder,
       String entityTypeId,
       String untypedId,
       AttributeFilter attributeFilter,
@@ -274,7 +273,7 @@ public class RestControllerV2 {
       HttpServletRequest httpRequest,
       @RequestParam(value = "includeCategories", defaultValue = "false")
           boolean includeCategories) {
-    ServletUriComponentsBuilder uriBuilder = createUriBuilder();
+    UriComponentsBuilder uriBuilder = createUriBuilder();
     return createEntityCollectionResponse(
         uriBuilder, entityTypeId, request, httpRequest, includeCategories);
   }
@@ -287,7 +286,7 @@ public class RestControllerV2 {
       HttpServletRequest httpRequest,
       @RequestParam(value = "includeCategories", defaultValue = "false")
           boolean includeCategories) {
-    ServletUriComponentsBuilder uriBuilder = createUriBuilder();
+    UriComponentsBuilder uriBuilder = createUriBuilder();
     return createEntityCollectionResponse(
         uriBuilder, entityTypeId, request, httpRequest, includeCategories);
   }
@@ -298,7 +297,7 @@ public class RestControllerV2 {
   public AttributeResponseV2 retrieveEntityAttributeMeta(
       @PathVariable("entityTypeId") String entityTypeId,
       @PathVariable("attributeName") String attributeName) {
-    ServletUriComponentsBuilder uriBuilder = createUriBuilder();
+    UriComponentsBuilder uriBuilder = createUriBuilder();
     return createAttributeResponse(uriBuilder, entityTypeId, attributeName);
   }
 
@@ -310,7 +309,7 @@ public class RestControllerV2 {
   public AttributeResponseV2 retrieveEntityAttributeMetaPost(
       @PathVariable("entityTypeId") String entityTypeId,
       @PathVariable("attributeName") String attributeName) {
-    ServletUriComponentsBuilder uriBuilder = createUriBuilder();
+    UriComponentsBuilder uriBuilder = createUriBuilder();
     return createAttributeResponse(uriBuilder, entityTypeId, attributeName);
   }
 
@@ -330,7 +329,7 @@ public class RestControllerV2 {
       @PathVariable("entityTypeId") String entityTypeId,
       @RequestBody @Valid EntityCollectionBatchRequestV2 request,
       HttpServletResponse response) {
-    ServletUriComponentsBuilder uriBuilder = createUriBuilder();
+    UriComponentsBuilder uriBuilder = createUriBuilder();
 
     final EntityType meta = dataService.getEntityType(entityTypeId);
 
@@ -394,7 +393,7 @@ public class RestControllerV2 {
       @PathVariable("entityTypeId") String entityTypeId,
       @RequestBody @Valid CopyEntityRequestV2 request,
       HttpServletResponse response) {
-    ServletUriComponentsBuilder uriBuilder = createUriBuilder();
+    UriComponentsBuilder uriBuilder = createUriBuilder();
 
     // No repo
     if (!dataService.hasRepository(entityTypeId)) {
@@ -686,7 +685,7 @@ public class RestControllerV2 {
   }
 
   private AttributeResponseV2 createAttributeResponse(
-      ServletUriComponentsBuilder uriBuilder, String entityTypeId, String attributeName) {
+      UriComponentsBuilder uriBuilder, String entityTypeId, String attributeName) {
     EntityType entity = dataService.getEntityType(entityTypeId);
     Attribute attribute = entity.getAttribute(attributeName);
     if (attribute == null) {
@@ -698,7 +697,7 @@ public class RestControllerV2 {
   }
 
   private EntityCollectionResponseV2 createEntityCollectionResponse(
-      ServletUriComponentsBuilder uriBuilder,
+      UriComponentsBuilder uriBuilder,
       String entityTypeId,
       EntityCollectionRequestV2 request,
       HttpServletRequest httpRequest,
@@ -810,12 +809,12 @@ public class RestControllerV2 {
   }
 
   private Map<String, Object> createEntityResponse(
-      ServletUriComponentsBuilder builder, Entity entity, Fetch fetch, boolean includeMetaData) {
+      UriComponentsBuilder builder, Entity entity, Fetch fetch, boolean includeMetaData) {
     return createEntityResponse(builder, entity, fetch, includeMetaData, false);
   }
 
   private Map<String, Object> createEntityResponse(
-      ServletUriComponentsBuilder builder,
+      UriComponentsBuilder builder,
       Entity entity,
       Fetch fetch,
       boolean includeMetaData,
@@ -845,7 +844,7 @@ public class RestControllerV2 {
   }
 
   private void createEntityValuesResponse(
-      ServletUriComponentsBuilder uriBuilder,
+      UriComponentsBuilder uriBuilder,
       Entity entity,
       Fetch fetch,
       Map<String, Object> responseData) {
@@ -854,7 +853,7 @@ public class RestControllerV2 {
   }
 
   private void createEntityValuesResponseRec(
-      ServletUriComponentsBuilder uriBuilder,
+      UriComponentsBuilder uriBuilder,
       Entity entity,
       Iterable<Attribute> attrs,
       Fetch fetch,
@@ -945,9 +944,9 @@ public class RestControllerV2 {
     }
   }
 
-  private ServletUriComponentsBuilder createUriBuilder() {
-    ServletUriComponentsBuilder servletUriComponentsBuilder = fromCurrentServletMapping();
-    servletUriComponentsBuilder.encode();
-    return servletUriComponentsBuilder;
+  private UriComponentsBuilder createUriBuilder() {
+    UriComponentsBuilder uriComponentsBuilder = fromCurrentServletMapping();
+    uriComponentsBuilder.encode();
+    return uriComponentsBuilder;
   }
 }

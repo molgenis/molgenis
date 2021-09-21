@@ -15,7 +15,7 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.util.EntityTypeUtils;
 import org.molgenis.security.core.UserPermissionEvaluator;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
 class AttributeResponseV2 {
   private final String href;
@@ -53,7 +53,7 @@ class AttributeResponseV2 {
    *     CATEGORICAL_MREF types in the attribute metadata
    */
   public AttributeResponseV2(
-      ServletUriComponentsBuilder uriBuilder,
+      UriComponentsBuilder uriBuilder,
       final String entityParentName,
       EntityType entityType,
       Attribute attr,
@@ -162,7 +162,7 @@ class AttributeResponseV2 {
    * @param fetch set of lowercase attribute names to include in response
    */
   public AttributeResponseV2(
-      ServletUriComponentsBuilder uriBuilder,
+      UriComponentsBuilder uriBuilder,
       final String entityParentName,
       EntityType entityType,
       Attribute attr,
