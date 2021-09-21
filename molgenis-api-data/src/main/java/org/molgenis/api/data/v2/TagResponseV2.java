@@ -10,14 +10,12 @@ import org.molgenis.util.AutoGson;
 public abstract class TagResponseV2 {
   public abstract String relationIRI();
 
-  @Nullable
-  @CheckForNull
   public abstract String relationLabel();
 
-  public abstract String objectIRI();
-
   @Nullable
   @CheckForNull
+  public abstract String objectIRI();
+
   public abstract String objectLabel();
 
   public static TagResponseV2 create(
