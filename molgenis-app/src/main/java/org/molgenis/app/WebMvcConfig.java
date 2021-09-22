@@ -11,7 +11,8 @@ import org.springframework.web.servlet.config.annotation.DelegatingWebMvcConfigu
 public class WebMvcConfig extends DelegatingWebMvcConfiguration {
 
   @SuppressWarnings("java:S3305") // Cannot add dependency to overriding method
-  @Autowired HttpLocaleResolver localeResolver;
+  @Autowired
+  HttpLocaleResolver localeResolver;
 
   @Bean
   @Override
