@@ -3,13 +3,18 @@ package org.molgenis.security.oidc.model;
 import static java.lang.Boolean.FALSE;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
+import static org.molgenis.data.meta.AttributeType.ENUM;
 import static org.molgenis.data.meta.AttributeType.HYPERLINK;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LOOKUP;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.security.oidc.model.OidcPackage.PACKAGE_OIDC;
+import static org.springframework.security.oauth2.core.ClientAuthenticationMethod.CLIENT_SECRET_BASIC;
+import static org.springframework.security.oauth2.core.ClientAuthenticationMethod.CLIENT_SECRET_POST;
+import static org.springframework.security.oauth2.core.ClientAuthenticationMethod.NONE;
 
+import java.util.List;
 import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.Attribute;
 import org.springframework.security.oauth2.core.oidc.StandardClaimNames;
@@ -75,11 +80,14 @@ public class OidcClientMetadata extends SystemEntityType {
         .setDataType(HYPERLINK)
         .setNillable(true);
     addAttribute(CLIENT_AUTHENTICATION_METHOD)
+        .setDataType(ENUM)
+        .setEnumOptions(
+            List.of(CLIENT_SECRET_BASIC.getValue(), CLIENT_SECRET_POST.getValue(), NONE.getValue()))
         .setLabel("Authentication")
         .setDescription("Client authentication method")
         .setNullableExpression(FALSE.toString())
         .setVisibleExpression(DETAILS_VISIBLE_EXPRESSION)
-        .setDefaultValue("basic");
+        .setDefaultValue(CLIENT_SECRET_BASIC.getValue());
     addAttribute(SCOPES)
         .setLabel("Scopes")
         .setDescription("Comma-separated set of scopes")

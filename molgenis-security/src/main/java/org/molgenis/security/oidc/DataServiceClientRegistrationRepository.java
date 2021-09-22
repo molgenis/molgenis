@@ -7,9 +7,13 @@ import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.security.oidc.model.OidcClientMetadata.CLAIMS_ROLE_PATH;
 import static org.molgenis.security.oidc.model.OidcClientMetadata.CLAIMS_VOGROUP_PATH;
 import static org.springframework.security.oauth2.core.AuthorizationGrantType.AUTHORIZATION_CODE;
+import static org.springframework.security.oauth2.core.ClientAuthenticationMethod.CLIENT_SECRET_BASIC;
+import static org.springframework.security.oauth2.core.ClientAuthenticationMethod.CLIENT_SECRET_POST;
+import static org.springframework.security.oauth2.core.ClientAuthenticationMethod.NONE;
 import static org.springframework.security.oauth2.core.oidc.StandardClaimNames.SUB;
 
 import java.util.Map;
+import java.util.stream.Stream;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.security.oidc.model.OidcClient;
@@ -81,20 +85,9 @@ public class DataServiceClientRegistrationRepository implements ClientRegistrati
   }
 
   private ClientAuthenticationMethod toClientAuthenticationMethod(OidcClient oidcClient) {
-    ClientAuthenticationMethod clientAuthenticationMethod;
-    String oidcClientClientAuthenticationMethod = oidcClient.getClientAuthenticationMethod();
-    switch (oidcClientClientAuthenticationMethod) {
-      case "basic":
-        clientAuthenticationMethod = ClientAuthenticationMethod.BASIC;
-        break;
-      case "post":
-        clientAuthenticationMethod = ClientAuthenticationMethod.POST;
-        break;
-      default:
-        clientAuthenticationMethod =
-            new ClientAuthenticationMethod(oidcClientClientAuthenticationMethod);
-        break;
-    }
-    return clientAuthenticationMethod;
+    return Stream.of(CLIENT_SECRET_BASIC, CLIENT_SECRET_POST, NONE)
+        .filter(it -> it.getValue().equals(oidcClient.getClientAuthenticationMethod()))
+        .findFirst()
+        .orElseThrow();
   }
 }
