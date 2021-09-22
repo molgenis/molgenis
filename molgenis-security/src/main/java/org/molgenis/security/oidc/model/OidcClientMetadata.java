@@ -1,10 +1,8 @@
 package org.molgenis.security.oidc.model;
 
 import static java.lang.Boolean.FALSE;
-import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeType.COMPOUND;
-import static org.molgenis.data.meta.AttributeType.ENUM;
 import static org.molgenis.data.meta.AttributeType.HYPERLINK;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
@@ -27,7 +25,6 @@ public class OidcClientMetadata extends SystemEntityType {
   static final String CLIENT_SECRET = "clientSecret";
   static final String CLIENT_NAME = "clientName";
   static final String CLIENT_AUTHENTICATION_METHOD = "clientAuthenticationMethod";
-  static final String AUTHORIZATION_GRANT_TYPE = "authorizationGrantType";
   static final String ISSUER_URI = "issuerUri";
   static final String SCOPES = "scopes";
 
@@ -83,14 +80,6 @@ public class OidcClientMetadata extends SystemEntityType {
         .setNullableExpression(FALSE.toString())
         .setVisibleExpression(DETAILS_VISIBLE_EXPRESSION)
         .setDefaultValue("basic");
-    addAttribute(AUTHORIZATION_GRANT_TYPE)
-        .setLabel("Grant type")
-        .setDescription("Authorization grant type")
-        .setDataType(ENUM)
-        .setEnumOptions(asList("authorization_code", "implicit", "refresh_token"))
-        .setDefaultValue("authorization_code")
-        .setNullableExpression(FALSE.toString())
-        .setVisibleExpression(DETAILS_VISIBLE_EXPRESSION);
     addAttribute(SCOPES)
         .setLabel("Scopes")
         .setDescription("Comma-separated set of scopes")

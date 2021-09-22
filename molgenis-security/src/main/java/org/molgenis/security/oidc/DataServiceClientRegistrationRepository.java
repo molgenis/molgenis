@@ -6,6 +6,7 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.security.oidc.model.OidcClientMetadata.CLAIMS_ROLE_PATH;
 import static org.molgenis.security.oidc.model.OidcClientMetadata.CLAIMS_VOGROUP_PATH;
+import static org.springframework.security.oauth2.core.AuthorizationGrantType.AUTHORIZATION_CODE;
 import static org.springframework.security.oauth2.core.oidc.StandardClaimNames.SUB;
 
 import java.util.Map;
@@ -16,7 +17,6 @@ import org.molgenis.security.settings.AuthenticationSettings;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.registration.ClientRegistrations;
-import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.stereotype.Component;
 
@@ -68,7 +68,7 @@ public class DataServiceClientRegistrationRepository implements ClientRegistrati
               .userInfoUri(oidcClient.getUserInfoUri())
               .redirectUri(DEFAULT_REDIRECT_URI_TEMPLATE)
               .clientAuthenticationMethod(toClientAuthenticationMethod(oidcClient))
-              .authorizationGrantType(toAuthorizationGrantType(oidcClient))
+              .authorizationGrantType(AUTHORIZATION_CODE)
               .scope(oidcClient.getScopes());
     }
     return result
@@ -96,22 +96,5 @@ public class DataServiceClientRegistrationRepository implements ClientRegistrati
         break;
     }
     return clientAuthenticationMethod;
-  }
-
-  private AuthorizationGrantType toAuthorizationGrantType(OidcClient oidcClient) {
-    AuthorizationGrantType authorizationGrantType;
-    String oidcClientAuthorizationGrantType = oidcClient.getAuthorizationGrantType();
-    switch (oidcClientAuthorizationGrantType) {
-      case "authorization_code":
-        authorizationGrantType = AuthorizationGrantType.AUTHORIZATION_CODE;
-        break;
-      case "implicit":
-        authorizationGrantType = AuthorizationGrantType.IMPLICIT;
-        break;
-      default:
-        authorizationGrantType = new AuthorizationGrantType(oidcClientAuthorizationGrantType);
-        break;
-    }
-    return authorizationGrantType;
   }
 }

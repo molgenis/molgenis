@@ -1,6 +1,5 @@
 package org.molgenis.security.oidc.model;
 
-import static org.molgenis.security.oidc.model.OidcClientMetadata.AUTHORIZATION_GRANT_TYPE;
 import static org.molgenis.security.oidc.model.OidcClientMetadata.AUTHORIZATION_URI;
 import static org.molgenis.security.oidc.model.OidcClientMetadata.CLAIMS_ROLE_PATH;
 import static org.molgenis.security.oidc.model.OidcClientMetadata.CLAIMS_VOGROUP_PATH;
@@ -76,14 +75,6 @@ public class OidcClient extends StaticEntity {
 
   public String getClientAuthenticationMethod() {
     return getString(CLIENT_AUTHENTICATION_METHOD);
-  }
-
-  public void setAuthorizationGrantType(String authorizationGrantType) {
-    set(AUTHORIZATION_GRANT_TYPE, authorizationGrantType);
-  }
-
-  public String getAuthorizationGrantType() {
-    return getString(AUTHORIZATION_GRANT_TYPE);
   }
 
   public void setAuthorizationUri(String authorizationUri) {
