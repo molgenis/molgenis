@@ -1,4 +1,4 @@
-package org.molgenis.web.converter;
+package org.molgenis.gson;
 
 import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;

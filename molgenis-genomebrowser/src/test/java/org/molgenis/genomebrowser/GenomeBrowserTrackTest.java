@@ -17,12 +17,12 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.genomebrowser.meta.GenomeBrowserAttributes;
 import org.molgenis.genomebrowser.meta.GenomeBrowserSettings;
 import org.molgenis.test.AbstractMockitoSpringContextTests;
-import org.molgenis.web.converter.GsonConfig;
+import org.molgenis.web.converter.GsonWebConfig;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 @WebAppConfiguration
-@ContextConfiguration(classes = GsonConfig.class)
+@ContextConfiguration(classes = GsonWebConfig.class)
 public class GenomeBrowserTrackTest extends AbstractMockitoSpringContextTests {
   @Test
   public void testToTrack() {

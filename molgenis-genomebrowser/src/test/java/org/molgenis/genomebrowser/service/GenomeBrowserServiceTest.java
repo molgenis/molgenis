@@ -40,12 +40,12 @@ import org.molgenis.genomebrowser.meta.GenomeBrowserAttributesMetadata;
 import org.molgenis.genomebrowser.meta.GenomeBrowserSettings;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.test.AbstractMockitoSpringContextTests;
-import org.molgenis.web.converter.GsonConfig;
+import org.molgenis.web.converter.GsonWebConfig;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 @WebAppConfiguration
-@ContextConfiguration(classes = GsonConfig.class)
+@ContextConfiguration(classes = GsonWebConfig.class)
 class GenomeBrowserServiceTest extends AbstractMockitoSpringContextTests {
   @Mock DataService dataService;
   @Mock UserPermissionEvaluator userPermissionEvaluator;

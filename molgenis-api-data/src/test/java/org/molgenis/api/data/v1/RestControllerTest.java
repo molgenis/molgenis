@@ -79,7 +79,7 @@ import org.molgenis.util.i18n.MessageSourceHolder;
 import org.molgenis.util.i18n.TestAllPropertiesMessageSource;
 import org.molgenis.util.i18n.format.MessageFormatFactory;
 import org.molgenis.web.converter.CsvHttpMessageConverter;
-import org.molgenis.web.converter.GsonConfig;
+import org.molgenis.web.converter.GsonWebConfig;
 import org.molgenis.web.rsql.MolgenisRSQL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -103,7 +103,7 @@ import org.springframework.web.util.NestedServletException;
 
 @MockitoSettings(strictness = Strictness.LENIENT)
 @WebAppConfiguration
-@ContextConfiguration(classes = {RestControllerConfig.class, GsonConfig.class})
+@ContextConfiguration(classes = {RestControllerConfig.class, GsonWebConfig.class})
 class RestControllerTest extends AbstractMockitoSpringContextTests {
   private static final String ENTITY_NAME = "Person";
   private static final String ENTITY_UNTYPED_ID = "p1";

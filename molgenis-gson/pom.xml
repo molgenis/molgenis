@@ -1,0 +1,54 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.molgenis</groupId>
+    <artifactId>molgenis</artifactId>
+    <version>9.1.0-SNAPSHOT</version>
+  </parent>
+  <artifactId>molgenis-gson</artifactId>
+  <packaging>jar</packaging>
+
+  <name>gson</name>
+  <description>GSON factory bean plus config</description>
+
+  <repositories>
+    <repository>
+      <id>local-maven-repo</id>
+      <url>file:///${project.basedir}/../local-maven-repo</url>
+    </repository>
+  </repositories>
+
+  <properties>
+    <gson-javatime-serialisers.version>1.1.1</gson-javatime-serialisers.version>
+    <guava-gson-serializers.version>1.0.1</guava-gson-serializers.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-beans</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fatboyindustrial.gson-javatime-serialisers</groupId>
+      <artifactId>gson-javatime-serialisers</artifactId>
+      <version>${gson-javatime-serialisers.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.danilopianini</groupId>
+      <artifactId>gson-extras</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.baggonius.gson</groupId>
+      <artifactId>guava-gson-serializers</artifactId>
+      <version>${guava-gson-serializers.version}</version>
+    </dependency>
+  </dependencies>
+</project>

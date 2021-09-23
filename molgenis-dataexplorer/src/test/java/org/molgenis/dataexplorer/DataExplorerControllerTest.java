@@ -56,7 +56,7 @@ import org.molgenis.dataexplorer.settings.DataExplorerSettings;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.test.AbstractMockitoSpringContextTests;
-import org.molgenis.web.converter.GsonConfig;
+import org.molgenis.web.converter.GsonWebConfig;
 import org.molgenis.web.menu.MenuReaderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
@@ -69,7 +69,7 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
 @MockitoSettings(strictness = Strictness.LENIENT)
 @WebAppConfiguration
-@ContextConfiguration(classes = {GsonConfig.class})
+@ContextConfiguration(classes = {GsonWebConfig.class})
 class DataExplorerControllerTest extends AbstractMockitoSpringContextTests {
   @InjectMocks private DataExplorerController controller = new DataExplorerController();
 

@@ -33,7 +33,7 @@ import org.molgenis.metadata.manager.service.MetadataManagerService;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.test.AbstractMockitoSpringContextTests;
-import org.molgenis.web.converter.GsonConfig;
+import org.molgenis.web.converter.GsonWebConfig;
 import org.molgenis.web.menu.MenuReaderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -48,7 +48,7 @@ import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 
 @WebAppConfiguration
-@ContextConfiguration(classes = {MetadataManagerControllerTest.Config.class, GsonConfig.class})
+@ContextConfiguration(classes = {MetadataManagerControllerTest.Config.class, GsonWebConfig.class})
 class MetadataManagerControllerTest extends AbstractMockitoSpringContextTests {
   @Autowired private GsonHttpMessageConverter gsonHttpMessageConverter;
 

@@ -30,6 +30,11 @@
   <dependencies>
     <dependency>
       <groupId>org.molgenis</groupId>
+      <artifactId>molgenis-gson</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.molgenis</groupId>
       <artifactId>molgenis-util</artifactId>
       <version>${project.version}</version>
     </dependency>

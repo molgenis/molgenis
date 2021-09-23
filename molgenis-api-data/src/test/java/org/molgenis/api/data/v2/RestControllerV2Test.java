@@ -120,7 +120,7 @@ import org.molgenis.util.i18n.MessageSourceHolder;
 import org.molgenis.util.i18n.TestAllPropertiesMessageSource;
 import org.molgenis.util.i18n.format.MessageFormatFactory;
 import org.molgenis.validation.ConstraintViolation;
-import org.molgenis.web.converter.GsonConfig;
+import org.molgenis.web.converter.GsonWebConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -139,7 +139,7 @@ import org.springframework.web.util.NestedServletException;
 
 @MockitoSettings(strictness = Strictness.LENIENT)
 @WebAppConfiguration
-@ContextConfiguration(classes = {RestControllerV2Config.class, GsonConfig.class})
+@ContextConfiguration(classes = {RestControllerV2Config.class, GsonWebConfig.class})
 class RestControllerV2Test extends AbstractMolgenisSpringTest {
 
   private static final String SELF_REF_ENTITY_NAME = "selfRefEntity";

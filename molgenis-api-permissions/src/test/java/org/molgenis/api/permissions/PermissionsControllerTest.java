@@ -39,7 +39,7 @@ import org.molgenis.data.security.permission.model.LabelledPermission;
 import org.molgenis.data.security.permission.model.Permission;
 import org.molgenis.security.acl.ObjectIdentityService;
 import org.molgenis.security.core.PermissionSet;
-import org.molgenis.web.converter.GsonConfig;
+import org.molgenis.web.converter.GsonWebConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
@@ -59,7 +59,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 @WebAppConfiguration
-@ContextConfiguration(classes = {GsonConfig.class})
+@ContextConfiguration(classes = {GsonWebConfig.class})
 class PermissionsControllerTest extends AbstractMolgenisSpringTest {
   @Autowired private GsonHttpMessageConverter gsonHttpMessageConverter;
 

@@ -12,7 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
 import org.molgenis.data.AbstractMolgenisSpringTest;
-import org.molgenis.web.converter.GsonConfig;
+import org.molgenis.web.converter.GsonWebConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.security.access.AccessDeniedException;
@@ -23,7 +23,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.LocaleResolver;
 
 @WebAppConfiguration
-@ContextConfiguration(classes = {UserAccountControllerTestConfig.class, GsonConfig.class})
+@ContextConfiguration(classes = {UserAccountControllerTestConfig.class, GsonWebConfig.class})
 class UserAccountControllerMockMvcTest extends AbstractMolgenisSpringTest {
   @Autowired private UserAccountControllerTestConfig config;
   @Autowired private UserAccountController userAccountController;

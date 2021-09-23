@@ -23,7 +23,7 @@ import org.molgenis.beacon.controller.model.BeaconResponse;
 import org.molgenis.beacon.service.BeaconInfoService;
 import org.molgenis.beacon.service.BeaconQueryService;
 import org.molgenis.test.AbstractMockitoSpringContextTests;
-import org.molgenis.web.converter.GsonConfig;
+import org.molgenis.web.converter.GsonWebConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
@@ -33,7 +33,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 @WebAppConfiguration
-@ContextConfiguration(classes = {GsonConfig.class})
+@ContextConfiguration(classes = {GsonWebConfig.class})
 class BeaconControllerTest extends AbstractMockitoSpringContextTests {
   @Autowired private GsonHttpMessageConverter gsonHttpMessageConverter;
 

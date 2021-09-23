@@ -29,7 +29,7 @@ import org.molgenis.security.captcha.ReCaptchaService;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.util.i18n.TestAllPropertiesMessageSource;
 import org.molgenis.util.i18n.format.MessageFormatFactory;
-import org.molgenis.web.converter.GsonConfig;
+import org.molgenis.web.converter.GsonWebConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -50,7 +50,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 @WebAppConfiguration
-@ContextConfiguration(classes = {Config.class, GsonConfig.class})
+@ContextConfiguration(classes = {Config.class, GsonWebConfig.class})
 class FeedbackControllerTest extends AbstractMolgenisSpringTest {
   @Autowired private FeedbackController feedbackController;
 

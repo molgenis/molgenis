@@ -33,7 +33,7 @@ import org.molgenis.oneclickimporter.job.OneClickImportJobExecutionFactory;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.test.AbstractMockitoSpringContextTests;
-import org.molgenis.web.converter.GsonConfig;
+import org.molgenis.web.converter.GsonWebConfig;
 import org.molgenis.web.menu.MenuReaderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -48,7 +48,7 @@ import org.springframework.web.servlet.LocaleResolver;
 
 @MockitoSettings(strictness = Strictness.LENIENT)
 @WebAppConfiguration
-@ContextConfiguration(classes = GsonConfig.class)
+@ContextConfiguration(classes = GsonWebConfig.class)
 class OneClickImporterControllerTest extends AbstractMockitoSpringContextTests {
   private static final String CONTENT_TYPE_EXCEL =
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
