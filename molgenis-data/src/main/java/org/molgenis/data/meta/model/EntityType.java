@@ -25,7 +25,9 @@ import static org.molgenis.data.meta.model.EntityTypeMetadata.TAGS;
 import static org.molgenis.data.util.AttributeUtils.getI18nAttributeName;
 import static org.molgenis.util.stream.MapCollectors.toLinkedMap;
 
+import com.google.common.collect.ImmutableMap;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +48,7 @@ import org.molgenis.util.i18n.Labeled;
  * frontends, including Repository instances.
  */
 public class EntityType extends StaticEntity implements Labeled {
-  private Map<String, Attribute> cachedOwnAttrs;
+  private volatile Map<String, Attribute> cachedOwnAttrs;
   private Boolean cachedHasAttrWithExpression;
 
   public EntityType(Entity entity) {
@@ -644,9 +646,9 @@ public class EntityType extends StaticEntity implements Labeled {
   }
 
   public void removeAttribute(Attribute attr) {
-    Map<String, Attribute> cachedOwnAttributes = getCachedOwnAttrs();
-    removeAttributeRecursive(attr, cachedOwnAttributes);
-    set(ATTRIBUTES, cachedOwnAttributes.values());
+    var attrs = new HashMap<>(getCachedOwnAttrs());
+    removeAttributeRecursive(attr, attrs);
+    set(ATTRIBUTES, attrs.values());
   }
 
   private void removeAttributeRecursive(Attribute attr, Map<String, Attribute> attributes) {
@@ -761,9 +763,13 @@ public class EntityType extends StaticEntity implements Labeled {
 
   private Map<String, Attribute> getCachedOwnAttrs() {
     if (cachedOwnAttrs == null) {
-      cachedOwnAttrs = new LinkedHashMap<>();
-      getEntities(ATTRIBUTES, Attribute.class)
-          .forEach(attr -> cachedOwnAttrs.put(attr.getName(), attr));
+      // to fix concurrency issues the attributes must be stored in a separate map first
+      if (cachedOwnAttrs == null) {
+        var builder = ImmutableMap.<String, Attribute>builder();
+        getEntities(ATTRIBUTES, Attribute.class).forEach(attr -> builder.put(attr.getName(), attr));
+        cachedOwnAttrs = builder.build();
+      }
+      return cachedOwnAttrs;
     }
     return cachedOwnAttrs;
   }
