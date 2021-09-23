@@ -14,13 +14,11 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Import;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
 @Configuration
 @EnableTransactionManagement
 @EnableAspectJAutoProxy
-@EnableWebMvc
 @EnableAsync
 @ComponentScan(basePackages = "org.molgenis")
 @Import({

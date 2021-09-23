@@ -14,7 +14,6 @@ import static org.molgenis.web.exception.ExceptionUtils.getErrors;
 import org.junit.jupiter.api.Test;
 import org.molgenis.util.exception.CodedRuntimeException;
 import org.springframework.validation.BindException;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 class ExceptionUtilsTest {
@@ -52,15 +51,6 @@ class ExceptionUtilsTest {
   void testGetErrorsBindException() {
     BindException bindException = mock(BindException.class);
     assertEquals(of(bindException), getErrors(bindException));
-  }
-
-  @Test
-  void testGetErrorsMethodArgumentNotValidException() {
-    MethodArgumentNotValidException methodArgumentNotValidException =
-        mock(MethodArgumentNotValidException.class);
-    BindingResult bindingResult = mock(BindingResult.class);
-    when(methodArgumentNotValidException.getBindingResult()).thenReturn(bindingResult);
-    assertEquals(of(bindingResult), getErrors(methodArgumentNotValidException));
   }
 
   @Test

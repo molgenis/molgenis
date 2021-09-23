@@ -57,6 +57,7 @@ public class DataServiceClientRegistrationRepository implements ClientRegistrati
     if (oidcClient.getIssuerUri() != null) {
       result =
           ClientRegistrations.fromOidcIssuerLocation(oidcClient.getIssuerUri())
+              .scope(oidcClient.getScopes())
               .registrationId(oidcClient.getRegistrationId());
     } else {
       result =
@@ -65,7 +66,7 @@ public class DataServiceClientRegistrationRepository implements ClientRegistrati
               .tokenUri(oidcClient.getTokenUri())
               .jwkSetUri(oidcClient.getJwkSetUri())
               .userInfoUri(oidcClient.getUserInfoUri())
-              .redirectUriTemplate(DEFAULT_REDIRECT_URI_TEMPLATE)
+              .redirectUri(DEFAULT_REDIRECT_URI_TEMPLATE)
               .clientAuthenticationMethod(toClientAuthenticationMethod(oidcClient))
               .authorizationGrantType(toAuthorizationGrantType(oidcClient))
               .scope(oidcClient.getScopes());
