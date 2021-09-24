@@ -48,7 +48,7 @@ import org.molgenis.util.i18n.Labeled;
  * frontends, including Repository instances.
  */
 public class EntityType extends StaticEntity implements Labeled {
-  private volatile Map<String, Attribute> cachedOwnAttrs;
+  private volatile ImmutableMap<String, Attribute> cachedOwnAttrs;
   private Boolean cachedHasAttrWithExpression;
 
   public EntityType(Entity entity) {
@@ -763,7 +763,6 @@ public class EntityType extends StaticEntity implements Labeled {
 
   private Map<String, Attribute> getCachedOwnAttrs() {
     if (cachedOwnAttrs == null) {
-      // to fix concurrency issues the attributes must be stored in a separate map first
       if (cachedOwnAttrs == null) {
         var builder = ImmutableMap.<String, Attribute>builder();
         getEntities(ATTRIBUTES, Attribute.class).forEach(attr -> builder.put(attr.getName(), attr));
