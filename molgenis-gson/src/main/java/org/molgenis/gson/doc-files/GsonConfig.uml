@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>org.molgenis.gson.GsonConfig</OriginalElement>
+  <nodes>
+    <node x="443.0" y="344.0">org.molgenis.web.converter.GsonWebConfig</node>
+    <node x="433.0" y="0.0">org.molgenis.gson.GsonConfig</node>
+    <node x="502.0" y="232.0">org.molgenis.web.menu.model.MenuGsonConfig</node>
+    <node x="0.0" y="232.0">org.molgenis.web.support.EntitySerializerGsonConfig</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="org.molgenis.web.support.EntitySerializerGsonConfig" target="org.molgenis.gson.GsonConfig" relationship="DEPENDENCY">
+      <point x="0.0" y="-30.0" />
+      <point x="241.0" y="206.0" />
+      <point x="690.5" y="206.0" />
+      <point x="0.0" y="90.0" />
+    </edge>
+    <edge source="org.molgenis.web.converter.GsonWebConfig" target="org.molgenis.web.menu.model.MenuGsonConfig" relationship="DEPENDENCY">
+      <point x="0.0" y="-42.0" />
+      <point x="0.0" y="30.0" />
+    </edge>
+    <edge source="org.molgenis.web.menu.model.MenuGsonConfig" target="org.molgenis.gson.GsonConfig" relationship="DEPENDENCY">
+      <point x="0.0" y="-30.0" />
+      <point x="0.0" y="90.0" />
+    </edge>
+    <edge source="org.molgenis.web.converter.GsonWebConfig" target="org.molgenis.gson.GsonConfig" relationship="DEPENDENCY">
+      <point x="0.0" y="-42.0" />
+      <point x="690.5" y="318.0" />
+      <point x="889.5" y="318.0" />
+      <point x="889.5" y="206.0" />
+      <point x="690.5" y="206.0" />
+      <point x="0.0" y="90.0" />
+    </edge>
+    <edge source="org.molgenis.web.converter.GsonWebConfig" target="org.molgenis.web.support.EntitySerializerGsonConfig" relationship="DEPENDENCY">
+      <point x="0.0" y="-42.0" />
+      <point x="690.5" y="318.0" />
+      <point x="241.0" y="318.0" />
+      <point x="0.0" y="30.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic" zoom="1.0" showDependencies="true" x="474.0" y="214.0" />
+  <SelectedNodes>
+    <node>org.molgenis.web.support.EntitySerializerGsonConfig</node>
+  </SelectedNodes>
+  <Categories>
+    <Category>Methods</Category>
+  </Categories>
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>public</VISIBILITY>
+</Diagram>
+

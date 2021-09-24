@@ -29,7 +29,7 @@ import org.molgenis.navigator.model.ResourceType;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.test.AbstractMockitoSpringContextTests;
-import org.molgenis.web.converter.GsonConfig;
+import org.molgenis.web.converter.GsonWebConfig;
 import org.molgenis.web.menu.MenuReaderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
@@ -40,7 +40,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.LocaleResolver;
 
 @WebAppConfiguration
-@ContextConfiguration(classes = {GsonConfig.class})
+@ContextConfiguration(classes = {GsonWebConfig.class})
 class NavigatorControllerTest extends AbstractMockitoSpringContextTests {
 
   private MockMvc mockMvc;

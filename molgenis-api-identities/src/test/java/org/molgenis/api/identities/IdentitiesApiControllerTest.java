@@ -76,7 +76,7 @@ import org.molgenis.test.AbstractMockitoSpringContextTests;
 import org.molgenis.util.i18n.MessageSourceHolder;
 import org.molgenis.util.i18n.TestAllPropertiesMessageSource;
 import org.molgenis.util.i18n.format.MessageFormatFactory;
-import org.molgenis.web.converter.GsonConfig;
+import org.molgenis.web.converter.GsonWebConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.FormHttpMessageConverter;
@@ -88,7 +88,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.util.NestedServletException;
 
-@ContextConfiguration(classes = {IdentitiesApiControllerTest.Config.class, GsonConfig.class})
+@ContextConfiguration(classes = {IdentitiesApiControllerTest.Config.class, GsonWebConfig.class})
 class IdentitiesApiControllerTest extends AbstractMockitoSpringContextTests {
 
   private final GroupValueFactory groupValueFactory = new GroupValueFactory();

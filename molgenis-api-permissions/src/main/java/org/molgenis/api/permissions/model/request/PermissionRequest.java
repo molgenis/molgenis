@@ -7,7 +7,7 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.api.permissions.exceptions.MissingUserOrRoleException;
 import org.molgenis.api.permissions.exceptions.UserAndRoleException;
-import org.molgenis.util.AutoGson;
+import org.molgenis.gson.AutoGson;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_PermissionRequest.class)

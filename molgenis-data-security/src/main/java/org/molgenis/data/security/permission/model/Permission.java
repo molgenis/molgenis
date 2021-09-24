@@ -1,8 +1,8 @@
 package org.molgenis.data.security.permission.model;
 
 import com.google.auto.value.AutoValue;
+import org.molgenis.gson.AutoGson;
 import org.molgenis.security.core.PermissionSet;
-import org.molgenis.util.AutoGson;
 import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.acls.model.Sid;
 

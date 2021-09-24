@@ -3,7 +3,7 @@ package org.molgenis.api.permissions.model.response;
 import com.google.auto.value.AutoValue;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
-import org.molgenis.util.AutoGson;
+import org.molgenis.gson.AutoGson;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_ObjectResponse.class)

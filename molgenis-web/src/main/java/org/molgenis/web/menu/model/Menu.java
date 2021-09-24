@@ -8,7 +8,7 @@ import com.google.common.collect.ImmutableList.Builder;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
-import org.molgenis.util.AutoGson;
+import org.molgenis.gson.AutoGson;
 
 /** Menu grouping a list of child items. */
 @AutoGson(autoValueClass = AutoValue_Menu.class)

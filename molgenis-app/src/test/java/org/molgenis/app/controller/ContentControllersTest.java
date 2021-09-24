@@ -13,7 +13,7 @@ import org.molgenis.core.ui.controller.StaticContentService;
 import org.molgenis.data.DataService;
 import org.molgenis.data.file.FileStore;
 import org.molgenis.test.AbstractMockitoSpringContextTests;
-import org.molgenis.web.converter.GsonConfig;
+import org.molgenis.web.converter.GsonWebConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,7 +26,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 @WebAppConfiguration
-@ContextConfiguration(classes = {Config.class, GsonConfig.class})
+@ContextConfiguration(classes = {Config.class, GsonWebConfig.class})
 class ContentControllersTest extends AbstractMockitoSpringContextTests {
 
   @Autowired private GsonHttpMessageConverter gsonHttpMessageConverter;

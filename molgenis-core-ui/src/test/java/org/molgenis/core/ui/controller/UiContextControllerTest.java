@@ -20,7 +20,7 @@ import org.molgenis.data.security.auth.User;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.test.AbstractMockitoSpringContextTests;
-import org.molgenis.web.converter.GsonConfig;
+import org.molgenis.web.converter.GsonWebConfig;
 import org.molgenis.web.menu.MenuReaderService;
 import org.molgenis.web.menu.model.Menu;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +37,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.LocaleResolver;
 
-@ContextConfiguration(classes = {UiContextControllerTest.Config.class, GsonConfig.class})
+@ContextConfiguration(classes = {UiContextControllerTest.Config.class, GsonWebConfig.class})
 class UiContextControllerTest extends AbstractMockitoSpringContextTests {
 
   private MockMvc mockMvc;

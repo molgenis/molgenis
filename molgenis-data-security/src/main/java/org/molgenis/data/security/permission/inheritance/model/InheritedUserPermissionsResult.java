@@ -3,8 +3,8 @@ package org.molgenis.data.security.permission.inheritance.model;
 import com.google.auto.value.AutoValue;
 import java.util.List;
 import javax.annotation.Nullable;
+import org.molgenis.gson.AutoGson;
 import org.molgenis.security.core.PermissionSet;
-import org.molgenis.util.AutoGson;
 import org.springframework.security.acls.model.Sid;
 
 @AutoValue

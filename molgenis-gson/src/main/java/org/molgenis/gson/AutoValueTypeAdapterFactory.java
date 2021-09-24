@@ -1,10 +1,9 @@
-package org.molgenis.web.converter;
+package org.molgenis.gson;
 
 import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
 import com.google.gson.TypeAdapterFactory;
 import com.google.gson.reflect.TypeToken;
-import org.molgenis.util.AutoGson;
 
 public class AutoValueTypeAdapterFactory implements TypeAdapterFactory {
   @SuppressWarnings("unchecked")

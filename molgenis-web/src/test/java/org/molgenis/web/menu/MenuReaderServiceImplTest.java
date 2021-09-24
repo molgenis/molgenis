@@ -19,13 +19,13 @@ import org.molgenis.data.plugin.model.PluginIdentity;
 import org.molgenis.data.plugin.model.PluginPermission;
 import org.molgenis.security.core.UserPermissionEvaluator;
 import org.molgenis.settings.AppSettings;
-import org.molgenis.web.converter.GsonConfig;
 import org.molgenis.web.menu.model.Menu;
+import org.molgenis.web.menu.model.MenuGsonConfig;
 import org.molgenis.web.menu.model.MenuItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
-@ContextConfiguration(classes = {GsonConfig.class})
+@ContextConfiguration(classes = {MenuGsonConfig.class})
 class MenuReaderServiceImplTest extends AbstractMolgenisSpringTest {
   @Autowired private Gson gson;
   @Mock private UserPermissionEvaluator userPermissionEvaluator;

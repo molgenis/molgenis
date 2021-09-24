@@ -1,8 +1,8 @@
 package org.molgenis.navigator;
 
 import com.google.auto.value.AutoValue;
+import org.molgenis.gson.AutoGson;
 import org.molgenis.navigator.model.Resource;
-import org.molgenis.util.AutoGson;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_UpdateResourceRequest.class)

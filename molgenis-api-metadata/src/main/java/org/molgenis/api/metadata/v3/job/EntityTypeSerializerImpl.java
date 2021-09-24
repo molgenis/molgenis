@@ -6,14 +6,9 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.meta.AttributeType.getValueString;
 
-import com.baggonius.gson.immutable.ImmutableListDeserializer;
-import com.baggonius.gson.immutable.ImmutableMapDeserializer;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 import org.molgenis.api.metadata.v3.MetadataUtils;
 import org.molgenis.data.DataService;
@@ -30,7 +25,6 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageMetadata;
 import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.meta.model.TagMetadata;
-import org.molgenis.web.converter.AutoValueTypeAdapterFactory;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -44,16 +38,12 @@ public class EntityTypeSerializerImpl implements EntityTypeSerializer {
   EntityTypeSerializerImpl(
       DataService dataService,
       EntityTypeFactory entityTypeFactory,
-      AttributeFactory attributeFactory) {
+      AttributeFactory attributeFactory,
+      Gson gson) {
     this.dataService = requireNonNull(dataService);
     this.entityTypeFactory = requireNonNull(entityTypeFactory);
     this.attributeFactory = requireNonNull(attributeFactory);
-    gson =
-        new GsonBuilder()
-            .registerTypeAdapterFactory(new AutoValueTypeAdapterFactory())
-            .registerTypeAdapter(ImmutableList.class, new ImmutableListDeserializer())
-            .registerTypeAdapter(ImmutableMap.class, new ImmutableMapDeserializer())
-            .create();
+    this.gson = requireNonNull(gson);
   }
 
   @Override
@@ -115,7 +105,7 @@ public class EntityTypeSerializerImpl implements EntityTypeSerializer {
         .setLabelAttribute(attribute.isLabelAttribute())
         .setLookupAttributeIndex(attribute.getLookupAttributeIndex())
         .setRefEntityTypeId(refEntityTypeId)
-        .setCascadeDelete(Optional.ofNullable(attribute.getCascadeDelete()))
+        .setCascadeDelete(attribute.getCascadeDelete())
         .setMappedById(mappedById)
         .setOrderBy(orderBy)
         .setLabel(attribute.getLabel())
@@ -210,7 +200,7 @@ public class EntityTypeSerializerImpl implements EntityTypeSerializer {
     attribute.setLabelAttribute(serializableAttribute.isLabelAttribute());
     attribute.setLookupAttributeIndex(serializableAttribute.getLookupAttributeIndex());
     attribute.setRefEntity(refEntityType);
-    attribute.setCascadeDelete(serializableAttribute.getCascadeDelete().orElse(null));
+    attribute.setCascadeDelete(serializableAttribute.getCascadeDelete());
     attribute.setMappedBy(mappedByAttr);
     attribute.setOrderBy(sort);
     attribute.setLabel(serializableAttribute.getLabel());

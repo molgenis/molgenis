@@ -17,7 +17,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.test.AbstractMockitoSpringContextTests;
-import org.molgenis.web.converter.GsonConfig;
+import org.molgenis.web.converter.GsonWebConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.FormHttpMessageConverter;
@@ -29,7 +29,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.filter.ForwardedHeaderFilter;
 
 @WebAppConfiguration
-@ContextConfiguration(classes = {GsonConfig.class})
+@ContextConfiguration(classes = {GsonWebConfig.class})
 class FairControllerTest extends AbstractMockitoSpringContextTests {
 
   @Mock private DataService dataService;

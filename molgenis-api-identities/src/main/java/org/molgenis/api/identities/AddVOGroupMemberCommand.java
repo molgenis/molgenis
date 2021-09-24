@@ -3,7 +3,7 @@ package org.molgenis.api.identities;
 import com.google.auto.value.AutoValue;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.molgenis.util.AutoGson;
+import org.molgenis.gson.AutoGson;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_AddVOGroupMemberCommand.class)

@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.molgenis.web.converter.GsonConfig;
+import org.molgenis.web.converter.GsonWebConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,7 +22,7 @@ import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
-@Import(GsonConfig.class)
+@Import(GsonWebConfig.class)
 public class HttpClientConfig {
   @Autowired private GsonHttpMessageConverter gsonHttpMessageConverter;
 

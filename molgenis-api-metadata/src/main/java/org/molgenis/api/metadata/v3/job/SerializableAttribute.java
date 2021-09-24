@@ -3,10 +3,9 @@ package org.molgenis.api.metadata.v3.job;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import java.util.Optional;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
-import org.molgenis.util.AutoGson;
+import org.molgenis.gson.AutoGson;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_SerializableAttribute.class)
@@ -31,7 +30,9 @@ abstract class SerializableAttribute {
   @CheckForNull
   abstract String getRefEntityTypeId();
 
-  abstract Optional<Boolean> getCascadeDelete();
+  @Nullable
+  @CheckForNull
+  abstract Boolean getCascadeDelete();
 
   @Nullable
   @CheckForNull
@@ -126,8 +127,7 @@ abstract class SerializableAttribute {
 
     public abstract Builder setRefEntityTypeId(String newRefEntityTypeId);
 
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    public abstract Builder setCascadeDelete(Optional<Boolean> newCascadeDelete);
+    public abstract Builder setCascadeDelete(Boolean newCascadeDelete);
 
     public abstract Builder setMappedById(String newMappedById);
 

@@ -2,7 +2,7 @@ package org.molgenis.searchall.model;
 
 import com.google.auto.value.AutoValue;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.util.AutoGson;
+import org.molgenis.gson.AutoGson;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_AttributeResult.class)

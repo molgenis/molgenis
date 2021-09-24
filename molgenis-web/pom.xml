@@ -18,16 +18,7 @@
     </repository>
   </repositories>
 
-  <properties>
-    <guava-gson-serializers.version>1.0.1</guava-gson-serializers.version>
-  </properties>
-
   <dependencies>
-    <dependency>
-      <groupId>com.baggonius.gson</groupId>
-      <artifactId>guava-gson-serializers</artifactId>
-      <version>${guava-gson-serializers.version}</version>
-    </dependency>
     <dependency>
       <groupId>org.molgenis</groupId>
       <artifactId>molgenis-api</artifactId>
@@ -102,17 +93,17 @@
       <artifactId>rsql-parser</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.fatboyindustrial.gson-javatime-serialisers</groupId>
-      <artifactId>gson-javatime-serialisers</artifactId>
-      <version>1.1.1</version>
-    </dependency>
-    <dependency>
       <groupId>io.swagger</groupId>
       <artifactId>swagger-annotations</artifactId>
     </dependency>
     <dependency>
       <groupId>javax.validation</groupId>
       <artifactId>validation-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.molgenis</groupId>
+      <artifactId>molgenis-gson</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <!-- test dependencies -->
     <dependency>
@@ -156,10 +147,6 @@
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-test</artifactId>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.danilopianini</groupId>
-      <artifactId>gson-extras</artifactId>
     </dependency>
   </dependencies>
 </project>
