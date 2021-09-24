@@ -2,7 +2,7 @@ package org.molgenis.api.model.response;
 
 import com.google.auto.value.AutoValue;
 import java.time.Instant;
-import org.molgenis.util.AutoGson;
+import org.molgenis.gson.AutoGson;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_AppVersionResponse.class)

@@ -5,7 +5,7 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.util.AutoGson;
+import org.molgenis.gson.AutoGson;
 
 /** Collection of typed resources. */
 @AutoValue

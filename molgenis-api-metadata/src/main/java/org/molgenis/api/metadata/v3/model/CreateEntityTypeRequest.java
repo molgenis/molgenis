@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import org.molgenis.util.AutoGson;
+import org.molgenis.gson.AutoGson;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_CreateEntityTypeRequest.class)

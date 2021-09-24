@@ -2,8 +2,8 @@ package org.molgenis.navigator.download;
 
 import com.google.auto.value.AutoValue;
 import java.util.List;
+import org.molgenis.gson.AutoGson;
 import org.molgenis.navigator.model.Resource;
-import org.molgenis.util.AutoGson;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_DownloadResourcesRequest.class)

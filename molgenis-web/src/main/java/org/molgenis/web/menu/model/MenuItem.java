@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
-import org.molgenis.util.AutoGson;
+import org.molgenis.gson.AutoGson;
 
 /** A menu item. */
 @AutoValue

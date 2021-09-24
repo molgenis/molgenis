@@ -4,7 +4,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.google.auto.value.AutoValue;
 import org.molgenis.api.support.PageUtils;
-import org.molgenis.util.AutoGson;
+import org.molgenis.gson.AutoGson;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_PageResponse.class)

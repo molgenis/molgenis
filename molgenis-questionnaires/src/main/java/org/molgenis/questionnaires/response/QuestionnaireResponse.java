@@ -3,9 +3,9 @@ package org.molgenis.questionnaires.response;
 import com.google.auto.value.AutoValue;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
+import org.molgenis.gson.AutoGson;
 import org.molgenis.questionnaires.meta.Questionnaire;
 import org.molgenis.questionnaires.meta.QuestionnaireStatus;
-import org.molgenis.util.AutoGson;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_QuestionnaireResponse.class)

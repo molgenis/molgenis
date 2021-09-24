@@ -4,7 +4,7 @@ import com.google.auto.value.AutoValue;
 import java.util.List;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import org.molgenis.util.AutoGson;
+import org.molgenis.gson.AutoGson;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_AddTagRequest.class)

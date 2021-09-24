@@ -4,7 +4,7 @@ import com.google.auto.value.AutoValue;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.app.manager.meta.App;
-import org.molgenis.util.AutoGson;
+import org.molgenis.gson.AutoGson;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_AppResponse.class)

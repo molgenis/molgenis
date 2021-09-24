@@ -2,7 +2,7 @@ package org.molgenis.api.data.v2;
 
 import com.google.auto.value.AutoValue;
 import javax.validation.constraints.NotNull;
-import org.molgenis.util.AutoGson;
+import org.molgenis.gson.AutoGson;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_CopyEntityRequestV2.class)

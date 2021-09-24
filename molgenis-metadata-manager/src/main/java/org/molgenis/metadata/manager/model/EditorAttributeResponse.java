@@ -2,7 +2,7 @@ package org.molgenis.metadata.manager.model;
 
 import com.google.auto.value.AutoValue;
 import java.util.List;
-import org.molgenis.util.AutoGson;
+import org.molgenis.gson.AutoGson;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_EditorAttributeResponse.class)

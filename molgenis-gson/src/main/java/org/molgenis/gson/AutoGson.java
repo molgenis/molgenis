@@ -1,4 +1,4 @@
-package org.molgenis.util;
+package org.molgenis.gson;
 
 import com.google.gson.Gson;
 import java.lang.annotation.ElementType;

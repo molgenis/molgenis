@@ -3,7 +3,7 @@ package org.molgenis.data.security.permission.inheritance.model;
 import com.google.auto.value.AutoValue;
 import java.util.List;
 import javax.annotation.Nullable;
-import org.molgenis.util.AutoGson;
+import org.molgenis.gson.AutoGson;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_InheritedPermissionsResult.class)

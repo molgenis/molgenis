@@ -2,8 +2,8 @@ package org.molgenis.web.menu.model;
 
 import com.google.gson.TypeAdapterFactory;
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
+import org.molgenis.gson.AutoGson;
 import org.molgenis.gson.GsonConfig;
-import org.molgenis.util.AutoGson;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;

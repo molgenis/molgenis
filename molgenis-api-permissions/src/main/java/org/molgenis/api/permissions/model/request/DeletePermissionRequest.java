@@ -5,7 +5,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import com.google.auto.value.AutoValue;
 import org.molgenis.api.permissions.exceptions.MissingUserOrRoleException;
 import org.molgenis.api.permissions.exceptions.UserAndRoleException;
-import org.molgenis.util.AutoGson;
+import org.molgenis.gson.AutoGson;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_DeletePermissionRequest.class)

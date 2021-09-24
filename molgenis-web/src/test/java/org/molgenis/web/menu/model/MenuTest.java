@@ -13,7 +13,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.molgenis.util.AutoGson;
+import org.molgenis.gson.AutoGson;
 
 class MenuTest {
   private Menu menu;

@@ -4,7 +4,7 @@ import com.google.auto.value.AutoValue;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.beacon.config.Beacon;
-import org.molgenis.util.AutoGson;
+import org.molgenis.gson.AutoGson;
 
 /** BeaconResponse's response to a query for information about a specific allele. */
 @AutoValue

@@ -1,7 +1,7 @@
 package org.molgenis.semanticsearch.explain.bean;
 
 import com.google.auto.value.AutoValue;
-import org.molgenis.util.AutoGson;
+import org.molgenis.gson.AutoGson;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_ExplainedQueryString.class)
