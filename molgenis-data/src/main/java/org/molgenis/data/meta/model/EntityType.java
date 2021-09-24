@@ -48,6 +48,7 @@ import org.molgenis.util.i18n.Labeled;
  * frontends, including Repository instances.
  */
 public class EntityType extends StaticEntity implements Labeled {
+  @SuppressWarnings("java:S3077") // Sonar warns that Attribute is not thread-safe
   private volatile ImmutableMap<String, Attribute> cachedOwnAttrs;
   private Boolean cachedHasAttrWithExpression;
 
