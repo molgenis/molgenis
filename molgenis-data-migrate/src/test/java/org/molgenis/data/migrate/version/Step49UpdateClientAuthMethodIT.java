@@ -18,6 +18,10 @@ import org.junit.jupiter.api.Test;
 import org.postgresql.ds.PGSimpleDataSource;
 import org.xml.sax.InputSource;
 
+/**
+ * This integration test tests the integration of the sql with an actual postgres database. It only
+ * runs in intellij, but we keep it around as an example of how to do this.
+ */
 class Step49UpdateClientAuthMethodIT {
 
   private PGSimpleDataSource dataSource;
