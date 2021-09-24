@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import org.molgenis.script.core.ScriptOutputHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class PythonScriptExecutor {
+
   private static final Logger LOG = LoggerFactory.getLogger(PythonScriptExecutor.class);
   private final String pythonScriptExecutable;
 
@@ -30,7 +32,7 @@ public class PythonScriptExecutor {
   }
 
   /** Execute a python script and wait for it to finish */
-  public void executeScript(String pythonScript, PythonOutputHandler outputHandler) {
+  public void executeScript(String pythonScript, ScriptOutputHandler outputHandler) {
     // Check if Python is installed
     File file = new File(pythonScriptExecutable);
     if (!file.exists()) {
@@ -49,24 +51,16 @@ public class PythonScriptExecutor {
       Files.write(tempFile, pythonScript.getBytes(UTF_8), StandardOpenOption.WRITE);
       String tempScriptFilePath = tempFile.toAbsolutePath().toString();
 
-      // Create r process
+      // Create Python process
       LOG.info("Running python script [{}]", tempScriptFilePath);
-      Process process =
-          Runtime.getRuntime().exec(getCommand(pythonScriptExecutable, tempScriptFilePath));
+      var process =
+          new ProcessBuilder()
+              .command(getCommand(pythonScriptExecutable, tempScriptFilePath))
+              .redirectErrorStream(true)
+              .start();
 
-      // Capture the error output
-      final StringBuilder sb = new StringBuilder();
-      PythonStreamHandler errorHandler =
-          new PythonStreamHandler(
-              process.getErrorStream(), output -> sb.append(output).append("\n"));
-      errorHandler.start();
-
-      // Capture r output if an Python output handler is defined
-      if (outputHandler != null) {
-        PythonStreamHandler streamHandler =
-            new PythonStreamHandler(process.getInputStream(), outputHandler);
-        streamHandler.start();
-      }
+      // Capture standard out and error
+      new PythonStreamHandler(process.getInputStream(), outputHandler).start();
 
       // Wait until script is finished
       process.waitFor();
@@ -74,15 +68,16 @@ public class PythonScriptExecutor {
       // Check for errors
       if (process.exitValue() > 0) {
         throw new MolgenisPythonException(
-            "Error running [" + tempScriptFilePath + "]." + sb.toString());
+            String.format(
+                "Python script process had non-zero exit value: %s", process.exitValue()));
       }
 
       LOG.info("Script [{}] done", tempScriptFilePath);
     } catch (IOException e) {
-      throw new MolgenisPythonException("Exception executing PythonScipt.", e);
+      throw new MolgenisPythonException("Exception executing PythonScript.", e);
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
-      throw new MolgenisPythonException("Exception waiting for PythonScipt to finish", e);
+      throw new MolgenisPythonException("Exception waiting for PythonScript to finish", e);
     } finally {
       if (tempFile != null) {
         try {

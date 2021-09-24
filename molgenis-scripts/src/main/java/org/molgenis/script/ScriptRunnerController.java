@@ -116,7 +116,7 @@ public class ScriptRunnerController {
       @RequestParam Map<String, Object> parameters,
       HttpServletResponse response)
       throws IOException {
-    ScriptResult result = savedScriptRunner.runScript(scriptName, parameters);
+    ScriptResult result = savedScriptRunner.runScript(scriptName, parameters, null);
 
     if (result.getOutputFile() != null) {
       response.sendRedirect(format("/files/{0}", result.getOutputFile().getId()));

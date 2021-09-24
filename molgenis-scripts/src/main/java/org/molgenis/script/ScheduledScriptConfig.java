@@ -15,6 +15,7 @@ import org.molgenis.jobs.Job;
 import org.molgenis.jobs.JobFactory;
 import org.molgenis.jobs.model.ScheduledJobType;
 import org.molgenis.jobs.model.ScheduledJobTypeFactory;
+import org.molgenis.script.core.ScriptOutputHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -22,6 +23,7 @@ import org.springframework.context.annotation.Lazy;
 @SuppressWarnings("SpringJavaAutowiringInspection")
 @Configuration
 public class ScheduledScriptConfig {
+
   private static final Type MAP_TOKEN = new TypeToken<Map<String, Object>>() {}.getType();
 
   private final SavedScriptRunner savedScriptRunner;
@@ -49,17 +51,23 @@ public class ScheduledScriptConfig {
         final String name = scriptJobExecution.getName();
         return progress -> {
           Map<String, Object> params = getParameterMap(scriptJobExecution);
-          ScriptResult scriptResult = savedScriptRunner.runScript(name, params);
-          if (scriptResult.getOutputFile() != null) {
-            scriptJobExecution.setResultUrl(
-                format("/files/%s", scriptResult.getOutputFile().getId()));
+          var scriptOutputHandler = new ScriptOutputHandler();
+          try {
+            ScriptResult scriptResult =
+                savedScriptRunner.runScript(name, params, scriptOutputHandler);
+            if (scriptResult.getOutputFile() != null) {
+              scriptJobExecution.setResultUrl(
+                  format("/files/%s", scriptResult.getOutputFile().getId()));
+            }
+            return scriptResult;
+          } finally {
+            var output = scriptOutputHandler.toString();
+            if (!output.isEmpty()) {
+              progress.status(format("Script output:%n%s", scriptOutputHandler.toString()));
+            } else {
+              progress.status("Script has no output.");
+            }
           }
-          if (scriptResult.getOutput() != null) {
-            progress.status(format("Script output:%n%s", scriptResult.getOutput()));
-          } else {
-            progress.status("Script has no output.");
-          }
-          return scriptResult;
         };
       }
     };
