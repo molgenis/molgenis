@@ -18,7 +18,11 @@ import org.junit.jupiter.api.Test;
 import org.postgresql.ds.PGSimpleDataSource;
 import org.xml.sax.InputSource;
 
-class Step47AddMaxLengthIT {
+/**
+ * This integration test tests the integration of the sql with an actual postgres database. It only
+ * runs in intellij, but we keep it around as an example of how to do this.
+ */
+class Step49UpdateClientAuthMethodIT {
 
   private PGSimpleDataSource dataSource;
   private DbUnitAssert assertions;
@@ -30,7 +34,7 @@ class Step47AddMaxLengthIT {
     dataSource.setUser(System.getProperty("db_user", "molgenis"));
     dataSource.setPassword(System.getProperty("db_password", "molgenis"));
 
-    var in = getClass().getResourceAsStream("attributes.xml");
+    var in = getClass().getResourceAsStream("step49-before.xml");
     var dataSet = new CachedDataSet(new XmlProducer(new InputSource(in)), true);
 
     DatabaseDataSourceConnection conn = getConnection();
@@ -50,18 +54,16 @@ class Step47AddMaxLengthIT {
 
   @Test
   void testUpgrade() throws Exception {
-    var step47 = new Step47AddMaxLength(dataSource);
-    Assertions.assertDoesNotThrow(step47::upgrade);
+    var step49 = new Step49UpdateClientAuthMethod(dataSource);
+    Assertions.assertDoesNotThrow(step49::upgrade);
 
     var actual =
         getConnection()
-            .createQueryTable(
-                "Attribute",
-                "select * from \"sys_md_Attribute#c8d9a252\" where name = 'maxLength'");
+            .createQueryTable("OidcClient", "select * from \"sys_sec_oidc_OidcClient#3e7b1b4d\"");
 
-    var in = getClass().getResourceAsStream("step47-done.xml");
+    var in = getClass().getResourceAsStream("step49-done.xml");
     var expected =
-        new CachedDataSet(new XmlProducer(new InputSource(in)), true).getTable("Attribute");
+        new CachedDataSet(new XmlProducer(new InputSource(in)), true).getTable("OidcClient");
 
     assertions.assertEquals(expected, actual);
   }

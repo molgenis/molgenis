@@ -22,6 +22,7 @@ import org.molgenis.data.migrate.version.Step45RemoveDanglingSids;
 import org.molgenis.data.migrate.version.Step46DisableInactiveOidcClients;
 import org.molgenis.data.migrate.version.Step47AddMaxLength;
 import org.molgenis.data.migrate.version.Step48RemoveMagmaPlaceholderLocalization;
+import org.molgenis.data.migrate.version.Step49UpdateClientAuthMethod;
 import org.springframework.stereotype.Component;
 
 /** Registers and executes {@link MolgenisUpgrade upgrades} during application bootstrapping. */
@@ -56,6 +57,7 @@ public class MolgenisUpgradeBootstrapper {
     upgradeService.addUpgrade(new Step46DisableInactiveOidcClients(dataSource));
     upgradeService.addUpgrade(new Step47AddMaxLength(dataSource));
     upgradeService.addUpgrade(new Step48RemoveMagmaPlaceholderLocalization(dataSource));
+    upgradeService.addUpgrade(new Step49UpdateClientAuthMethod(dataSource));
     upgradeService.upgrade();
   }
 }

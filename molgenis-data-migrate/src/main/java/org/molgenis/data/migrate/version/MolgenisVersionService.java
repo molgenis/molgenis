@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 public class MolgenisVersionService {
 
   /** package-private for testability */
-  static final int VERSION = 48;
+  static final int VERSION = 49;
 
   private final DataSource dataSource;
 
@@ -40,13 +40,12 @@ public class MolgenisVersionService {
 
   private boolean versionTableExist() {
     try {
-      return (boolean)
-          JdbcUtils.extractDatabaseMetaData(
-              dataSource,
-              dbmd -> {
-                ResultSet tables = dbmd.getTables(null, null, "Version", new String[] {"TABLE"});
-                return tables.first();
-              });
+      return JdbcUtils.extractDatabaseMetaData(
+          dataSource,
+          dbmd -> {
+            ResultSet tables = dbmd.getTables(null, null, "Version", new String[] {"TABLE"});
+            return tables.first();
+          });
     } catch (MetaDataAccessException e) {
       return false;
     }

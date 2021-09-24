@@ -1,29 +1,27 @@
 package org.molgenis.security.oidc;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.security.oidc.model.OidcClientMetadata.CLAIMS_ROLE_PATH;
 import static org.springframework.security.oauth2.core.AuthorizationGrantType.AUTHORIZATION_CODE;
-import static org.springframework.security.oauth2.core.ClientAuthenticationMethod.BASIC;
+import static org.springframework.security.oauth2.core.ClientAuthenticationMethod.CLIENT_SECRET_BASIC;
 import static org.springframework.security.oauth2.core.oidc.StandardClaimNames.SUB;
 
-import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
 import org.molgenis.security.oidc.model.OidcClient;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
-import org.springframework.security.oauth2.client.registration.ClientRegistration.ProviderDetails;
-import org.springframework.security.oauth2.client.registration.ClientRegistration.ProviderDetails.UserInfoEndpoint;
 
 class DataServiceClientRegistrationRepositoryTest extends AbstractMockitoTest {
   @Mock private AuthenticationSettings authenticationSettings;
@@ -47,8 +45,7 @@ class DataServiceClientRegistrationRepositoryTest extends AbstractMockitoTest {
     String clientId = "clientId";
     String clientName = "clientName";
     String clientSecret = "clientSecret";
-    String clientAuthenticationMethod = "basic";
-    String authorizationGrantType = "authorization_code";
+    String clientAuthenticationMethod = CLIENT_SECRET_BASIC.getValue();
     String authorizationUri = "authorizationUri";
     String tokenUri = "tokenUri";
     String jwkSetUri = "jwkSetUri";
@@ -61,7 +58,6 @@ class DataServiceClientRegistrationRepositoryTest extends AbstractMockitoTest {
     when(oidcClient.getClientName()).thenReturn(clientName);
     when(oidcClient.getClientSecret()).thenReturn(clientSecret);
     when(oidcClient.getClientAuthenticationMethod()).thenReturn(clientAuthenticationMethod);
-    when(oidcClient.getAuthorizationGrantType()).thenReturn(authorizationGrantType);
     when(oidcClient.getAuthorizationUri()).thenReturn(authorizationUri);
     when(oidcClient.getTokenUri()).thenReturn(tokenUri);
     when(oidcClient.getJwkSetUri()).thenReturn(jwkSetUri);
@@ -73,27 +69,33 @@ class DataServiceClientRegistrationRepositoryTest extends AbstractMockitoTest {
     ClientRegistration clientRegistration =
         dataServiceClientRegistrationRepository.findByRegistrationId(registrationId);
 
-    // ClientRegistration doesn't implement equals, so we have to compare fields ourselves
-    assertEquals(registrationId, clientRegistration.getRegistrationId());
-    assertEquals(clientId, clientRegistration.getClientId());
-    assertEquals(clientName, clientRegistration.getClientName());
-    assertEquals(clientSecret, clientRegistration.getClientSecret());
-    assertEquals(BASIC, clientRegistration.getClientAuthenticationMethod());
-    assertEquals(AUTHORIZATION_CODE, clientRegistration.getAuthorizationGrantType());
-    assertEquals(new HashSet<>(asList(scopes)), clientRegistration.getScopes());
-    ProviderDetails providerDetails = clientRegistration.getProviderDetails();
-    assertEquals(authorizationUri, providerDetails.getAuthorizationUri());
-    assertEquals(tokenUri, providerDetails.getTokenUri());
-    assertEquals(jwkSetUri, providerDetails.getJwkSetUri());
-    UserInfoEndpoint userInfoEndpoint = providerDetails.getUserInfoEndpoint();
-    assertEquals(userInfoUri, userInfoEndpoint.getUri());
-    assertEquals(SUB, userInfoEndpoint.getUserNameAttributeName());
-    assertEquals(
-        "{baseUrl}/login/oauth2/code/{registrationId}",
-        clientRegistration.getRedirectUriTemplate());
-    assertEquals(
-        "roles",
-        clientRegistration.getProviderDetails().getConfigurationMetadata().get(CLAIMS_ROLE_PATH));
+    var expected =
+        ClientRegistration.withRegistrationId(registrationId)
+            .clientId(clientId)
+            .clientName(clientName)
+            .clientSecret(clientSecret)
+            .clientAuthenticationMethod(CLIENT_SECRET_BASIC)
+            .authorizationGrantType(AUTHORIZATION_CODE)
+            .scope("openid", "profile", "email")
+            .authorizationUri(authorizationUri)
+            .tokenUri(tokenUri)
+            .jwkSetUri(jwkSetUri)
+            .userInfoUri(userInfoUri)
+            .userNameAttributeName(SUB)
+            .redirectUri("{baseUrl}/login/oauth2/code/{registrationId}")
+            .providerConfigurationMetadata(Map.of(CLAIMS_ROLE_PATH, "roles"))
+            .build();
+
+    assertTrue(
+        new ReflectionEquals(expected, "serialVersionUID", "providerDetails")
+            .matches(clientRegistration));
+    assertTrue(
+        new ReflectionEquals(expected.getProviderDetails(), "serialVersionUID", "userInfoEndpoint")
+            .matches(clientRegistration.getProviderDetails()));
+    assertTrue(
+        new ReflectionEquals(
+                expected.getProviderDetails().getUserInfoEndpoint(), "serialVersionUID")
+            .matches(clientRegistration.getProviderDetails().getUserInfoEndpoint()));
   }
 
   @Test
