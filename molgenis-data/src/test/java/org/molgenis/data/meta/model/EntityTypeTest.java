@@ -232,11 +232,11 @@ class EntityTypeTest extends AbstractSystemEntityTest {
         when(mock(Attribute.class).getDataType()).thenReturn(COMPOUND).getMock();
     when(compoundAttr.getName()).thenReturn("compoundAttr");
     Attribute childAttr1 = when(mock(Attribute.class).getDataType()).thenReturn(INT).getMock();
-    when(compoundAttr.getName()).thenReturn("childAttr1");
+    when(childAttr1.getName()).thenReturn("childAttr1");
     Attribute childAttr2 = when(mock(Attribute.class).getDataType()).thenReturn(COMPOUND).getMock();
-    when(compoundAttr.getName()).thenReturn("childAttr2");
+    when(childAttr2.getName()).thenReturn("childAttr2");
     Attribute childAttr2a = when(mock(Attribute.class).getDataType()).thenReturn(INT).getMock();
-    when(compoundAttr.getName()).thenReturn("childAttr2a");
+    when(childAttr2a.getName()).thenReturn("childAttr2a");
     when(compoundAttr.getChildren()).thenReturn(asList(childAttr1, childAttr2));
     when(childAttr2.getChildren()).thenReturn(singletonList(childAttr2a));
     entityType.setOwnAllAttributes(
@@ -253,6 +253,7 @@ class EntityTypeTest extends AbstractSystemEntityTest {
     String attributeIdentifier = "MyAttributeIdentifier";
     Attribute attribute = mock(Attribute.class);
     when(attribute.getIdentifier()).thenReturn(attributeIdentifier);
+    when(attribute.getName()).thenReturn(attributeIdentifier);
 
     Entity entity = mock(Entity.class);
     EntityType entityType = new EntityType(entity);
