@@ -3,12 +3,11 @@ services:
   postgres:
     image: postgres:11-alpine
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=molgenis
+      - POSTGRES_PASSWORD=molgenis
+      - POSTGRES_DB=molgenis
     ports:
       - 5432:5432
-    volumes:
-      - ./init_db.sql:/docker-entrypoint-initdb.d/init.sql
     network_mode: ${NETWORK_MODE:-bridge}
 
   elasticsearch:
