@@ -43,7 +43,7 @@
   </developers>
 
   <properties>
-    <java.version>11</java.version>
+    <java.version>17</java.version>
     <graalvm.version>20.2.0</graalvm.version>
 
     <!-- authentication for release scm plugin -->
@@ -87,7 +87,6 @@
     <guava.version>30.1-jre</guava.version>
     <!-- parent version 0.35 depends on org.apache.commons:commons-compress:jar:1.9, 1.18 is required by org.apache.poi:poi:jar:4.0.1 -->
     <webjars-locator-core.version>0.36</webjars-locator-core.version>
-    <!-- Java 11 support -->
     <rest-assured.version>3.3.0</rest-assured.version>
 
     <!-- dependency versions not managed by parent pom -->
@@ -127,7 +126,7 @@
     <swagger-maven-plugin.version>3.1.5</swagger-maven-plugin.version>
     <jaxb2-maven-plugin.version>1.5</jaxb2-maven-plugin.version>
     <jaxws-maven-plugin.version>2.1</jaxws-maven-plugin.version>
-    <jacoco-maven-plugin.version>0.8.4</jacoco-maven-plugin.version>
+    <jacoco-maven-plugin.version>0.8.7</jacoco-maven-plugin.version>
     <properties-maven-plugin.version>1.0.0</properties-maven-plugin.version>
     <minify-maven-plugin.version>1.7.6</minify-maven-plugin.version>
     <extra-enforcer-rules.version>1.0-beta-6</extra-enforcer-rules.version>
@@ -311,7 +310,6 @@
           <version>${maven-surefire-plugin.version}</version>
           <configuration>
             <skip>${skipUTs}</skip>
-            <argLine>@{argLine} --illegal-access=permit</argLine>
           </configuration>
         </plugin>
         <plugin>
