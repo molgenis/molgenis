@@ -1,7 +1,8 @@
 pipeline {
     agent {
         kubernetes {
-            inheritFrom 'molgenis-jdk11'
+            inheritFrom 'shared'
+            yamlFile ".jenkins/build-pod.yaml"
         }
     }
     environment {
@@ -48,7 +49,7 @@ pipeline {
                                 env.PREVIEW_VERSION = sh(script: "grep version pom.xml | grep SNAPSHOT | cut -d'>' -f2 | cut -d'<' -f1", returnStdout: true).trim() + "-${env.TAG}"
                             }
                             sh "mvn -q -B versions:set -DnewVersion=${PREVIEW_VERSION} -DgenerateBackupPoms=false -T1C"
-                            sh "mvn -q -B clean deploy -Dmaven.test.redirectTestOutputToFile=true -DskipITs -Djib.tag=${TAG} -Djib.repository=${LOCAL_REPOSITORY} -T1C -DargLine='-XX:TieredStopAtLevel=1 -noverify'"
+                            sh "mvn -q -B clean deploy -Dmaven.test.redirectTestOutputToFile=true -DskipITs -Djib.tag=${TAG} -Djib.repository=${LOCAL_REPOSITORY} -T1C"
                             // Fetch the target branch, sonar likes to take a look at it
                             sh "git fetch --no-tags origin ${CHANGE_TARGET}:refs/remotes/origin/${CHANGE_TARGET}"
                             sh "mvn -q -B sonar:sonar -Dsonar.login=${env.SONAR_TOKEN} -Dsonar.github.oauth=${env.GITHUB_TOKEN} -Dsonar.pullrequest.base=${CHANGE_TARGET} -Dsonar.pullrequest.branch=${BRANCH_NAME} -Dsonar.pullrequest.key=${env.CHANGE_ID} -Dsonar.pullrequest.provider=GitHub -Dsonar.pullrequest.github.repository=molgenis/molgenis -Dsonar.ws.timeout=120 -T1C"
@@ -100,7 +101,8 @@ pipeline {
             }
             agent {
                 kubernetes {
-                    label('molgenis-it-jdk11')
+                    inheritFrom 'shared'
+                    yamlFile ".jenkins/build-pod-it.yaml"
                 }
             }
             stages {
@@ -121,7 +123,8 @@ pipeline {
                             input(message: 'Prepare to release?')
                         }
                         container('maven') {
-                            sh "mvn -q -B verify -pl molgenis-platform-integration-tests -Dmaven.test.redirectTestOutputToFile=true -Dit_db_user=molgenis -Dit_db_password=molgenis -Dit_db_name=molgenis -Delasticsearch.cluster.name=molgenis -Delasticsearch.transport.addresses=localhost:9300 -P!create-it-db -P!create-it-es"
+                            sh "mvn -q -B verify -pl molgenis-api-tests -Dmaven.test.redirectTestOutputToFile=true"
+                            sh "mvn -q -B verify -pl molgenis-platform-integration-tests -Dmaven.test.redirectTestOutputToFile=true"
                             sh "mvn -q -B release:prepare -DskipITs -Dmaven.test.redirectTestOutputToFile=true -Darguments=\"-q -B -DskipITs -Dmaven.test.redirectTestOutputToFile=true -Pproduction\""
                             script {
                                 env.TAG = sh(script: "grep project.rel release.properties | head -n1 | cut -d'=' -f2", returnStdout: true).trim()
