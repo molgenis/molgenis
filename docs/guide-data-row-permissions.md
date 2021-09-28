@@ -9,10 +9,10 @@ Select from the left 'Row-Level Security'. Find your package and check Row-Level
 
 Go to the Data Row Permissions plugin
 
-Open your selected package (or use the filter option to easily find your package).
-Click on the package.
+Open your selected EntityType (or use the filter option to easily find your entityType).
+Click on the EntityType.
 
-> **Note:** if you don't see any entities in this screen, there are none with set permissions. Get the entity id from the data explorer, navigate back to this screen and add it to the end of the url e.g: http://....#/entityId/objectId
+> **Note:** if you don't see any entities in this screen, there are none with set permissions. Get the entity id from the data explorer, navigate back to this screen and add it to the end of the url e.g: http://....#/entityTypeId/objectId
 
 If you have manually added the Id to the URL the screen will start in addmode.
 
