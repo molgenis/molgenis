@@ -3,8 +3,8 @@ pipeline {
         kubernetes {
             // the shared pod template defined on the Jenkins server config
             inheritFrom 'shared'
-            // the specific build config defined in this repo
-            yamlFile ".jenkins/build-pod.yaml"
+            // maven jdk17 pod template defined in molgenis/molgenis-jenkins-pipeline repository
+            yaml libraryResource("pod-templates/maven-jdk17.yaml")
         }
     }
     environment {
@@ -103,9 +103,10 @@ pipeline {
             }
             agent {
                 kubernetes {
+                    // the shared pod template defined on the Jenkins server config
                     inheritFrom 'shared'
-                    // Build pod that includes backend services for integration tests
-                    yamlFile ".jenkins/build-pod-it.yaml"
+                    // integration test pod template defined in molgenis/molgenis-jenkins-pipeline repository
+                    yaml libraryResource("pod-templates/molgenis-it-10.yaml")
                 }
             }
             stages {
