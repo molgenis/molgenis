@@ -1,7 +1,9 @@
 pipeline {
     agent {
         kubernetes {
+            // the shared pod template defined on the Jenkins server config
             inheritFrom 'shared'
+            // the specific build config defined in this repo
             yamlFile ".jenkins/build-pod.yaml"
         }
     }
@@ -102,6 +104,7 @@ pipeline {
             agent {
                 kubernetes {
                     inheritFrom 'shared'
+                    // Build pod that includes backend services for integration tests
                     yamlFile ".jenkins/build-pod-it.yaml"
                 }
             }
