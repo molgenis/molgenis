@@ -1,0 +1,20 @@
+apiVersion: "v1"
+kind: "Pod"
+spec:
+  containers:
+    - name: "maven"
+      image: "molgenis/maven-jdk17:1.0.0"
+      command:
+        - "cat"
+      env:
+        - name: "MAVEN_OPTS"
+          value: "-Duser.home=/home/jenkins/agent"
+        - name: "MAVEN_CONFIG"
+          value: "/home/jenkins/agent/.m2"
+        - name: "HOME"
+          value: "/home/jenkins/agent"
+      resources:
+        requests:
+          memory: "4Gi"
+          cpu: "1"
+      tty: true

@@ -1,6 +1,5 @@
 package org.molgenis.integrationtest.platform;
 
-import static com.google.common.collect.Streams.stream;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -41,6 +40,7 @@ import static org.molgenis.data.util.MolgenisDateFormat.parseLocalDate;
 import static org.molgenis.integrationtest.utils.AbstractMolgenisIntegrationTests.cleanupUserPermissions;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 
+import com.google.common.collect.Iterables;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -226,12 +226,8 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
   @Test
   @Order(10)
   public void testIterator() {
-    assertNotNull(dataService.iterator());
     Repository repo = dataService.getRepository(entityType.getId());
-
-    // Repository equals not implemented: repository from dataService and dataService.getRepository
-    // are not the same
-    assertTrue(stream(dataService).anyMatch(e -> repo.getName().equals(e.getName())));
+    assertTrue(Iterables.any(dataService, e -> repo.getName().equals(e.getName())));
   }
 
   @WithMockUser(username = USERNAME_READ)

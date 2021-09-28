@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.molgenis</groupId>
     <artifactId>molgenis</artifactId>
-    <version>9.1.0-SNAPSHOT</version>
+    <version>10.0.0-SNAPSHOT</version>
   </parent>
   <artifactId>molgenis-data-migrate</artifactId>
 
@@ -14,73 +14,6 @@
   <description>Handles application migration on version updates.</description>
 
   <packaging>jar</packaging>
-
-  <profiles>
-  <!-- Profile create-it-db (active by default) creates a new postgres database and drops it after running the tests -->
-  <profile>
-    <id>create-it-db</id>
-    <activation>
-      <activeByDefault>true</activeByDefault>
-    </activation>
-    <properties>
-      <!-- override the it db name and create new database for the test run -->
-      <maven.build.timestamp.format>yyMMddHHmmssSSS</maven.build.timestamp.format>
-      <it_db_name>molgenis_migrate_${maven.build.timestamp}</it_db_name>
-    </properties>
-    <build>
-      <plugins>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-failsafe-plugin</artifactId>
-          <configuration>
-            <argLine>--illegal-access=permit</argLine>
-            <systemPropertyVariables combine.children="append">
-              <!-- These override molgenis-server.properties for the integration test -->
-              <elasticsearch.transport.addresses>${elasticsearch.transport.addresses}
-              </elasticsearch.transport.addresses>
-              <elasticsearch.cluster.name>${elasticsearch.cluster.name}</elasticsearch.cluster.name>
-              <db_uri>jdbc:postgresql://localhost:${it_db_port}/${it_db_name}</db_uri>
-              <db_user>${it_db_user}</db_user>
-              <db_password>${it_db_password}</db_password>
-            </systemPropertyVariables>
-          </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>sql-maven-plugin</artifactId>
-          <version>${sql-maven-plugin.version}</version>
-          <configuration>
-            <skip>${skipITs}</skip>
-          </configuration>
-          <executions>
-            <execution>
-              <id>create postgres integration database</id>
-              <phase>pre-integration-test</phase>
-            </execution>
-            <execution>
-              <id>drop postgres integration database</id>
-              <phase>post-integration-test</phase>
-            </execution>
-            <execution>
-              <id>create-schema</id>
-              <phase>pre-integration-test</phase>
-              <goals>
-                <goal>execute</goal>
-              </goals>
-              <configuration>
-                <url>jdbc:postgresql://localhost:${it_db_port}/${it_db_name}</url>
-                <autocommit>true</autocommit>
-                <srcFiles>
-                  <srcFile>src/test/resources/org/molgenis/data/migrate/version/8.6-schema.sql</srcFile>
-                </srcFiles>
-              </configuration>
-            </execution>
-          </executions>
-        </plugin>
-      </plugins>
-    </build>
-  </profile>
-  </profiles>
 
   <build>
     <plugins>

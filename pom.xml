@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.molgenis</groupId>
   <artifactId>molgenis</artifactId>
-  <version>9.1.0-SNAPSHOT</version>
+  <version>10.0.0-SNAPSHOT</version>
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
@@ -43,7 +43,7 @@
   </developers>
 
   <properties>
-    <java.version>11</java.version>
+    <java.version>17</java.version>
     <graalvm.version>20.2.0</graalvm.version>
 
     <!-- authentication for release scm plugin -->
@@ -87,7 +87,6 @@
     <guava.version>30.1-jre</guava.version>
     <!-- parent version 0.35 depends on org.apache.commons:commons-compress:jar:1.9, 1.18 is required by org.apache.poi:poi:jar:4.0.1 -->
     <webjars-locator-core.version>0.36</webjars-locator-core.version>
-    <!-- Java 11 support -->
     <rest-assured.version>3.3.0</rest-assured.version>
 
     <!-- dependency versions not managed by parent pom -->
@@ -127,7 +126,7 @@
     <swagger-maven-plugin.version>3.1.5</swagger-maven-plugin.version>
     <jaxb2-maven-plugin.version>1.5</jaxb2-maven-plugin.version>
     <jaxws-maven-plugin.version>2.1</jaxws-maven-plugin.version>
-    <jacoco-maven-plugin.version>0.8.4</jacoco-maven-plugin.version>
+    <jacoco-maven-plugin.version>0.8.7</jacoco-maven-plugin.version>
     <properties-maven-plugin.version>1.0.0</properties-maven-plugin.version>
     <minify-maven-plugin.version>1.7.6</minify-maven-plugin.version>
     <extra-enforcer-rules.version>1.0-beta-6</extra-enforcer-rules.version>
@@ -139,10 +138,10 @@
     <cargo-plugin.version>1.7.7</cargo-plugin.version>
     <sql-maven-plugin.version>1.5</sql-maven-plugin.version>
     <elasticsearch-maven-plugin.version>5.7</elasticsearch-maven-plugin.version>
-    <!-- if profiles are inactive, set these props to use local infrastructure -->
-    <it_db_name>molgenis_test</it_db_name>
-    <it_db_user>postgres</it_db_user>
-    <it_db_password>postgres</it_db_password>
+    <!-- Integration test props to use docker infrastructure -->
+    <it_db_name>molgenis</it_db_name>
+    <it_db_user>molgenis</it_db_user>
+    <it_db_password>molgenis</it_db_password>
     <it_db_port>5432</it_db_port>
     <elasticsearch.transport.addresses>localhost:9300</elasticsearch.transport.addresses>
     <elasticsearch.cluster.name>molgenis</elasticsearch.cluster.name>
@@ -311,7 +310,6 @@
           <version>${maven-surefire-plugin.version}</version>
           <configuration>
             <skip>${skipUTs}</skip>
-            <argLine>@{argLine} --illegal-access=permit</argLine>
           </configuration>
         </plugin>
         <plugin>
@@ -391,85 +389,6 @@
               <id>verify</id>
               <goals>
                 <goal>verify</goal>
-              </goals>
-            </execution>
-          </executions>
-        </plugin>
-        <!-- SQL plugin -->
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>sql-maven-plugin</artifactId>
-          <version>${sql-maven-plugin.version}</version>
-          <dependencies>
-            <dependency>
-              <groupId>org.postgresql</groupId>
-              <artifactId>postgresql</artifactId>
-              <version>${postgresql.version}</version>
-            </dependency>
-          </dependencies>
-          <configuration>
-            <driver>org.postgresql.Driver</driver>
-            <url>jdbc:postgresql://localhost:${it_db_port}/</url>
-            <username>${it_db_user}</username>
-            <password>${it_db_password}</password>
-            <forceMojoExecution>true</forceMojoExecution>
-            <onError>continue</onError>
-            <autocommit>true</autocommit>
-            <skip>${skipTests}</skip>
-          </configuration>
-          <executions>
-            <execution>
-              <id>create postgres integration database</id>
-              <goals>
-                <goal>execute</goal>
-              </goals>
-              <!-- skip by default unless child pom binds it to existing phase -->
-              <phase>none</phase>
-              <configuration>
-                <sqlCommand>CREATE DATABASE ${it_db_name};</sqlCommand>
-              </configuration>
-            </execution>
-            <execution>
-              <id>drop postgres integration database</id>
-              <goals>
-                <goal>execute</goal>
-              </goals>
-              <!-- skip by default unless child pom binds it to existing phase -->
-              <phase>none</phase>
-              <configuration>
-                <sqlCommand>DROP DATABASE ${it_db_name};</sqlCommand>
-              </configuration>
-            </execution>
-          </executions>
-        </plugin>
-        <!-- Elasticsearch plugin start and stop elasticsearch instance -->
-        <plugin>
-          <groupId>com.github.alexcojocaru</groupId>
-          <artifactId>elasticsearch-maven-plugin</artifactId>
-          <version>${elasticsearch-maven-plugin.version}</version>
-          <configuration>
-            <version>${elasticsearch.version}</version>
-            <clusterName>${elasticsearch.cluster.name}</clusterName>
-            <pathConf>${project.build.directory}/test-classes/conf/elasticsearch</pathConf>
-            <transportPort>${elasticsearch.tcp.port}</transportPort>
-            <httpPort>${elasticsearch.http.port}</httpPort>
-            <!-- on build server, concurrent launches are slow to start -->
-            <timeout>120</timeout>
-            <skip>${skipTests}</skip>
-          </configuration>
-          <executions>
-            <execution>
-              <id>start-elasticsearch</id>
-              <phase>none</phase>
-              <goals>
-                <goal>runforked</goal>
-              </goals>
-            </execution>
-            <execution>
-              <id>stop-elasticsearch</id>
-              <phase>none</phase>
-              <goals>
-                <goal>stop</goal>
               </goals>
             </execution>
           </executions>

@@ -2,7 +2,7 @@ version: 2.1
 executors:
   it-executor:
     docker:
-      - image: molgenis/maven-jdk11:maven-jdk11-release-2019-05-07_09-20-11
+      - image: molgenis/maven-jdk17:1.0.0
         environment:
           MINIO_ACCESS_KEY: molgenis
           MINIO_SECRET_KEY: molgenis
@@ -25,7 +25,7 @@ executors:
 jobs:
   build:
     docker:
-      - image: molgenis/maven-jdk11:maven-jdk11-release-2019-05-07_09-20-11
+      - image: molgenis/maven-jdk17:1.0.0
     steps:
       - checkout
       - restore_cache:
@@ -57,7 +57,7 @@ jobs:
       - attach_workspace:
           at: ~/.m2
       - checkout
-      - run: mvn verify --batch-mode -pl molgenis-api-tests -Dit_db_user=molgenis -Dit_db_password=molgenis -Dit_db_name=molgenis -Dit_db_port=5432 -P\!create-it-db,\!create-it-es
+      - run: mvn verify --batch-mode -pl molgenis-api-tests
       - run:
           name: Save test results
           command: |
@@ -78,7 +78,7 @@ jobs:
       - attach_workspace:
           at: ~/.m2
       - checkout
-      - run: mvn verify -pl molgenis-platform-integration-tests -Dit_db_user=molgenis -Dit_db_password=molgenis -Dit_db_name=molgenis -Dit_db_port=5432 -P\!create-it-db,\!create-it-es
+      - run: mvn verify --batch-mode -pl molgenis-platform-integration-tests
       - run:
           name: Save test results
           command: |
