@@ -52,8 +52,9 @@ class IdentitiesApiControllerIT extends AbstractApiTests {
     anonymousID =
         given()
             .contentType(APPLICATION_JSON_VALUE)
-            .get("/api/data/sys_sec_Role?q=name=q=ANONYMOUS")
+            .get("/api/data/sys_sec_Role?q=name==ANONYMOUS")
             .then()
+            .statusCode(OK.value())
             .extract()
             .response()
             .getBody()
