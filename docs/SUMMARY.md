@@ -22,6 +22,7 @@
   * [Users](guide-users.md)
   * [Groups and roles](guide-groups-roles.md)
   * [Finegrained permissions](guide-permissions.md)
+  * [Set permissions on row level (RLS)](guide-data-row-permissions.md)
 * Data processing
   * [Scripts](guide-scripts.md)
   * [R](guide-r.md)

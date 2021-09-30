@@ -221,6 +221,11 @@
     </dependency>
     <dependency>
       <groupId>org.molgenis</groupId>
+      <artifactId>molgenis-data-row-permissions</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.molgenis</groupId>
       <artifactId>molgenis-jobs</artifactId>
       <version>${project.version}</version>
     </dependency>

@@ -956,6 +956,7 @@
     <module>molgenis-data-plugin</module>
     <module>molgenis-data-postgresql</module>
     <module>molgenis-data-row-edit</module>
+    <module>molgenis-data-row-permissions</module>
     <module>molgenis-data-security</module>
     <module>molgenis-data-validation</module>
     <module>molgenis-data-vcf</module>
