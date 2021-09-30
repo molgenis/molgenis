@@ -32,7 +32,7 @@ class QueryClauseSearchGenerator extends BaseQueryClauseGenerator {
   }
 
   private QueryBuilder createQueryClauseSearchAll(QueryRule queryRule) {
-    return QueryBuilders.matchPhraseQuery("_all", queryRule.getValue()).slop(10);
+    return QueryBuilders.multiMatchQuery(queryRule.getValue());
   }
 
   private QueryBuilder createQueryClauseSearchAttribute(

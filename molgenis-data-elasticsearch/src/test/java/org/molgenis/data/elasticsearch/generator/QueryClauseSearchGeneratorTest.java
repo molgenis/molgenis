@@ -35,7 +35,7 @@ class QueryClauseSearchGeneratorTest extends AbstractMockitoTest {
     EntityType entityType = mock(EntityType.class);
 
     QueryBuilder queryBuilder = queryClauseSearchGenerator.mapQueryRule(queryRule, entityType);
-    QueryBuilder expectedQueryBuilder = QueryBuilders.matchPhraseQuery("_all", "val").slop(10);
+    QueryBuilder expectedQueryBuilder = QueryBuilders.multiMatchQuery("val");
     assertQueryBuilderEquals(expectedQueryBuilder, queryBuilder);
   }
 
