@@ -27,12 +27,13 @@ services:
       - db-data:/var/lib/postgresql/data
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.15.0
     environment:
       - cluster.name=molgenis
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
       - discovery.type=single-node
+      - xpack.security.enabled=false
     ulimits:
       memlock:
         soft: -1
@@ -44,12 +45,12 @@ services:
       - 9300:9300
 
   kibana:
-    image: docker.elastic.co/kibana/kibana-oss:7.10.2
+    image: docker.elastic.co/kibana/kibana:7.15.0
     ports:
       - 5601:5601
 
   filebeat:
-    image: docker.elastic.co/beats/filebeat-oss:7.10.2
+    image: docker.elastic.co/beats/filebeat:7.15.0
     environment:
       ELASTICSEARCH_HOSTS: "http://elasticsearch:9200"
     volumes:
