@@ -155,13 +155,6 @@
     </dependency>
     <dependency>
       <groupId>org.molgenis</groupId>
-      <artifactId>molgenis-data-elasticsearch</artifactId>
-      <version>${project.version}</version>
-      <type>test-jar</type>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.molgenis</groupId>
       <artifactId>molgenis-semantic-search</artifactId>
       <version>${project.version}</version>
     </dependency>
