@@ -127,7 +127,6 @@ pipeline {
                             input(message: 'Prepare to release?')
                         }
                         container('maven') {
-                            sh "mvn -q -B verify -pl molgenis-api-tests -Dmaven.test.redirectTestOutputToFile=true"
                             sh "mvn -q -B verify -pl molgenis-platform-integration-tests -Dmaven.test.redirectTestOutputToFile=true"
                             sh "mvn -q -B release:prepare -DskipITs -Dmaven.test.redirectTestOutputToFile=true -Darguments=\"-q -B -DskipITs -Dmaven.test.redirectTestOutputToFile=true -Pproduction\""
                             script {
