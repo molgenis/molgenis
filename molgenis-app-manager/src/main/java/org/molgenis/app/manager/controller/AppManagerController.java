@@ -9,6 +9,7 @@ import static org.molgenis.app.manager.service.impl.AppManagerServiceImpl.ZIP_IN
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+
 import org.molgenis.app.manager.exception.CouldNotUploadAppException;
 import org.molgenis.app.manager.meta.App;
 import org.molgenis.app.manager.meta.AppMetadata;
@@ -91,6 +92,50 @@ public class AppManagerController extends PluginController {
           appManagerService.extractFileContent(
               APPS_DIR + separator + appConfig.getName(), ZIP_INDEX_FILE);
       appManagerService.configureApp(appConfig, htmlTemplate);
+    } catch (IOException err) {
+      throw new CouldNotUploadAppException(filename);
+    }
+  }
+
+  @ResponseStatus(HttpStatus.OK)
+  @PostMapping("/update/{id}")
+  public void updateApp(@RequestParam("file") MultipartFile multipartFile, @PathVariable("id") String id, @RequestParam(value = "updateConfig", required = false) Boolean updateConfig) {
+
+    // ?updateConfig=true
+    Boolean overwriteConfig = updateConfig != null;
+
+    // get current App
+    App app = getApp(id);
+
+    // deactivate and delete the app
+    appManagerService.deleteApp(id);
+
+    // get filename for possible error
+    String filename = multipartFile.getOriginalFilename();
+    String formFieldName = app.getName();
+    try (InputStream fileInputStream = multipartFile.getInputStream()) {
+      String tempDir = appManagerService.uploadApp(fileInputStream, filename, formFieldName);
+      String configFile =  appManagerService.extractFileContent(tempDir, ZIP_CONFIG_FILE);
+
+      AppConfig appConfig = appManagerService.checkAndObtainConfig(tempDir, configFile);
+      AppConfig originalAppConfig = appManagerService.checkAndObtainConfig(APPS_DIR + separator + app.getName(), app.getAppConfig());
+
+      // set the new version
+      originalAppConfig.setVersion(appConfig.getVersion());
+
+      // choose which one based on optional parameter
+      AppConfig newConfig = overwriteConfig ? appConfig : originalAppConfig;
+
+      String htmlTemplate =
+              appManagerService.extractFileContent(
+                      APPS_DIR + separator + appConfig.getName(), ZIP_INDEX_FILE);
+
+      appManagerService.configureApp(newConfig, htmlTemplate);
+
+      // Get the latest version of the app and then reactivate
+      app = getApp(id);
+      app.setActive(true);
+      dataService.update(AppMetadata.APP, app);
     } catch (IOException err) {
       throw new CouldNotUploadAppException(filename);
     }
