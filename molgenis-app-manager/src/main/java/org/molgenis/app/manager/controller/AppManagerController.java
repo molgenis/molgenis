@@ -107,24 +107,25 @@ public class AppManagerController extends PluginController {
     // get current App
     App app = getApp(id);
 
-    // deactivate and delete the app
-    appManagerService.deleteApp(id);
-
     // get filename for possible error
     String filename = multipartFile.getOriginalFilename();
     String formFieldName = app.getName();
     try (InputStream fileInputStream = multipartFile.getInputStream()) {
+
       String tempDir = appManagerService.uploadApp(fileInputStream, filename, formFieldName);
       String configFile =  appManagerService.extractFileContent(tempDir, ZIP_CONFIG_FILE);
 
-      AppConfig appConfig = appManagerService.checkAndObtainConfig(tempDir, configFile);
       AppConfig originalAppConfig = appManagerService.checkAndObtainConfig(APPS_DIR + separator + app.getName(), app.getAppConfig());
+      AppConfig appConfig = appManagerService.checkAndObtainConfig(tempDir, configFile);
 
       // set the new version
       originalAppConfig.setVersion(appConfig.getVersion());
 
       // choose which one based on optional parameter
       AppConfig newConfig = overwriteConfig ? appConfig : originalAppConfig;
+
+      // deactivate and delete the app
+      appManagerService.deleteApp(id);
 
       String htmlTemplate =
               appManagerService.extractFileContent(
