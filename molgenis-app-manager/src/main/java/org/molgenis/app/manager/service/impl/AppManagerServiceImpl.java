@@ -179,6 +179,38 @@ public class AppManagerServiceImpl implements AppManagerService {
   }
 
   @Override
+  public AppConfig updateApp(String appId, String tempDir, String configContent) throws IOException {
+    if (configContent.isEmpty() || !isConfigContentValidJson(configContent)) {
+      fileStore.deleteDirectory(APPS_TMP_DIR);
+      throw new InvalidAppConfigException();
+    }
+
+    AppConfig appConfig = gson.fromJson(configContent, AppConfig.class);
+    List<String> missingAppConfigParams = buildMissingConfigParams(appConfig);
+    if (!missingAppConfigParams.isEmpty()) {
+      fileStore.deleteDirectory(APPS_TMP_DIR);
+      throw new AppConfigMissingParametersException(missingAppConfigParams);
+    }
+
+    if (appConfig.getName().contains("/")) {
+      fileStore.deleteDirectory(APPS_TMP_DIR);
+      throw new IllegalAppNameException(appConfig.getName());
+    }
+
+    App app = getAppById(appId);
+
+    try {
+      deleteDirectory(fileStore.getFileUnchecked(APPS_DIR + separator + app.getName()));
+    } catch (IOException err) {
+      throw new CouldNotDeleteAppException(appId);
+    }
+    fileStore.move(tempDir, APPS_DIR + separator + app.getName());
+    fileStore.deleteDirectory(APPS_TMP_DIR);
+
+    return appConfig;
+  }
+
+  @Override
   @Transactional
   public void configureApp(AppConfig appConfig, String htmlTemplate) {
     String appDirName = APPS_DIR + separator + appConfig.getName();
@@ -202,6 +234,23 @@ public class AppManagerServiceImpl implements AppManagerService {
     newApp.setName(appConfig.getName());
 
     dataService.add(AppMetadata.APP, newApp);
+  }
+
+  @Override
+  @Transactional
+  public void configureUpdatedApp(String appId, AppConfig newAppConfig, String htmlTemplate, Boolean overwriteConfig) {
+
+    App app = getAppById(appId);
+    app.setLabel(newAppConfig.getLabel());
+    app.setDescription(newAppConfig.getDescription());
+    app.setAppVersion(newAppConfig.getVersion());
+    app.setApiDependency(newAppConfig.getApiDependency());
+    app.setTemplateContent(htmlTemplate);
+    app.setIncludeMenuAndFooter(newAppConfig.getIncludeMenuAndFooter());
+    app.setAppConfig(overwriteConfig ? gson.toJson(newAppConfig.getRuntimeOptions()) : app.getAppConfig()); // getAppConfig = RuntimeOption field.
+    app.setActive(true);
+
+    dataService.update(AppMetadata.APP, app);
   }
 
   @Override

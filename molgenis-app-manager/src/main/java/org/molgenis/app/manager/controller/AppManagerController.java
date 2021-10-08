@@ -104,7 +104,6 @@ public class AppManagerController extends PluginController {
     // ?updateConfig=true
     Boolean overwriteConfig = updateConfig != null;
 
-    // get current App
     App app = getApp(id);
 
     // get filename for possible error
@@ -115,28 +114,13 @@ public class AppManagerController extends PluginController {
       String tempDir = appManagerService.uploadApp(fileInputStream, filename, formFieldName);
       String configFile =  appManagerService.extractFileContent(tempDir, ZIP_CONFIG_FILE);
 
-      AppConfig originalAppConfig = appManagerService.checkAndObtainConfig(APPS_DIR + separator + app.getName(), app.getAppConfig());
-      AppConfig appConfig = appManagerService.checkAndObtainConfig(tempDir, configFile);
-
-      // set the new version
-      originalAppConfig.setVersion(appConfig.getVersion());
-
-      // choose which one based on optional parameter
-      AppConfig newConfig = overwriteConfig ? appConfig : originalAppConfig;
-
-      // deactivate and delete the app
-      appManagerService.deleteApp(id);
+      AppConfig appConfig = appManagerService.updateApp(id, tempDir, configFile);
 
       String htmlTemplate =
               appManagerService.extractFileContent(
                       APPS_DIR + separator + appConfig.getName(), ZIP_INDEX_FILE);
 
-      appManagerService.configureApp(newConfig, htmlTemplate);
-
-      // Get the latest version of the app and then reactivate
-      app = getApp(id);
-      app.setActive(true);
-      dataService.update(AppMetadata.APP, app);
+      appManagerService.configureUpdatedApp(id, appConfig, htmlTemplate, overwriteConfig);
     } catch (IOException err) {
       throw new CouldNotUploadAppException(filename);
     }
