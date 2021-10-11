@@ -3,7 +3,7 @@ package org.molgenis.security.account;
 import javax.validation.constraints.NotBlank;
 import org.hibernate.validator.constraints.ScriptAssert;
 
-@ScriptAssert(lang = "javascript", script = "_this.password1 === _this.password2")
+@ScriptAssert(lang = "graal.js", script = "_this.password1 === _this.password2")
 public class ChangePasswordForm {
   @NotBlank private String password1;
 

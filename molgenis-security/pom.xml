@@ -100,6 +100,11 @@
       <artifactId>hibernate-validator</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.graalvm.js</groupId>
+      <artifactId>js-scriptengine</artifactId>
+      <version>${graalvm.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.glassfish</groupId>
       <artifactId>jakarta.el</artifactId>
     </dependency>
