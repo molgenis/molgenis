@@ -66,7 +66,7 @@ class RestControllerV1APIIT extends AbstractApiTests {
     LOG.info("Importing Done");
 
     testUserName = "api_v1_test_user" + System.currentTimeMillis();
-    RestTestUtils.createUser(adminToken, testUserName, REST_TEST_USER_PASSWORD);
+    RestTestUtils.createUser(adminToken, testUserName, REST_TEST_USER_PASSWORD, false);
 
     LOG.info("testUserName: " + testUserName);
 

@@ -61,7 +61,7 @@ class BeaconAPIIT extends AbstractApiTests {
     adminToken = AbstractApiTests.getAdminToken();
 
     testUsername = "beacon_test_user" + System.currentTimeMillis();
-    createUser(adminToken, testUsername, BEACON_TEST_USER_PASSWORD);
+    createUser(adminToken, testUsername, BEACON_TEST_USER_PASSWORD, false);
 
     RestTestUtils.uploadVCFToEntity(adminToken, "/beacon_set.vcf", BEACON_SET);
 

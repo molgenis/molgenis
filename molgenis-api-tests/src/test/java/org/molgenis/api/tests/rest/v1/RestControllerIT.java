@@ -49,7 +49,7 @@ class RestControllerIT extends AbstractApiTests {
     adminToken = AbstractApiTests.getAdminToken();
 
     testUsername = "rest_test_user" + System.currentTimeMillis();
-    createUser(adminToken, testUsername, REST_TEST_USER_PASSWORD);
+    createUser(adminToken, testUsername, REST_TEST_USER_PASSWORD, false);
 
     setGrantedRepositoryPermissions(
         adminToken,
