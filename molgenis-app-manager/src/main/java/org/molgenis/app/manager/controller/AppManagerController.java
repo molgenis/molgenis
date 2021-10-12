@@ -9,7 +9,6 @@ import static org.molgenis.app.manager.service.impl.AppManagerServiceImpl.ZIP_IN
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-
 import org.molgenis.app.manager.exception.CouldNotUploadAppException;
 import org.molgenis.app.manager.meta.App;
 import org.molgenis.app.manager.meta.AppMetadata;
@@ -99,7 +98,10 @@ public class AppManagerController extends PluginController {
 
   @ResponseStatus(HttpStatus.OK)
   @PostMapping("/update/{id}")
-  public void updateApp(@RequestParam("file") MultipartFile multipartFile, @PathVariable("id") String id, @RequestParam(value = "updateConfig", required = false) Boolean updateConfig) {
+  public void updateApp(
+      @RequestParam("file") MultipartFile multipartFile,
+      @PathVariable("id") String id,
+      @RequestParam(value = "updateConfig", required = false) Boolean updateConfig) {
 
     // ?updateConfig=true
     Boolean overwriteConfig = updateConfig != null;
@@ -112,13 +114,13 @@ public class AppManagerController extends PluginController {
     try (InputStream fileInputStream = multipartFile.getInputStream()) {
 
       String tempDir = appManagerService.uploadApp(fileInputStream, filename, formFieldName);
-      String configFile =  appManagerService.extractFileContent(tempDir, ZIP_CONFIG_FILE);
+      String configFile = appManagerService.extractFileContent(tempDir, ZIP_CONFIG_FILE);
 
       AppConfig appConfig = appManagerService.updateApp(id, tempDir, configFile);
 
       String htmlTemplate =
-              appManagerService.extractFileContent(
-                      APPS_DIR + separator + appConfig.getName(), ZIP_INDEX_FILE);
+          appManagerService.extractFileContent(
+              APPS_DIR + separator + appConfig.getName(), ZIP_INDEX_FILE);
 
       appManagerService.configureUpdatedApp(id, appConfig, htmlTemplate, overwriteConfig);
     } catch (IOException err) {

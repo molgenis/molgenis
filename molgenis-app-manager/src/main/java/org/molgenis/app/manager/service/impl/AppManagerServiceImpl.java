@@ -179,7 +179,8 @@ public class AppManagerServiceImpl implements AppManagerService {
   }
 
   @Override
-  public AppConfig updateApp(String appId, String tempDir, String configContent) throws IOException {
+  public AppConfig updateApp(String appId, String tempDir, String configContent)
+      throws IOException {
     if (configContent.isEmpty() || !isConfigContentValidJson(configContent)) {
       fileStore.deleteDirectory(APPS_TMP_DIR);
       throw new InvalidAppConfigException();
@@ -238,7 +239,8 @@ public class AppManagerServiceImpl implements AppManagerService {
 
   @Override
   @Transactional
-  public void configureUpdatedApp(String appId, AppConfig newAppConfig, String htmlTemplate, Boolean overwriteConfig) {
+  public void configureUpdatedApp(
+      String appId, AppConfig newAppConfig, String htmlTemplate, Boolean overwriteConfig) {
 
     App app = getAppById(appId);
     app.setLabel(newAppConfig.getLabel());
@@ -247,7 +249,10 @@ public class AppManagerServiceImpl implements AppManagerService {
     app.setApiDependency(newAppConfig.getApiDependency());
     app.setTemplateContent(htmlTemplate);
     app.setIncludeMenuAndFooter(newAppConfig.getIncludeMenuAndFooter());
-    app.setAppConfig(overwriteConfig ? gson.toJson(newAppConfig.getRuntimeOptions()) : app.getAppConfig()); // getAppConfig = RuntimeOption field.
+    app.setAppConfig(
+        overwriteConfig
+            ? gson.toJson(newAppConfig.getRuntimeOptions())
+            : app.getAppConfig()); // getAppConfig = RuntimeOption field.
     app.setActive(true);
 
     dataService.update(AppMetadata.APP, app);
