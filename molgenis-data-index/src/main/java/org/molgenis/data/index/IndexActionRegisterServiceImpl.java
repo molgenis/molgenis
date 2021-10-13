@@ -134,9 +134,9 @@ public class IndexActionRegisterServiceImpl
       return;
     }
     LOG.debug("Store index actions for transaction {}", transactionId);
-    dataService.add(
-        INDEX_ACTION_GROUP,
-        indexActionGroupFactory.create(transactionId).setCount(indexActions.size()));
+//    dataService.add(
+//        INDEX_ACTION_GROUP,
+//        indexActionGroupFactory.create(transactionId).setCount(indexActions.size()));
     dataService.add(INDEX_ACTION, indexActions.stream());
   }
 
