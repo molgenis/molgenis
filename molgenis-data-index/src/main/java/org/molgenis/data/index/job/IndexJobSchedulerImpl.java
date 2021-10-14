@@ -1,10 +1,9 @@
 package org.molgenis.data.index.job;
 
+import static com.google.common.collect.Streams.stream;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.counting;
-import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toSet;
 import static org.molgenis.data.index.meta.IndexActionGroupMetadata.INDEX_ACTION_GROUP;
-import static org.molgenis.data.index.meta.IndexActionMetadata.ENTITY_TYPE_ID;
 import static org.molgenis.data.index.meta.IndexActionMetadata.INDEX_ACTION;
 import static org.molgenis.data.index.meta.IndexActionMetadata.INDEX_ACTION_GROUP_ATTR;
 import static org.molgenis.jobs.model.JobExecution.Status.SUCCESS;
@@ -14,86 +13,147 @@ import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Map;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Stream;
-import javax.annotation.PreDestroy;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionGroup;
+import org.molgenis.data.index.meta.IndexActionMetadata;
+import org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus;
+import org.molgenis.data.index.queue.RunnableIndexAction;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.jobs.JobExecutor;
-import org.molgenis.security.core.runas.RunAsSystem;
-import org.molgenis.util.ExecutorServiceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
 
+@Service
 public class IndexJobSchedulerImpl implements IndexJobScheduler {
-  private static final Logger LOG = LoggerFactory.getLogger(IndexJobSchedulerImpl.class);
-
+  private final ExecutorService executorService;
+  private final IndexJobService indexJobService;
   private final DataService dataService;
-  private final IndexJobExecutionFactory indexJobExecutionFactory;
-  // the executor for the index jobs.
-  private ExecutorService executorService = Executors.newSingleThreadExecutor();
-  private final JobExecutor jobExecutor;
-  private final IndexStatus indexStatus = new IndexStatus();
+
+  private final Lock lock = new ReentrantLock();
+  private final Condition allEntitiesStable = lock.newCondition();
+  private final Condition singleEntityStable = lock.newCondition();
+  private final List<RunnableIndexAction> indexActions = new CopyOnWriteArrayList<>();
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(IndexJobSchedulerImpl.class);
 
   public IndexJobSchedulerImpl(
-      DataService dataService,
-      IndexJobExecutionFactory indexJobExecutionFactory,
-      JobExecutor jobExecutor) {
+      IndexJobService indexJobService, ExecutorService jobExecutor, DataService dataService) {
     this.dataService = requireNonNull(dataService);
-    this.indexJobExecutionFactory = requireNonNull(indexJobExecutionFactory);
-    this.jobExecutor = requireNonNull(jobExecutor);
-  }
-
-  @PreDestroy
-  void preDestroy() {
-    if (executorService != null) {
-      ExecutorServiceUtils.shutdownAndAwaitTermination(executorService);
-    }
+    this.indexJobService = requireNonNull(indexJobService);
+    this.executorService = requireNonNull(jobExecutor);
   }
 
   @Override
-  @RunAsSystem
   public void scheduleIndexJob(String transactionId) {
-    LOG.trace("Index transaction with id {}...", transactionId);
+    LOGGER.trace("Index transaction with id {}...", transactionId);
     IndexActionGroup indexActionGroup =
         dataService.findOneById(INDEX_ACTION_GROUP, transactionId, IndexActionGroup.class);
-
     if (indexActionGroup != null) {
-      Stream<Entity> indexActions =
-          dataService.findAll(
-              INDEX_ACTION, new QueryImpl<>().eq(INDEX_ACTION_GROUP_ATTR, indexActionGroup));
-      Map<String, Long> numberOfActionsPerEntity =
-          indexActions.collect(
-              groupingBy(indexAction -> indexAction.getString(ENTITY_TYPE_ID), counting()));
-      indexStatus.addActionCounts(numberOfActionsPerEntity);
-
-      IndexJobExecution indexJobExecution = indexJobExecutionFactory.create();
-      indexJobExecution.setIndexActionJobID(transactionId);
-      jobExecutor
-          .submit(indexJobExecution, executorService)
-          .whenComplete((a, b) -> indexStatus.removeActionCounts(numberOfActionsPerEntity));
-    } else {
-      LOG.debug("No index job found for id [{}].", transactionId);
+      var query = new QueryImpl<IndexAction>().eq(INDEX_ACTION_GROUP_ATTR, indexActionGroup);
+      dataService.findAll(INDEX_ACTION, query, IndexAction.class).forEach(this::schedule);
     }
   }
 
   @Override
-  @RunAsSystem
-  public void waitForAllIndicesStable() throws InterruptedException {
-    indexStatus.waitForAllEntitiesToBeStable();
+  public void schedule(IndexAction indexAction) {
+    var task = new RunnableIndexAction(indexAction, indexJobService);
+    if (indexActions.stream().anyMatch(other -> other.contains(task))) {
+      LOGGER.info(
+          "An action containing the work of index action {} is already scheduled, skipping!",
+          indexAction);
+      task.setStatus(IndexStatus.CANCELED);
+      return;
+    }
+    indexActions.stream()
+        .filter(other -> other.isContainedBy(task))
+        .filter(other -> other.getStatus() == IndexActionMetadata.IndexStatus.PENDING)
+        .forEach(
+            other -> {
+              LOGGER.info(
+                  "Canceled pending index action {} contained by the work of index action {}!",
+                  other,
+                  indexAction);
+              other.setStatus(IndexActionMetadata.IndexStatus.CANCELED);
+            });
+
+    addTask(task);
+    CompletableFuture.runAsync(task, executorService).whenComplete((a, b) -> removeTask(task));
+  }
+
+  void addTask(RunnableIndexAction task) {
+    lock.lock();
+    try {
+      indexActions.add(task);
+    } finally {
+      lock.unlock();
+    }
+  }
+
+  void removeTask(RunnableIndexAction task) {
+    lock.lock();
+    try {
+      indexActions.remove(task);
+      if (indexActions.isEmpty()) {
+        allEntitiesStable.signalAll();
+      }
+      singleEntityStable.signalAll();
+    } finally {
+      lock.unlock();
+    }
   }
 
   @Override
-  @RunAsSystem
-  public void waitForIndexToBeStableIncludingReferences(EntityType entityType)
+  public void waitForAllIndicesStable() throws InterruptedException {
+    lock.lock();
+    try {
+      while (!isAllIndicesStable()) {
+        allEntitiesStable.await();
+      }
+    } finally {
+      lock.unlock();
+    }
+  }
+
+  private boolean isIndexStableIncludingReferences(EntityType emd) {
+    if (isAllIndicesStable()) {
+      return true;
+    }
+    Set<String> referencedEntityIds =
+        stream(emd.getAtomicAttributes())
+            .filter(Attribute::hasRefEntity)
+            .map(attribute -> attribute.getRefEntity().getId())
+            .collect(toSet());
+    referencedEntityIds.add(emd.getId());
+    return referencedEntityIds.stream()
+        .noneMatch(
+            entityTypeId ->
+                indexActions.stream().anyMatch(action -> action.concerns(entityTypeId)));
+  }
+
+  public void waitForIndexToBeStableIncludingReferences(EntityType emd)
       throws InterruptedException {
-    indexStatus.waitForIndexToBeStableIncludingReferences(entityType);
+    lock.lock();
+    try {
+      while (!isIndexStableIncludingReferences(emd)) {
+        singleEntityStable.await();
+      }
+    } finally {
+      lock.unlock();
+    }
   }
 
   /**
@@ -101,10 +161,11 @@ public class IndexJobSchedulerImpl implements IndexJobScheduler {
    * minute to allow the transaction manager to become available
    */
   @Scheduled(initialDelay = 1 * 60 * 1000, fixedRate = 5 * 60 * 1000)
+  @Override
   public void cleanupJobExecutions() {
     runAsSystem(
         () -> {
-          LOG.trace("Clean up Index job executions...");
+          LOGGER.trace("Clean up Index job executions...");
           Instant fiveMinutesAgo = Instant.now().minus(5, ChronoUnit.MINUTES);
           boolean indexJobExecutionExists =
               dataService.hasRepository(IndexJobExecutionMetadata.INDEX_JOB_EXECUTION);
@@ -118,10 +179,14 @@ public class IndexJobSchedulerImpl implements IndexJobScheduler {
                     .eq(STATUS, SUCCESS.toString())
                     .findAll();
             dataService.delete(IndexJobExecutionMetadata.INDEX_JOB_EXECUTION, executions);
-            LOG.debug("Cleaned up Index job executions.");
+            LOGGER.debug("Cleaned up Index job executions.");
           } else {
-            LOG.warn("{} does not exist", IndexJobExecutionMetadata.INDEX_JOB_EXECUTION);
+            LOGGER.warn("{} does not exist", IndexJobExecutionMetadata.INDEX_JOB_EXECUTION);
           }
         });
+  }
+
+  private boolean isAllIndicesStable() {
+    return indexActions.isEmpty();
   }
 }

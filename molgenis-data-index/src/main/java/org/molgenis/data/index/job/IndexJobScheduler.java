@@ -1,5 +1,6 @@
 package org.molgenis.data.index.job;
 
+import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.meta.model.EntityType;
 
 /** Schedules {@link IndexJobService}s. */
@@ -11,6 +12,8 @@ public interface IndexJobScheduler {
    * @param transactionId the ID of the transaction.
    */
   void scheduleIndexJob(String transactionId);
+
+  void schedule(IndexAction indexAction);
 
   void waitForAllIndicesStable() throws InterruptedException;
 

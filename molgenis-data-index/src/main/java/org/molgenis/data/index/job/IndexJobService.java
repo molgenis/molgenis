@@ -27,6 +27,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.jobs.Progress;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -145,12 +146,52 @@ public class IndexJobService {
   }
 
   /**
+   * Performs a single IndexAction
+   *
+   * @param indexAction Entity of type IndexActionMetaData
+   * @return boolean indicating success or failure
+   */
+  @RunAsSystem
+  public boolean performAction(IndexAction indexAction) {
+    requireNonNull(indexAction);
+    String entityTypeId = indexAction.getEntityTypeId();
+    try {
+      if (dataService.hasEntityType(entityTypeId)) {
+        EntityType entityType = dataService.getEntityType(entityTypeId);
+        if (indexAction.getEntityId() != null) {
+          LOG.info("Indexing {}.{}", entityType.getId(), indexAction.getEntityId());
+          rebuildIndexOneEntity(entityTypeId, indexAction.getEntityId());
+        } else {
+          LOG.info("Indexing {}", entityType.getId());
+          final Repository<Entity> repository = dataService.getRepository(entityType.getId());
+          indexService.rebuildIndex(repository);
+        }
+      } else {
+        EntityType entityType = getEntityType(indexAction);
+        if (indexService.hasIndex(entityType)) {
+          LOG.info("Dropping entityType with id: {}", entityType.getId());
+          indexService.deleteIndex(entityType);
+        } else {
+          // Index Job is finished, here we concluded that we don't have enough info to continue the
+          // index job
+          LOG.info("Skip index entity {}.{}", entityType.getId(), indexAction.getEntityId());
+        }
+      }
+      return true;
+    } catch (Exception ex) {
+      LOG.error("Index job failed", ex);
+      return false;
+    }
+  }
+
+  /**
    * Updates the {@link IndexStatus} of a IndexAction and stores the change.
    *
    * @param indexAction the IndexAction of which the status is updated
    * @param status the new {@link IndexStatus}
    */
-  private void updateIndexActionStatus(
+  @RunAsSystem
+  public void updateIndexActionStatus(
       IndexAction indexAction, IndexActionMetadata.IndexStatus status) {
     indexAction.setIndexStatus(status);
     dataService.update(INDEX_ACTION, indexAction);
