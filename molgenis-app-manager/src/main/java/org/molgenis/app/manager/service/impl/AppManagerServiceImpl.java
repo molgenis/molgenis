@@ -125,6 +125,7 @@ public class AppManagerServiceImpl implements AppManagerService {
   }
 
   @Override
+  @Transactional
   public String uploadApp(InputStream zipData, String zipFileName, String formFieldName)
       throws IOException {
     String tempFilesDir = "extracted_" + zipFileName;
@@ -240,9 +241,16 @@ public class AppManagerServiceImpl implements AppManagerService {
   @Override
   @Transactional
   public void configureUpdatedApp(
-      String appId, AppConfig newAppConfig, String htmlTemplate, Boolean overwriteConfig) {
+      String appId, AppConfig newAppConfig, String htmlTemplate, boolean overwriteConfig) {
+
+    Map<String, Object> newRuntimeOptions = newAppConfig.getRuntimeOptions();
+
+    if (newRuntimeOptions == null) {
+      newRuntimeOptions = Maps.newHashMap();
+    }
 
     App app = getAppById(appId);
+
     app.setLabel(newAppConfig.getLabel());
     app.setDescription(newAppConfig.getDescription());
     app.setAppVersion(newAppConfig.getVersion());
@@ -251,8 +259,8 @@ public class AppManagerServiceImpl implements AppManagerService {
     app.setIncludeMenuAndFooter(newAppConfig.getIncludeMenuAndFooter());
     app.setAppConfig(
         overwriteConfig
-            ? gson.toJson(newAppConfig.getRuntimeOptions())
-            : app.getAppConfig()); // getAppConfig = RuntimeOption field.
+            ? gson.toJson(newRuntimeOptions)
+            : app.getAppConfig()); // getAppConfig = RuntimeOptions field.
     app.setActive(true);
 
     dataService.update(AppMetadata.APP, app);

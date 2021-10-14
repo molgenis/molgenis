@@ -93,7 +93,7 @@ public interface AppManagerService {
    * @param overwriteConfig overwrite runtime options if set to true
    */
   void configureUpdatedApp(
-      String appId, AppConfig newAppConfig, String htmlTemplate, Boolean overwriteConfig);
+      String appId, AppConfig newAppConfig, String htmlTemplate, boolean overwriteConfig);
 
   /**
    * Get the UTF-8 file-content of a file served by an app
