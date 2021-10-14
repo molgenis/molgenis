@@ -35,9 +35,7 @@ import org.molgenis.data.support.QueryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
 
-@Service
 public class IndexJobSchedulerImpl implements IndexJobScheduler {
   private final ExecutorService executorService;
   private final IndexJobService indexJobService;
