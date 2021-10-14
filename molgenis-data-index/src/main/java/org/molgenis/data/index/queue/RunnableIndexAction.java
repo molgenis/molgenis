@@ -7,7 +7,7 @@ import static org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus.FINIS
 import static org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus.PENDING;
 import static org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus.STARTED;
 
-import java.util.Objects;
+import java.util.Optional;
 import org.molgenis.data.index.job.IndexJobService;
 import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionMetadata;
@@ -34,9 +34,9 @@ public class RunnableIndexAction implements Runnable {
     try {
       var success = indexJobService.performAction(indexAction);
       setStatus(success ? FINISHED : FAILED);
-    } catch (Error e) {
+    } catch (Exception e) {
       setStatus(FAILED);
-      throw (e);
+      throw e;
     }
   }
 
@@ -50,15 +50,16 @@ public class RunnableIndexAction implements Runnable {
   }
 
   /**
-   * Checks if the work done by this action is smaller than but contained in the work by the other
-   * action.
+   * Checks if the work done by this action is contained in the work done by the other action.
    *
    * @param other the other action
    * @return true if the work is contained, false otherwise
    */
   public boolean isContainedBy(RunnableIndexAction other) {
-    return other.indexAction.isWholeRepository()
-        && other.indexAction.getEntityTypeId().equals(indexAction.getEntityTypeId());
+    return other.concerns(indexAction.getEntityTypeId())
+        && Optional.ofNullable(other.indexAction.getEntityId())
+            .map(singleRowId -> singleRowId.equals(other.indexAction.getEntityId()))
+            .orElse(true);
   }
 
   /**
@@ -70,23 +71,6 @@ public class RunnableIndexAction implements Runnable {
    */
   public boolean contains(RunnableIndexAction other) {
     return other.isContainedBy(this);
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    RunnableIndexAction that = (RunnableIndexAction) o;
-    return indexAction.equals(that.indexAction);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(indexAction);
   }
 
   @Override

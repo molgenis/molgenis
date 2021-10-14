@@ -13,15 +13,16 @@ import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Stream;
+import org.apache.commons.collections.list.SynchronizedList;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.index.meta.IndexAction;
@@ -32,6 +33,7 @@ import org.molgenis.data.index.queue.RunnableIndexAction;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -44,7 +46,8 @@ public class IndexJobSchedulerImpl implements IndexJobScheduler {
   private final Lock lock = new ReentrantLock();
   private final Condition allEntitiesStable = lock.newCondition();
   private final Condition singleEntityStable = lock.newCondition();
-  private final List<RunnableIndexAction> indexActions = new CopyOnWriteArrayList<>();
+  private final List<RunnableIndexAction> indexActions =
+      SynchronizedList.decorate(new ArrayList<RunnableIndexAction>());
 
   private static final Logger LOGGER = LoggerFactory.getLogger(IndexJobSchedulerImpl.class);
 
@@ -56,6 +59,7 @@ public class IndexJobSchedulerImpl implements IndexJobScheduler {
   }
 
   @Override
+  @RunAsSystem
   public void scheduleIndexJob(String transactionId) {
     LOGGER.trace("Index transaction with id {}...", transactionId);
     IndexActionGroup indexActionGroup =
@@ -67,6 +71,7 @@ public class IndexJobSchedulerImpl implements IndexJobScheduler {
   }
 
   @Override
+  @RunAsSystem
   public void schedule(IndexAction indexAction) {
     var task = new RunnableIndexAction(indexAction, indexJobService);
     if (indexActions.stream().anyMatch(other -> other.contains(task))) {

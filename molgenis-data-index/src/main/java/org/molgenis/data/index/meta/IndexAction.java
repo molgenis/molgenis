@@ -8,6 +8,9 @@ import static org.molgenis.data.index.meta.IndexActionMetadata.INDEX_ACTION_GROU
 import static org.molgenis.data.index.meta.IndexActionMetadata.INDEX_STATUS;
 import static org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus;
 
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
@@ -124,5 +127,12 @@ public class IndexAction extends StaticEntity {
 
   public boolean isWholeRepository() {
     return getEntityId() == null;
+  }
+
+  @Override
+  public String toString() {
+    return Stream.of(getEntityTypeId(), getEntityId())
+        .filter(Objects::nonNull)
+        .collect(Collectors.joining("."));
   }
 }
