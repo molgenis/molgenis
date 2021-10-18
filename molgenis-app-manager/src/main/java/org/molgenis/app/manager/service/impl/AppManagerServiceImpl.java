@@ -151,17 +151,7 @@ public class AppManagerServiceImpl implements AppManagerService {
 
   @Override
   public AppConfig checkAndObtainConfig(String tempDir, String configContent) throws IOException {
-    if (configContent.isEmpty() || !isConfigContentValidJson(configContent)) {
-      fileStore.deleteDirectory(APPS_TMP_DIR);
-      throw new InvalidAppConfigException();
-    }
-
-    AppConfig appConfig = gson.fromJson(configContent, AppConfig.class);
-    List<String> missingAppConfigParams = buildMissingConfigParams(appConfig);
-    if (!missingAppConfigParams.isEmpty()) {
-      fileStore.deleteDirectory(APPS_TMP_DIR);
-      throw new AppConfigMissingParametersException(missingAppConfigParams);
-    }
+    AppConfig appConfig = getAppConfig(gson, fileStore, configContent);
 
     if (appConfig.getName().contains("/")) {
       fileStore.deleteDirectory(APPS_TMP_DIR);
@@ -182,22 +172,8 @@ public class AppManagerServiceImpl implements AppManagerService {
   @Override
   public AppConfig updateApp(String appId, String tempDir, String configContent)
       throws IOException {
-    if (configContent.isEmpty() || !isConfigContentValidJson(configContent)) {
-      fileStore.deleteDirectory(APPS_TMP_DIR);
-      throw new InvalidAppConfigException();
-    }
 
-    AppConfig appConfig = gson.fromJson(configContent, AppConfig.class);
-    List<String> missingAppConfigParams = buildMissingConfigParams(appConfig);
-    if (!missingAppConfigParams.isEmpty()) {
-      fileStore.deleteDirectory(APPS_TMP_DIR);
-      throw new AppConfigMissingParametersException(missingAppConfigParams);
-    }
-
-    if (appConfig.getName().contains("/")) {
-      fileStore.deleteDirectory(APPS_TMP_DIR);
-      throw new IllegalAppNameException(appConfig.getName());
-    }
+    AppConfig appConfig = getAppConfig(gson, fileStore, configContent);
 
     App app = getAppById(appId);
 
@@ -342,5 +318,27 @@ public class AppManagerServiceImpl implements AppManagerService {
     }
 
     return missingConfigParameters;
+  }
+
+  private AppConfig getAppConfig(Gson gson, FileStore fileStore, String configContent)
+      throws IOException {
+    if (configContent.isEmpty() || !isConfigContentValidJson(configContent)) {
+      fileStore.deleteDirectory(APPS_TMP_DIR);
+      throw new InvalidAppConfigException();
+    }
+
+    AppConfig appConfig = gson.fromJson(configContent, AppConfig.class);
+    List<String> missingAppConfigParams = buildMissingConfigParams(appConfig);
+    if (!missingAppConfigParams.isEmpty()) {
+      fileStore.deleteDirectory(APPS_TMP_DIR);
+      throw new AppConfigMissingParametersException(missingAppConfigParams);
+    }
+
+    if (appConfig.getName().contains("/")) {
+      fileStore.deleteDirectory(APPS_TMP_DIR);
+      throw new IllegalAppNameException(appConfig.getName());
+    }
+
+    return appConfig;
   }
 }

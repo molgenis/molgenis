@@ -101,7 +101,8 @@ public class AppManagerController extends PluginController {
   public void updateApp(
       @RequestParam("file") MultipartFile multipartFile,
       @PathVariable("id") String id,
-      @RequestParam(value = "updateRuntimeOptions", required = false) boolean updateRuntimeOptions) {
+      @RequestParam(value = "updateRuntimeOptions", required = false)
+          boolean updateRuntimeOptions) {
 
     // ?updateRuntimeOptions=true
     boolean overwriteConfig = updateRuntimeOptions && updateRuntimeOptions;
