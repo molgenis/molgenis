@@ -33,6 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Controller
 @RequestMapping(AppManagerController.URI)
 public class AppManagerController extends PluginController {
+
   public static final String ID = "appmanager";
   public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
@@ -104,9 +105,6 @@ public class AppManagerController extends PluginController {
       @RequestParam(value = "updateRuntimeOptions", required = false)
           boolean updateRuntimeOptions) {
 
-    // ?updateRuntimeOptions=true
-    boolean overwriteConfig = updateRuntimeOptions && updateRuntimeOptions;
-
     App app = getApp(id);
 
     // get filename for possible error
@@ -123,7 +121,7 @@ public class AppManagerController extends PluginController {
           appManagerService.extractFileContent(
               APPS_DIR + separator + appConfig.getName(), ZIP_INDEX_FILE);
 
-      appManagerService.configureUpdatedApp(id, appConfig, htmlTemplate, overwriteConfig);
+      appManagerService.configureUpdatedApp(id, appConfig, htmlTemplate, updateRuntimeOptions);
     } catch (IOException err) {
       throw new CouldNotUploadAppException(filename);
     }
