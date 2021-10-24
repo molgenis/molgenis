@@ -49,8 +49,8 @@ class PermissionAPIIT extends AbstractApiTests {
 
     testUserName = "api_v2_test_user" + System.currentTimeMillis();
     testUserName2 = "api_v2_test2_user" + System.currentTimeMillis();
-    createUser(adminToken, testUserName, REST_TEST_USER_PASSWORD);
-    createUser(adminToken, testUserName2, REST_TEST_USER_PASSWORD);
+    createUser(adminToken, testUserName, REST_TEST_USER_PASSWORD, false);
+    createUser(adminToken, testUserName2, REST_TEST_USER_PASSWORD, false);
 
     ImmutableMap.<String, Permission>builder()
         .put(RoleMetadata.ROLE, READ)

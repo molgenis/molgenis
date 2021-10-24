@@ -82,15 +82,17 @@ public class RestTestUtils {
    * @param adminToken the token to use for login
    * @param username the name of the user to create
    * @param password the password of the user to create
+   * @param changePassword should the user change their password when they log in
    */
-  public static void createUser(String adminToken, String username, String password) {
+  public static void createUser(
+      String adminToken, String username, String password, boolean changePassword) {
     if (adminToken != null) {
       JSONObject createTestUserBody = new JSONObject();
       createTestUserBody.put("active", true);
       createTestUserBody.put("username", username);
       createTestUserBody.put("password_", password);
       createTestUserBody.put("superuser", false);
-      createTestUserBody.put("changePassword", false);
+      createTestUserBody.put("changePassword", changePassword);
       createTestUserBody.put("Email", username + "@example.com");
 
       given()
