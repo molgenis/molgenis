@@ -104,9 +104,6 @@ public class AppManagerController extends PluginController {
       @RequestParam(value = "updateRuntimeOptions", required = false)
           boolean updateRuntimeOptions) {
 
-    // ?updateRuntimeOptions=true
-    boolean overwriteConfig = updateRuntimeOptions && updateRuntimeOptions;
-
     App app = getApp(id);
 
     // get filename for possible error
@@ -123,7 +120,7 @@ public class AppManagerController extends PluginController {
           appManagerService.extractFileContent(
               APPS_DIR + separator + appConfig.getName(), ZIP_INDEX_FILE);
 
-      appManagerService.configureUpdatedApp(id, appConfig, htmlTemplate, overwriteConfig);
+      appManagerService.configureUpdatedApp(id, appConfig, htmlTemplate, updateRuntimeOptions);
     } catch (IOException err) {
       throw new CouldNotUploadAppException(filename);
     }
