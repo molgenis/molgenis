@@ -33,6 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Controller
 @RequestMapping(AppManagerController.URI)
 public class AppManagerController extends PluginController {
+
   public static final String ID = "appmanager";
   public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
