@@ -2,6 +2,7 @@ package org.molgenis.data.elasticsearch.client;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
@@ -44,7 +45,7 @@ class ClientFactoryTest extends AbstractMockitoTest {
   @Test
   void testCreateClientSuccess() throws Throwable {
     when(retryTemplate.execute(any())).thenReturn(client);
-    clientFactory.createClient();
+    assertDoesNotThrow(() -> clientFactory.createClient());
   }
 
   @Test
@@ -62,7 +63,7 @@ class ClientFactoryTest extends AbstractMockitoTest {
   void testTryPingSuccess() throws InterruptedException, IOException {
     when(client.ping(RequestOptions.DEFAULT)).thenReturn(true);
 
-    ClientFactory.tryPing(client, "localhost:9022", retryContext);
+    assertDoesNotThrow(() -> ClientFactory.tryPing(client, "localhost:9022", retryContext));
   }
 
   @Test

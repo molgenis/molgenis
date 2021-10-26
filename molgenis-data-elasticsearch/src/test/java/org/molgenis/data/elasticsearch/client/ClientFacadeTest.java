@@ -5,7 +5,8 @@ import static ch.qos.logback.classic.Level.ERROR;
 import static ch.qos.logback.classic.Level.TRACE;
 import static ch.qos.logback.classic.Level.WARN;
 import static java.util.Collections.emptyList;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.argThat;
@@ -20,6 +21,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
+import java.util.List;
 import java.util.stream.Stream;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.ElasticsearchStatusException;
@@ -50,6 +52,7 @@ import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.core.TimeValue;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.shard.ShardId;
 import org.elasticsearch.rest.RestStatus;
@@ -69,8 +72,19 @@ import org.molgenis.data.elasticsearch.generator.model.Index;
 import org.molgenis.data.elasticsearch.generator.model.IndexSettings;
 import org.molgenis.data.elasticsearch.generator.model.Mapping;
 import org.molgenis.data.elasticsearch.generator.model.MappingType;
+import org.molgenis.data.index.exception.AggregationException;
+import org.molgenis.data.index.exception.AggregationTimeoutException;
+import org.molgenis.data.index.exception.DocumentDeleteException;
+import org.molgenis.data.index.exception.DocumentIndexException;
+import org.molgenis.data.index.exception.ExplainException;
 import org.molgenis.data.index.exception.IndexAlreadyExistsException;
-import org.molgenis.data.index.exception.IndexException;
+import org.molgenis.data.index.exception.IndexCountException;
+import org.molgenis.data.index.exception.IndexCreateException;
+import org.molgenis.data.index.exception.IndexDeleteException;
+import org.molgenis.data.index.exception.IndexExistsException;
+import org.molgenis.data.index.exception.IndexRefreshException;
+import org.molgenis.data.index.exception.IndexSearchException;
+import org.molgenis.data.index.exception.IndexSearchTimeoutException;
 import org.molgenis.data.index.exception.UnknownIndexException;
 import org.slf4j.LoggerFactory;
 
@@ -167,9 +181,11 @@ class ClientFacadeTest {
     when(indicesClient.create(any(CreateIndexRequest.class), eq(RequestOptions.DEFAULT)))
         .thenThrow(new ResourceAlreadyExistsException("Index already exists"));
 
-    assertThrows(
-        IndexAlreadyExistsException.class,
-        () -> clientFacade.createIndex(index, indexSettings, mappings));
+    var exception =
+        assertThrows(
+            IndexAlreadyExistsException.class,
+            () -> clientFacade.createIndex(index, indexSettings, mappings));
+    assertEquals(List.of("indexname"), exception.getIndices());
   }
 
   @Test
@@ -183,10 +199,11 @@ class ClientFacadeTest {
     when(indicesClient.create(any(CreateIndexRequest.class), eq(RequestOptions.DEFAULT)))
         .thenThrow(new ElasticsearchException("error creating index"));
 
-    Exception exception =
+    var exception =
         assertThrows(
-            IndexException.class, () -> clientFacade.createIndex(index, indexSettings, mappings));
-    assertThat(exception.getMessage()).containsPattern("Error creating index 'indexname'\\.");
+            IndexCreateException.class,
+            () -> clientFacade.createIndex(index, indexSettings, mappings));
+    assertEquals(List.of("indexname"), exception.getIndices());
   }
 
   @Test
@@ -221,10 +238,9 @@ class ClientFacadeTest {
     when(indicesClient.exists(any(GetIndexRequest.class), eq(RequestOptions.DEFAULT)))
         .thenThrow(new ElasticsearchException("exception"));
 
-    Exception exception =
-        assertThrows(IndexException.class, () -> clientFacade.indexesExist(index));
-    assertThat(exception.getMessage())
-        .containsPattern("Error determining index\\(es\\) 'index' existence\\.");
+    var exception =
+        assertThrows(IndexExistsException.class, () -> clientFacade.indexesExist(index));
+    assertEquals(List.of("index"), exception.getIndices());
   }
 
   @Test
@@ -234,8 +250,8 @@ class ClientFacadeTest {
     when(indicesClient.delete(any(DeleteIndexRequest.class), eq(RequestOptions.DEFAULT)))
         .thenThrow(new ElasticsearchException("exception"));
 
-    Exception exception = assertThrows(IndexException.class, () -> clientFacade.deleteIndex(index));
-    assertThat(exception.getMessage()).containsPattern("Error deleting index\\(es\\) 'index'\\.");
+    var exception = assertThrows(IndexDeleteException.class, () -> clientFacade.deleteIndex(index));
+    assertEquals(List.of("index"), exception.getIndices());
   }
 
   @Test
@@ -246,8 +262,8 @@ class ClientFacadeTest {
         .thenReturn(deleteIndexResponse);
     when(deleteIndexResponse.isAcknowledged()).thenReturn(false);
 
-    Exception exception = assertThrows(IndexException.class, () -> clientFacade.deleteIndex(index));
-    assertThat(exception.getMessage()).containsPattern("Error deleting index\\(es\\) 'index'\\.");
+    var exception = assertThrows(IndexDeleteException.class, () -> clientFacade.deleteIndex(index));
+    assertEquals(List.of("index"), exception.getIndices());
   }
 
   @Test
@@ -255,8 +271,8 @@ class ClientFacadeTest {
     when(indicesClient.refresh(any(RefreshRequest.class), eq(RequestOptions.DEFAULT)))
         .thenThrow(new ElasticsearchException("exception"));
 
-    Exception exception = assertThrows(IndexException.class, () -> clientFacade.refreshIndexes());
-    assertThat(exception.getMessage()).containsPattern("Error refreshing index\\(es\\) '_all'\\.");
+    var exception = assertThrows(IndexRefreshException.class, () -> clientFacade.refreshIndexes());
+    assertEquals(List.of("_all"), exception.getIndices());
   }
 
   @Test
@@ -264,9 +280,8 @@ class ClientFacadeTest {
     when(indicesClient.refresh(any(RefreshRequest.class), eq(RequestOptions.DEFAULT)))
         .thenThrow(new ResourceNotFoundException("exception"));
 
-    Exception exception =
-        assertThrows(UnknownIndexException.class, () -> clientFacade.refreshIndexes());
-    assertThat(exception.getMessage()).containsPattern("One or more indexes '_all' not found\\.");
+    var exception = assertThrows(UnknownIndexException.class, () -> clientFacade.refreshIndexes());
+    assertEquals(List.of("_all"), exception.getIndices());
   }
 
   @Test
@@ -276,8 +291,8 @@ class ClientFacadeTest {
     when(refreshResponse.getFailedShards()).thenReturn(1);
     when(refreshResponse.getShardFailures()).thenReturn(singleShardFailure);
 
-    Exception exception = assertThrows(IndexException.class, () -> clientFacade.refreshIndexes());
-    assertThat(exception.getMessage()).containsPattern("Error refreshing index\\(es\\) '_all'\\.");
+    var exception = assertThrows(IndexRefreshException.class, () -> clientFacade.refreshIndexes());
+    assertEquals(List.of("_all"), exception.getIndices());
   }
 
   @Test
@@ -286,9 +301,8 @@ class ClientFacadeTest {
     when(client.count(any(CountRequest.class), eq(RequestOptions.DEFAULT)))
         .thenThrow(new ElasticsearchException("exception"));
 
-    Exception exception = assertThrows(IndexException.class, () -> clientFacade.getCount(index));
-    assertThat(exception.getMessage())
-        .containsPattern("Error counting docs in index\\(es\\) 'index'\\.");
+    var exception = assertThrows(IndexCountException.class, () -> clientFacade.getCount(index));
+    assertEquals(List.of("index"), exception.getIndices());
   }
 
   @Test
@@ -298,9 +312,8 @@ class ClientFacadeTest {
     when(client.count(any(CountRequest.class), eq(RequestOptions.DEFAULT)))
         .thenThrow(new ElasticsearchStatusException("exception", RestStatus.NOT_FOUND));
 
-    Exception exception =
-        assertThrows(UnknownIndexException.class, () -> clientFacade.getCount(index));
-    assertThat(exception.getMessage()).containsPattern("One or more indexes 'index' not found\\.");
+    var exception = assertThrows(UnknownIndexException.class, () -> clientFacade.getCount(index));
+    assertEquals(List.of("index"), exception.getIndices());
   }
 
   @Test
@@ -312,9 +325,8 @@ class ClientFacadeTest {
     when(countResponse.getFailedShards()).thenReturn(1);
     when(countResponse.getShardFailures()).thenReturn(singleShardSearchFailure);
 
-    Exception exception = assertThrows(IndexException.class, () -> clientFacade.getCount(index));
-    assertThat(exception.getMessage())
-        .containsPattern("Error counting docs in index\\(es\\) 'index'\\.");
+    var exception = assertThrows(IndexCountException.class, () -> clientFacade.getCount(index));
+    assertEquals(List.of("index"), exception.getIndices());
   }
 
   @Test
@@ -326,9 +338,8 @@ class ClientFacadeTest {
     when(countResponse.getFailedShards()).thenReturn(0);
     when(countResponse.isTerminatedEarly()).thenReturn(true);
 
-    Exception exception = assertThrows(IndexException.class, () -> clientFacade.getCount(index));
-    assertThat(exception.getMessage())
-        .containsPattern("Timeout while counting docs in index\\(es\\) 'index'\\.");
+    var exception = assertThrows(IndexCountException.class, () -> clientFacade.getCount(index));
+    assertEquals(List.of("index"), exception.getIndices());
   }
 
   @Test
@@ -339,15 +350,16 @@ class ClientFacadeTest {
         .thenReturn(searchResponse);
     when(searchResponse.getFailedShards()).thenReturn(0);
     when(searchResponse.isTimedOut()).thenReturn(true);
-    when(queryBuilder.toString()).thenReturn("a == b");
+    when(searchResponse.getTook()).thenReturn(TimeValue.timeValueMillis(200));
 
-    Exception exception =
+    var indices = List.of(index);
+    var exception =
         assertThrows(
-            IndexException.class,
-            () -> clientFacade.search(queryBuilder, 0, 100, ImmutableList.of(index)));
-    assertThat(exception.getMessage())
-        .containsPattern(
-            "Timeout searching counting docs in index\\(es\\) 'index'  with query 'a == b'\\.");
+            IndexSearchTimeoutException.class,
+            () -> clientFacade.search(queryBuilder, 0, 100, indices));
+    assertEquals(List.of("index"), exception.getIndices());
+    assertEquals("", exception.getQuery());
+    assertEquals(200L, exception.getMillis());
   }
 
   @Test
@@ -358,14 +370,13 @@ class ClientFacadeTest {
         .thenReturn(searchResponse);
     when(searchResponse.getFailedShards()).thenReturn(1);
     when(searchResponse.getShardFailures()).thenReturn(singleShardSearchFailure);
-    when(queryBuilder.toString()).thenReturn("a == b");
 
-    Exception exception =
+    var indices = List.of(index);
+    var exception =
         assertThrows(
-            IndexException.class,
-            () -> clientFacade.search(queryBuilder, 0, 100, ImmutableList.of(index)));
-    assertThat(exception.getMessage())
-        .containsPattern("Error searching docs in index\\(es\\) 'index' with query 'a == b'\\.");
+            IndexSearchException.class, () -> clientFacade.search(queryBuilder, 0, 100, indices));
+    assertEquals(List.of("index"), exception.getIndices());
+    assertEquals("", exception.getQuery());
   }
 
   @Test
@@ -376,11 +387,11 @@ class ClientFacadeTest {
         .thenThrow(new ResourceNotFoundException("Exception"));
     when(queryBuilder.toString()).thenReturn("a == b");
 
-    Exception exception =
+    var indices = ImmutableList.of(index);
+    var exception =
         assertThrows(
-            UnknownIndexException.class,
-            () -> clientFacade.search(queryBuilder, 0, 100, ImmutableList.of(index)));
-    assertThat(exception.getMessage()).containsPattern("One or more indexes 'index' not found\\.");
+            UnknownIndexException.class, () -> clientFacade.search(queryBuilder, 0, 100, indices));
+    assertEquals(List.of("index"), exception.getIndices());
   }
 
   @Test
@@ -391,12 +402,12 @@ class ClientFacadeTest {
         .thenThrow(new ElasticsearchException("Exception"));
     when(queryBuilder.toString()).thenReturn("a == b");
 
-    Exception exception =
+    var indices = List.of(index);
+    var exception =
         assertThrows(
-            IndexException.class,
-            () -> clientFacade.search(queryBuilder, 0, 100, ImmutableList.of(index)));
-    assertThat(exception.getMessage())
-        .containsPattern("Error searching docs in index\\(es\\) 'index' with query 'a == b'\\.");
+            IndexSearchException.class, () -> clientFacade.search(queryBuilder, 0, 100, indices));
+    assertEquals(List.of("index"), exception.getIndices());
+    assertEquals("", exception.getQuery());
   }
 
   @Test
@@ -407,13 +418,12 @@ class ClientFacadeTest {
         .thenThrow(new ElasticsearchException("Exception"));
     when(queryBuilder.toString()).thenReturn("a == b");
 
-    Exception exception =
+    var aggregations = List.of(aggregationBuilder);
+    var exception =
         assertThrows(
-            IndexException.class,
-            () ->
-                clientFacade.aggregate(ImmutableList.of(aggregationBuilder), queryBuilder, index));
-    assertThat(exception.getMessage())
-        .containsPattern("Error aggregating docs in index\\(es\\) 'index'\\.");
+            AggregationException.class,
+            () -> clientFacade.aggregate(aggregations, queryBuilder, index));
+    assertEquals(List.of("index"), exception.getIndices());
   }
 
   @Test
@@ -424,12 +434,12 @@ class ClientFacadeTest {
         .thenThrow(new ResourceNotFoundException("Exception"));
     when(queryBuilder.toString()).thenReturn("a == b");
 
-    Exception exception =
+    var aggregations = ImmutableList.of(aggregationBuilder);
+    var exception =
         assertThrows(
             UnknownIndexException.class,
-            () ->
-                clientFacade.aggregate(ImmutableList.of(aggregationBuilder), queryBuilder, index));
-    assertThat(exception.getMessage()).containsPattern("One or more indexes 'index' not found\\.");
+            () -> clientFacade.aggregate(aggregations, queryBuilder, index));
+    assertEquals(List.of("index"), exception.getIndices());
   }
 
   @Test
@@ -440,15 +450,16 @@ class ClientFacadeTest {
         .thenReturn(searchResponse);
     when(searchResponse.getFailedShards()).thenReturn(1);
     when(searchResponse.getShardFailures()).thenReturn(singleShardSearchFailure);
-    when(queryBuilder.toString()).thenReturn("a == b");
 
-    Exception exception =
+    var aggregations = List.of(aggregationBuilder);
+    var exception =
         assertThrows(
-            IndexException.class,
-            () ->
-                clientFacade.aggregate(ImmutableList.of(aggregationBuilder), queryBuilder, index));
-    assertThat(exception.getMessage())
-        .containsPattern("Error aggregating docs in index\\(es\\) 'index'\\.");
+            AggregationException.class,
+            () -> clientFacade.aggregate(aggregations, queryBuilder, index));
+    assertEquals(List.of("index"), exception.getIndices());
+    assertEquals(
+        "indices:index, detailMessage:{\"shard\":1,\"index\":\"cluster:index\",\"node\":\"node\",\"reason\":{\"type\":\"i_o_exception\",\"reason\":\"reason\"}}",
+        exception.getMessage());
   }
 
   @Test
@@ -459,30 +470,29 @@ class ClientFacadeTest {
         .thenReturn(searchResponse);
     when(searchResponse.getFailedShards()).thenReturn(0);
     when(searchResponse.isTimedOut()).thenReturn(true);
-    when(queryBuilder.toString()).thenReturn("a == b");
+    when(searchResponse.getTook()).thenReturn(TimeValue.timeValueMillis(200));
 
-    Exception exception =
+    var aggregations = ImmutableList.of(aggregationBuilder);
+    var exception =
         assertThrows(
-            IndexException.class,
-            () ->
-                clientFacade.aggregate(ImmutableList.of(aggregationBuilder), queryBuilder, index));
-    assertThat(exception.getMessage())
-        .containsPattern("Timeout aggregating docs in index\\(es\\) 'index'\\.");
+            AggregationTimeoutException.class,
+            () -> clientFacade.aggregate(aggregations, queryBuilder, index));
+    assertEquals(List.of("index"), exception.getIndices());
+    assertEquals(200L, exception.getMillis());
   }
 
   @Test
   void testExplainThrowsException() throws IOException {
     SearchHit searchHit = SearchHit.create("id", "index");
 
-    when(client.explain(any(ExplainRequest.class), eq(RequestOptions.DEFAULT)))
-        .thenThrow(new ElasticsearchException("exception"));
-    when(queryBuilder.toString()).thenReturn("a == b");
+    var cause = new ElasticsearchException("exception");
+    when(client.explain(any(ExplainRequest.class), eq(RequestOptions.DEFAULT))).thenThrow(cause);
 
-    Exception exception =
-        assertThrows(IndexException.class, () -> clientFacade.explain(searchHit, queryBuilder));
-    assertThat(exception.getMessage())
-        .containsPattern(
-            "Error explaining doc with id 'id' in index 'index' for query 'a == b'\\.");
+    var exception =
+        assertThrows(ExplainException.class, () -> clientFacade.explain(searchHit, queryBuilder));
+    assertEquals(List.of("index"), exception.getIndices());
+    assertEquals("", exception.getQuery());
+    assertSame(cause, exception.getCause());
   }
 
   @Test
@@ -492,13 +502,13 @@ class ClientFacadeTest {
     when(document.getContent()).thenReturn(xContentBuilder);
     when(document.getId()).thenReturn("id");
 
-    when(client.index(any(IndexRequest.class), eq(RequestOptions.DEFAULT)))
-        .thenThrow(new ElasticsearchException("exception"));
+    var cause = new ElasticsearchException("exception");
+    when(client.index(any(IndexRequest.class), eq(RequestOptions.DEFAULT))).thenThrow(cause);
 
-    Exception exception =
-        assertThrows(IndexException.class, () -> clientFacade.index(index, document));
-    assertThat(exception.getMessage())
-        .containsPattern("Error indexing doc with id 'id' in index 'index'\\.");
+    var exception =
+        assertThrows(DocumentIndexException.class, () -> clientFacade.index(index, document));
+    assertEquals(List.of("index"), exception.getIndices());
+    assertSame(cause, exception.getCause());
   }
 
   @Test
@@ -508,12 +518,13 @@ class ClientFacadeTest {
     when(document.getContent()).thenReturn(xContentBuilder);
     when(document.getId()).thenReturn("id");
 
-    when(client.index(any(IndexRequest.class), eq(RequestOptions.DEFAULT)))
-        .thenThrow(new ResourceNotFoundException("exception"));
+    var cause = new ResourceNotFoundException("exception");
+    when(client.index(any(IndexRequest.class), eq(RequestOptions.DEFAULT))).thenThrow(cause);
 
-    Exception exception =
+    var exception =
         assertThrows(UnknownIndexException.class, () -> clientFacade.index(index, document));
-    assertThat(exception.getMessage()).containsPattern("Index 'index' not found\\.");
+    assertEquals(List.of("index"), exception.getIndices());
+    assertSame(cause, exception.getCause());
   }
 
   @Test
@@ -530,10 +541,10 @@ class ClientFacadeTest {
     when(shardInfo.getSuccessful()).thenReturn(0);
     when(shardInfo.getFailures()).thenReturn(singleShardIndexResponseFailure);
 
-    Exception exception =
-        assertThrows(IndexException.class, () -> clientFacade.index(index, document));
-    assertThat(exception.getMessage())
-        .containsPattern("Error indexing doc with id 'id' in index 'index'\\.");
+    var exception =
+        assertThrows(DocumentIndexException.class, () -> clientFacade.index(index, document));
+    assertEquals(List.of("index"), exception.getIndices());
+    assertEquals("id", exception.getDocumentId());
   }
 
   @Test
@@ -542,13 +553,14 @@ class ClientFacadeTest {
 
     when(document.getId()).thenReturn("id");
 
-    when(client.delete(any(DeleteRequest.class), eq(RequestOptions.DEFAULT)))
-        .thenThrow(new ElasticsearchException("exception"));
+    var cause = new ElasticsearchException("exception");
+    when(client.delete(any(DeleteRequest.class), eq(RequestOptions.DEFAULT))).thenThrow(cause);
 
-    Exception exception =
-        assertThrows(IndexException.class, () -> clientFacade.deleteById(index, document));
-    assertThat(exception.getMessage())
-        .containsPattern("Error deleting doc with id 'id' in index 'index'\\.");
+    var exception =
+        assertThrows(DocumentDeleteException.class, () -> clientFacade.deleteById(index, document));
+    assertEquals(List.of("index"), exception.getIndices());
+    assertSame(cause, exception.getCause());
+    assertEquals("id", exception.getDocumentId());
   }
 
   @Test
@@ -560,9 +572,9 @@ class ClientFacadeTest {
     when(client.delete(any(DeleteRequest.class), eq(RequestOptions.DEFAULT)))
         .thenThrow(new ResourceNotFoundException("exception"));
 
-    Exception exception =
+    var exception =
         assertThrows(UnknownIndexException.class, () -> clientFacade.deleteById(index, document));
-    assertThat(exception.getMessage()).containsPattern("Index 'index' not found\\.");
+    assertEquals(List.of("index"), exception.getIndices());
   }
 
   @Test

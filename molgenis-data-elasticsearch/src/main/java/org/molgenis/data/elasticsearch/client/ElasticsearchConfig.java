@@ -1,7 +1,6 @@
 package org.molgenis.data.elasticsearch.client;
 
 import static java.lang.String.format;
-import static java.util.stream.Collectors.toList;
 
 import java.util.List;
 import org.apache.http.HttpHost;
