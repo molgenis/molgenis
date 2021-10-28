@@ -48,16 +48,16 @@ public class ElasticsearchConfig {
     return new ClientFactory(retryTemplate, toHosts(hosts));
   }
 
-  private List<HttpHost> toHosts(List<String> addressses) {
-    return addressses.stream().map(this::toHost).collect(toList());
+  static List<HttpHost> toHosts(List<String> addresses) {
+    return addresses.stream().map(ElasticsearchConfig::toHost).toList();
   }
 
-  private HttpHost toHost(String address) {
+  static HttpHost toHost(String address) {
     int idx = address.lastIndexOf(':');
     if (idx == -1 || idx == address.length() - 1) {
       throw new IllegalArgumentException(
           format(
-              "Invalid hostname '%s' in property elasticsearch.hosts. Host should be of form 'hostname:port'",
+              "Invalid hostname '%s' in property elasticsearch.hosts. Host should be of form 'hostname:port'.",
               address));
     }
     String hostname = address.substring(0, idx);
@@ -67,7 +67,7 @@ public class ElasticsearchConfig {
     } catch (NumberFormatException e) {
       throw new IllegalArgumentException(
           format(
-              "Invalid hostname '%s' in property elasticsearch.hosts. Host should be of form 'hostname:port'",
+              "Invalid hostname '%s' in property elasticsearch.hosts. Port number should be numeric.",
               address));
     }
     return new HttpHost(hostname, port);
