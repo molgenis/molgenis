@@ -16,6 +16,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.lucene.search.Explanation;
@@ -27,7 +28,7 @@ import org.elasticsearch.action.ShardOperationFailedException;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
-import org.elasticsearch.action.bulk.BulkRequest;
+import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.explain.ExplainRequest;
@@ -98,12 +99,14 @@ public class ClientFacade implements Closeable {
   private final SettingsContentBuilder settingsBuilder;
   private final MappingContentBuilder mappingSourceBuilder;
   private final SortContentBuilder sortContentBuilder;
+  private final BulkProcessorFactory bulkProcessorFactory;
 
   public ClientFacade(RestHighLevelClient client) {
     this.client = requireNonNull(client);
     this.settingsBuilder = new SettingsContentBuilder();
     this.mappingSourceBuilder = new MappingContentBuilder();
     this.sortContentBuilder = new SortContentBuilder();
+    this.bulkProcessorFactory = new BulkProcessorFactory();
   }
 
   public void createIndex(Index index, IndexSettings indexSettings, Stream<Mapping> mappingStream) {
@@ -622,12 +625,12 @@ public class ClientFacade implements Closeable {
 
   public void processDocumentActions(Stream<DocumentAction> documentActions) {
     LOG.trace("Processing document actions ...");
-    BulkRequest bulkRequest = new BulkRequest();
-    documentActions.map(this::toDocWriteRequest).forEach(bulkRequest::add);
+    BulkProcessor bulkProcessor = bulkProcessorFactory.create(client);
     try {
-      client.bulk(bulkRequest, DEFAULT);
-    } catch (IOException | ElasticsearchException ex) {
-      throw new MolgenisDataException("Failed to complete bulk request within the given time");
+      documentActions.map(this::toDocWriteRequest).forEach(bulkProcessor::add);
+    } finally {
+      waitForCompletion(bulkProcessor);
+      LOG.debug("Processed document actions.");
     }
   }
 
@@ -653,6 +656,18 @@ public class ClientFacade implements Closeable {
         throw new UnexpectedEnumException(documentAction.getOperation());
     }
     return docWriteRequest;
+  }
+
+  private void waitForCompletion(BulkProcessor bulkProcessor) {
+    try {
+      boolean isCompleted = bulkProcessor.awaitClose(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+      if (!isCompleted) {
+        throw new MolgenisDataException("Failed to complete bulk request within the given time");
+      }
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new RuntimeException(e);
+    }
   }
 
   private String[] toIndexNames(List<Index> indexes) {
