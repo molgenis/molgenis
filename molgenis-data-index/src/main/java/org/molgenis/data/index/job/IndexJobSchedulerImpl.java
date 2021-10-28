@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 
 public class IndexJobSchedulerImpl implements IndexJobScheduler {
+
   private final ExecutorService executorService;
   private final IndexJobService indexJobService;
   private final DataService dataService;
@@ -163,7 +164,7 @@ public class IndexJobSchedulerImpl implements IndexJobScheduler {
    * Cleans up successful IndexJobExecutions that finished longer than five minutes ago. delay for a
    * minute to allow the transaction manager to become available
    */
-  @Scheduled(initialDelay = 1 * 60 * 1000, fixedRate = 5 * 60 * 1000)
+  @Scheduled(initialDelay = 60 * 1000, fixedRate = 5 * 60 * 1000)
   @Override
   public void cleanupJobExecutions() {
     runAsSystem(

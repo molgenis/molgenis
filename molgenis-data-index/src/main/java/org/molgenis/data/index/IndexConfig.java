@@ -75,7 +75,7 @@ public class IndexConfig {
 
   @Bean
   public IndexJobScheduler indexJobScheduler(IndexJobService indexJobService) {
-    var executors = Executors.newFixedThreadPool(2);
+    var executors = Executors.newFixedThreadPool(5);
     return new IndexJobSchedulerImpl(indexJobService, executors, dataService);
   }
 
