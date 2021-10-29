@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.molgenis</groupId>
     <artifactId>molgenis</artifactId>
-    <version>9.2.0-SNAPSHOT</version>
+    <version>10.0.0-SNAPSHOT</version>
   </parent>
   <artifactId>molgenis-app</artifactId>
   <packaging>war</packaging>
@@ -57,7 +57,7 @@
             <appRoot>/usr/local/tomcat/webapps/ROOT</appRoot>
             <environment>
               <elasticsearch.cluster.name>molgenis</elasticsearch.cluster.name>
-              <elasticsearch.transport.addresses>127.0.0.1:9300</elasticsearch.transport.addresses>
+              <elasticsearch.hosts>127.0.0.1:9200</elasticsearch.hosts>
               <opencpu.uri.scheme>http</opencpu.uri.scheme>
               <opencpu.uri.host>127.0.0.1</opencpu.uri.host>
               <opencpu.uri.port>8004</opencpu.uri.port>

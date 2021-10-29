@@ -69,7 +69,9 @@ public class ExplainServiceHelper {
           newArrayList(explanation.getDetails()).stream()
               .max(
                   (explanation1, explanation2) ->
-                      Float.compare(explanation1.getValue(), explanation2.getValue()))
+                      Float.compare(
+                          explanation1.getValue().floatValue(),
+                          explanation2.getValue().floatValue()))
               .orElseThrow(
                   () ->
                       new IllegalStateException(

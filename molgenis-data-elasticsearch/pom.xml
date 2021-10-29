@@ -3,29 +3,12 @@
   <parent>
     <groupId>org.molgenis</groupId>
     <artifactId>molgenis</artifactId>
-    <version>9.2.0-SNAPSHOT</version>
+    <version>10.0.0-SNAPSHOT</version>
   </parent>
   <artifactId>molgenis-data-elasticsearch</artifactId>
 
   <name>data-elasticsearch</name>
   <description>Data layer indexing implementation based on Elasticsearch.</description>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals>
-              <!-- Create a test jar containing shared elasticsearch resources -->
-              <goal>test-jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
 
   <dependencies>
     <dependency>
@@ -54,7 +37,7 @@
     </dependency>
     <dependency>
       <groupId>org.elasticsearch.client</groupId>
-      <artifactId>transport</artifactId>
+      <artifactId>elasticsearch-rest-high-level-client</artifactId>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>

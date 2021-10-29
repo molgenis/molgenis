@@ -1,6 +1,6 @@
 environment=development
 opencpu.uri.host=localhost
-elasticsearch.transport.addresses=localhost:9300
+elasticsearch.hosts=localhost:9200
 db_uri=jdbc:postgresql://localhost/molgenis
 db_user=molgenis
 db_password=molgenis

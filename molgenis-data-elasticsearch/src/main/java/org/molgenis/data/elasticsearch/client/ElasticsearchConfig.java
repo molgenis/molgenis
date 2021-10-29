@@ -1,10 +1,9 @@
 package org.molgenis.data.elasticsearch.client;
 
 import static java.lang.String.format;
-import static java.util.stream.Collectors.toList;
 
-import java.net.InetSocketAddress;
 import java.util.List;
+import org.apache.http.HttpHost;
 import org.molgenis.data.index.IndexConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,11 +23,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 @Import({IndexConfig.class, ConnectionRetryConfig.class})
 public class ElasticsearchConfig {
-  @Value("${elasticsearch.cluster.name:molgenis}")
-  private String clusterName;
 
-  @Value("${elasticsearch.transport.addresses:127.0.0.1:9300}")
-  private List<String> transportAddresses;
+  @Value("${elasticsearch.hosts:127.0.0.1:9200}")
+  private List<String> hosts;
 
   final RetryTemplate retryTemplate;
 
@@ -44,43 +41,34 @@ public class ElasticsearchConfig {
 
   @Bean
   public ClientFactory clientFactory() {
-    if (clusterName == null) {
-      throw new IllegalArgumentException("Property 'elasticsearch.cluster.name' cannot be null");
+    if (hosts == null || hosts.isEmpty()) {
+      throw new IllegalArgumentException("Property 'elasticsearch.hosts' cannot be null or empty");
     }
-    if (transportAddresses == null || transportAddresses.isEmpty()) {
-      throw new IllegalArgumentException(
-          "Property 'elasticsearch.transport.addresses' cannot be null or empty");
-    }
-    return new ClientFactory(
-        retryTemplate,
-        clusterName,
-        toIpSocketAddresses(transportAddresses),
-        new PreBuiltTransportClientFactory());
+    return new ClientFactory(retryTemplate, toHosts(hosts));
   }
 
-  private List<InetSocketAddress> toIpSocketAddresses(
-      List<String> elasticsearchTransportAddresses) {
-    return elasticsearchTransportAddresses.stream().map(this::toIpSocketAddress).collect(toList());
+  static List<HttpHost> toHosts(List<String> addresses) {
+    return addresses.stream().map(ElasticsearchConfig::toHost).toList();
   }
 
-  private InetSocketAddress toIpSocketAddress(String elasticsearchTransportAddress) {
-    int idx = elasticsearchTransportAddress.lastIndexOf(':');
-    if (idx == -1 || idx == elasticsearchTransportAddress.length() - 1) {
+  static HttpHost toHost(String address) {
+    int idx = address.lastIndexOf(':');
+    if (idx == -1 || idx == address.length() - 1) {
       throw new IllegalArgumentException(
           format(
-              "Invalid transport address '%s' in property elasticsearch.transport.addresses. Transport address should be of form 'hostname:port'",
-              elasticsearchTransportAddress));
+              "Invalid hostname '%s' in property elasticsearch.hosts. Host should be of form 'hostname:port'.",
+              address));
     }
-    String hostname = elasticsearchTransportAddress.substring(0, idx);
+    String hostname = address.substring(0, idx);
     int port;
     try {
-      port = Integer.parseInt(elasticsearchTransportAddress.substring(idx + 1));
+      port = Integer.parseInt(address.substring(idx + 1));
     } catch (NumberFormatException e) {
       throw new IllegalArgumentException(
           format(
-              "Invalid transport address '%s' in property elasticsearch.transport.addresses. Transport address should be of form 'hostname:port'",
-              elasticsearchTransportAddress));
+              "Invalid hostname '%s' in property elasticsearch.hosts. Port number should be numeric.",
+              address));
     }
-    return new InetSocketAddress(hostname, port);
+    return new HttpHost(hostname, port);
   }
 }

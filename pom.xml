@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.molgenis</groupId>
   <artifactId>molgenis</artifactId>
-  <version>9.2.0-SNAPSHOT</version>
+  <version>10.0.0-SNAPSHOT</version>
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
@@ -83,7 +83,7 @@
     <sonar.skip>${skipTests}</sonar.skip>
 
     <!-- override dependency versions managed by parent pom -->
-    <elasticsearch.version>5.5.3</elasticsearch.version>
+    <elasticsearch.version>7.15.0</elasticsearch.version>
     <guava.version>30.1-jre</guava.version>
     <!-- parent version 0.35 depends on org.apache.commons:commons-compress:jar:1.9, 1.18 is required by org.apache.poi:poi:jar:4.0.1 -->
     <webjars-locator-core.version>0.36</webjars-locator-core.version>
@@ -137,13 +137,12 @@
     <!-- Integration test properties -->
     <cargo-plugin.version>1.7.7</cargo-plugin.version>
     <sql-maven-plugin.version>1.5</sql-maven-plugin.version>
-    <elasticsearch-maven-plugin.version>5.7</elasticsearch-maven-plugin.version>
     <!-- Integration test props to use docker infrastructure -->
     <it_db_name>molgenis</it_db_name>
     <it_db_user>molgenis</it_db_user>
     <it_db_password>molgenis</it_db_password>
     <it_db_port>5432</it_db_port>
-    <elasticsearch.transport.addresses>localhost:9300</elasticsearch.transport.addresses>
+    <elasticsearch.hosts>localhost:9200</elasticsearch.hosts>
     <elasticsearch.cluster.name>molgenis</elasticsearch.cluster.name>
     <zt-zip.version>1.13</zt-zip.version>
     <fmt-maven-plugin.version>2.9</fmt-maven-plugin.version>
@@ -678,17 +677,6 @@
         <groupId>com.google.auto.value</groupId>
         <artifactId>auto-value-annotations</artifactId>
         <version>${google.auto-value.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.elasticsearch.client</groupId>
-        <artifactId>transport</artifactId>
-        <version>${elasticsearch.version}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-          </exclusion>
-        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.awaitility</groupId>

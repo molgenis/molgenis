@@ -1,47 +1,40 @@
 package org.molgenis.data.elasticsearch.client;
 
-import java.net.InetSocketAddress;
+import static java.util.Objects.requireNonNull;
+
+import java.io.IOException;
 import java.util.List;
-import java.util.Objects;
-import org.elasticsearch.client.Client;
-import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import java.util.stream.Collectors;
+import org.apache.http.HttpHost;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestHighLevelClient;
 import org.molgenis.data.MolgenisDataException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.RetryContext;
 import org.springframework.retry.support.RetryTemplate;
 
-/** Creates an Elasticsearch transport client based on given configuration settings. */
+/** Creates an Elasticsearch REST client based on given configuration settings. */
 class ClientFactory {
   private static final Logger LOG = LoggerFactory.getLogger(ClientFactory.class);
 
   private final RetryTemplate retryTemplate;
-  private final String clusterName;
-  private final List<InetSocketAddress> inetAddresses;
-  private final PreBuiltTransportClientFactory preBuiltTransportClientFactory;
+  private final RestHighLevelClient client;
+  private final String hostnames;
 
   /**
-   * * @param clusterName name of the cluster
-   *
-   * @param inetAddresses addresses to connect to
-   * @param preBuiltTransportClientFactory {@link PreBuiltTransportClientFactory} used to create the
-   *     client
+   * @param hosts addresses to connect to
    * @param retryTemplate {@link RetryTemplate} to keep trying to connect
-   * @param clusterName name of the cluster
    */
-  public ClientFactory(
-      RetryTemplate retryTemplate,
-      String clusterName,
-      List<InetSocketAddress> inetAddresses,
-      PreBuiltTransportClientFactory preBuiltTransportClientFactory) {
-    this.retryTemplate = Objects.requireNonNull(retryTemplate);
-    this.clusterName = Objects.requireNonNull(clusterName);
-    this.inetAddresses = Objects.requireNonNull(inetAddresses);
-    if (inetAddresses.isEmpty()) {
-      throw new IllegalArgumentException("inetAddresses cannot be empty");
+  public ClientFactory(RetryTemplate retryTemplate, List<HttpHost> hosts) {
+    this.retryTemplate = requireNonNull(retryTemplate);
+    requireNonNull(hosts);
+    if (hosts.isEmpty()) {
+      throw new IllegalArgumentException("hosts cannot be empty");
     }
-    this.preBuiltTransportClientFactory = Objects.requireNonNull(preBuiltTransportClientFactory);
+    hostnames = hosts.stream().map(HttpHost::toURI).collect(Collectors.joining());
+    client = new RestHighLevelClient(RestClient.builder(hosts.toArray(new HttpHost[] {})));
   }
 
   /**
@@ -50,40 +43,38 @@ class ClientFactory {
    * @throws InterruptedException if this thread gets interrupted while trying to connect
    * @throws MolgenisDataException if maximum number of retries is exceeded
    */
-  Client createClient() throws InterruptedException {
-
-    Client client = retryTemplate.execute(this::tryCreateClient);
-    LOG.info("Connected to Elasticsearch cluster '{}'.", clusterName);
+  RestHighLevelClient createClient() throws InterruptedException {
+    retryTemplate.execute(context -> ClientFactory.tryPing(client, hostnames, context));
+    LOG.info("Connected to Elasticsearch cluster.");
     return client;
   }
 
-  private Client tryCreateClient(RetryContext retryContext) throws InterruptedException {
+  static Void tryPing(RestHighLevelClient client, String hostnames, RetryContext retryContext)
+      throws InterruptedException {
     if (Thread.interrupted()) {
       throw new InterruptedException();
     }
-
-    TransportClient result =
-        preBuiltTransportClientFactory
-            .build(clusterName, null)
-            .addTransportAddresses(createInetTransportAddresses());
-    if (result.connectedNodes().isEmpty()) {
-      result.close();
+    try {
+      if (!client.ping(RequestOptions.DEFAULT)) {
+        LOG.error(
+            "Failed to connect to Elasticsearch cluster on {}. Retry count = {}",
+            hostnames,
+            retryContext.getRetryCount());
+        throw new MolgenisDataException(
+            String.format(
+                "Failed to connect to Elasticsearch cluster on %s. Is Elasticsearch running?",
+                hostnames));
+      }
+    } catch (IOException e) {
       LOG.error(
-          "Failed to connect to Elasticsearch cluster '{}' on {}. Retry count = {}",
-          clusterName,
-          inetAddresses,
+          "Failed to connect to Elasticsearch cluster on {}. Retry count = {}",
+          hostnames,
           retryContext.getRetryCount());
       throw new MolgenisDataException(
           String.format(
-              "Failed to connect to Elasticsearch cluster '%s' on %s. Is Elasticsearch running?",
-              clusterName, inetAddresses));
+              "Failed to connect to Elasticsearch cluster on %s. Is Elasticsearch running?",
+              hostnames));
     }
-    return result;
-  }
-
-  private InetSocketTransportAddress[] createInetTransportAddresses() {
-    return inetAddresses.stream()
-        .map(InetSocketTransportAddress::new)
-        .toArray(InetSocketTransportAddress[]::new);
+    return null;
   }
 }

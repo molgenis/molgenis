@@ -49,16 +49,9 @@ class SettingsContentBuilder {
 
     contentBuilder.field("number_of_shards", indexSettings.getNumberOfShards());
     contentBuilder.field("number_of_replicas", indexSettings.getNumberOfReplicas());
-    createMapperSettings(contentBuilder);
     createMappingSettings(contentBuilder);
     createAnalysisSettings(contentBuilder);
 
-    contentBuilder.endObject();
-  }
-
-  private void createMapperSettings(XContentBuilder contentBuilder) throws IOException {
-    contentBuilder.startObject("mapper");
-    contentBuilder.field("dynamic", false);
     contentBuilder.endObject();
   }
 

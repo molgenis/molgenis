@@ -10,8 +10,8 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 
 /**
- * Decorator around a {@link Repository} that registers changes made to its data with the {@link
- * IndexActionRegisterServiceImpl}.
+ * Decorator around a {@link RepositoryCollection} that registers changes made to its data with the
+ * {@link IndexActionRegisterServiceImpl}.
  */
 public class IndexActionRepositoryCollectionDecorator
     extends AbstractRepositoryCollectionDecorator {

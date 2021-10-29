@@ -148,7 +148,7 @@ class IndexedRepositoryDecoratorTest {
     AggregateQuery aggregateQuery = mock(AggregateQuery.class);
     AggregateResult aggregateResult = mock(AggregateResult.class);
     when(searchService.aggregate(repositoryEntityType, aggregateQuery))
-        .thenThrow(new UnknownIndexException("msg"))
+        .thenThrow(new UnknownIndexException("index"))
         .thenReturn(aggregateResult);
 
     assertEquals(aggregateResult, indexedRepositoryDecorator.aggregate(aggregateQuery));
@@ -159,7 +159,7 @@ class IndexedRepositoryDecoratorTest {
   void aggregateUnknownIndexExceptionUnrecoverable() {
     AggregateQuery aggregateQuery = mock(AggregateQuery.class);
     when(searchService.aggregate(repositoryEntityType, aggregateQuery))
-        .thenThrow(new UnknownIndexException("msg"));
+        .thenThrow(new UnknownIndexException("index"));
     Exception exception =
         assertThrows(
             MolgenisDataException.class,
@@ -200,7 +200,7 @@ class IndexedRepositoryDecoratorTest {
   @Test
   void countUnknownIndexExceptionRecoverable() {
     when(searchService.count(repositoryEntityType, unsupportedQuery))
-        .thenThrow(new UnknownIndexException("msg"))
+        .thenThrow(new UnknownIndexException("index"))
         .thenReturn(5L);
 
     assertEquals(5L, indexedRepositoryDecorator.count(unsupportedQuery));
@@ -210,7 +210,7 @@ class IndexedRepositoryDecoratorTest {
   @Test
   void countUnknownIndexExceptionUnrecoverable() {
     when(searchService.count(repositoryEntityType, unsupportedQuery))
-        .thenThrow(new UnknownIndexException("msg"));
+        .thenThrow(new UnknownIndexException("index"));
     Exception exception =
         assertThrows(
             MolgenisDataException.class, () -> indexedRepositoryDecorator.count(unsupportedQuery));
@@ -282,7 +282,7 @@ class IndexedRepositoryDecoratorTest {
   @Test
   void findOneUnknownIndexExceptionUnrecoverable() {
     when(searchService.searchOne(repositoryEntityType, unsupportedQuery))
-        .thenThrow(new UnknownIndexException("msg"));
+        .thenThrow(new UnknownIndexException("index"));
     Exception exception =
         assertThrows(
             MolgenisDataException.class,
@@ -386,7 +386,7 @@ class IndexedRepositoryDecoratorTest {
   void findAllUnknownIndexExceptionRecoverable() {
     Stream<Object> entityStream = mock(Stream.class);
     when(searchService.search(repositoryEntityType, unsupportedQuery))
-        .thenThrow(new UnknownIndexException("msg"))
+        .thenThrow(new UnknownIndexException("index"))
         .thenReturn(entityStream);
     indexedRepositoryDecorator.findAll(unsupportedQuery);
     verify(searchService, times(2)).search(repositoryEntityType, unsupportedQuery);
@@ -396,7 +396,7 @@ class IndexedRepositoryDecoratorTest {
   @Test
   void findAllUnknownIndexExceptionUnrecoverable() {
     when(searchService.search(repositoryEntityType, unsupportedQuery))
-        .thenThrow(new UnknownIndexException("msg"));
+        .thenThrow(new UnknownIndexException("index"));
     Exception exception =
         assertThrows(
             MolgenisDataException.class,

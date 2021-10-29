@@ -16,7 +16,7 @@ import org.molgenis.data.elasticsearch.generator.model.FieldMapping;
 import org.molgenis.data.elasticsearch.generator.model.Mapping;
 import org.molgenis.util.UnexpectedEnumException;
 
-/** Creates Elasticsearch transport client content for mappings. */
+/** Creates Elasticsearch client content for mappings. */
 class MappingContentBuilder {
 
   /**
