@@ -20,9 +20,11 @@ public enum Relation {
   hasSourceId("http://molgenis.org/uml/hasSourceId"),
   hasSourceName("http://molgenis.org/uml/hasSourceName"),
   isAssociatedWith("http://molgenis.org#isAssociatedWith"),
-  isAudited("http://molgenis.org/audit#isAudited");
+  isAudited("http://molgenis.org/audit#isAudited"),
+  hasIDPrefix("http://purl.obolibrary.org/obo/IAO_0000599"),
+  hasIDDigitCount("http://purl.obolibrary.org/obo/IAO_0000596");
 
-  private String iri;
+  private final String iri;
 
   Relation(IRI iri) {
     this.iri = iri.toString();

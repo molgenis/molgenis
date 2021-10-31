@@ -1,19 +1,24 @@
 package org.molgenis.data.populate;
 
+import static com.google.common.collect.Iterables.tryFind;
 import static com.google.common.collect.Streams.stream;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.meta.AttributeType.DATE;
 import static org.molgenis.data.meta.AttributeType.DATE_TIME;
 import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.semantic.Relation.hasIDDigitCount;
+import static org.molgenis.data.semantic.Relation.hasIDPrefix;
 
+import java.text.DecimalFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Optional;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.Tag;
 import org.molgenis.util.UnexpectedEnumException;
 import org.springframework.stereotype.Component;
 
@@ -21,9 +26,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class AutoValuePopulator {
   private final IdGenerator idGenerator;
+  private final Sequences sequences;
 
-  public AutoValuePopulator(IdGenerator idGenerator) {
+  public AutoValuePopulator(IdGenerator idGenerator, Sequences sequences) {
     this.idGenerator = requireNonNull(idGenerator);
+    this.sequences = requireNonNull(sequences);
   }
 
   /**
@@ -41,8 +48,36 @@ public class AutoValuePopulator {
         && idAttr.isAuto()
         && entity.getIdValue() == null
         && (idAttr.getDataType() == STRING)) {
-      entity.set(idAttr.getName(), idGenerator.generateId());
+      var id = generateFormattedSequenceId(idAttr).orElseGet(idGenerator::generateId);
+      entity.set(idAttr.getName(), id);
     }
+  }
+
+  /**
+   * Generates a new sequence ID if the attribute is tagged with ID prefix and ID digit count
+   *
+   * @param attribute the ID attribute
+   * @return formatted ID, in sequence with
+   */
+  private Optional<String> generateFormattedSequenceId(Attribute attribute) {
+    return Optional.ofNullable(attribute.getTags())
+        .flatMap(
+            tags ->
+                tryFind(tags, tag -> hasIDPrefix.getIRI().equals(tag.getRelationIri()))
+                    .toJavaUtil()
+                    .map(Tag::getLabel)
+                    .flatMap(
+                        idPrefix ->
+                            tryFind(
+                                    tags,
+                                    tag -> hasIDDigitCount.getIRI().equals(tag.getRelationIri()))
+                                .toJavaUtil()
+                                .map(Tag::getLabel)
+                                .map(Integer::parseInt)
+                                .map("0"::repeat)
+                                .map(zeroes -> idPrefix + zeroes))
+                    .map(DecimalFormat::new)
+                    .map(format -> format.format((int) sequences.generateId(attribute))));
   }
 
   private static void generateAutoDateOrDateTime(
@@ -59,7 +94,7 @@ public class AutoValuePopulator {
                     return false;
                   }
                 })
-            .collect(toList());
+            .toList();
 
     // set current date for auto date and datetime attributes
     for (Entity entity : entities) {
