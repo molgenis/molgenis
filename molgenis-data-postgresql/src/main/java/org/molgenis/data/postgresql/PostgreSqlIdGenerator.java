@@ -41,6 +41,12 @@ public class PostgreSqlIdGenerator extends AbstractMetadataIdGenerator {
     }
   }
 
+  String generateSequenceName(Attribute attribute) {
+    String idPart = generateHashcode(attribute.getEntity().getId() + attribute.getIdentifier());
+    String namePart = truncateName(cleanName(attribute.getName()));
+    return namePart + SEPARATOR + idPart;
+  }
+
   private String cleanName(String name) {
     return PATTERN_WORD_REPLACE.matcher(name).replaceAll("");
   }
