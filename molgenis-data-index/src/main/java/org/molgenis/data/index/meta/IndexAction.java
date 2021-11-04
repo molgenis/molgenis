@@ -4,9 +4,9 @@ import static org.molgenis.data.index.meta.IndexActionMetadata.ACTION_ORDER;
 import static org.molgenis.data.index.meta.IndexActionMetadata.ENTITY_ID;
 import static org.molgenis.data.index.meta.IndexActionMetadata.ENTITY_TYPE_ID;
 import static org.molgenis.data.index.meta.IndexActionMetadata.ID;
-import static org.molgenis.data.index.meta.IndexActionMetadata.INDEX_ACTION_GROUP_ATTR;
 import static org.molgenis.data.index.meta.IndexActionMetadata.INDEX_STATUS;
 import static org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus;
+import static org.molgenis.data.index.meta.IndexActionMetadata.TRANSACTION_ID;
 
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -41,14 +41,12 @@ public class IndexAction extends StaticEntity {
     return this;
   }
 
-  @Nullable
-  @CheckForNull
-  public IndexActionGroup getIndexActionGroup() {
-    return getEntity(INDEX_ACTION_GROUP_ATTR, IndexActionGroup.class);
+  public String getTransactionId() {
+    return getString(TRANSACTION_ID);
   }
 
-  public IndexAction setIndexActionGroup(IndexActionGroup indexActionGroup) {
-    set(INDEX_ACTION_GROUP_ATTR, indexActionGroup);
+  public IndexAction setTransactionId(String transactionId) {
+    set(TRANSACTION_ID, transactionId);
     return this;
   }
 

@@ -42,7 +42,7 @@ public class IndexTransactionListener implements TransactionListener {
   public void doCleanupAfterCompletion(String transactionId) {
     try {
       if (indexActionRegisterService.forgetIndexActions(transactionId)) {
-        indexJobScheduler.scheduleIndexJob(transactionId);
+        indexJobScheduler.scheduleIndexActions(transactionId);
       }
     } catch (Exception ex) {
       LOG.error("Error during cleanupAfterCompletion", ex);

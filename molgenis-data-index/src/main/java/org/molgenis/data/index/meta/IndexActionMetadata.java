@@ -5,7 +5,6 @@ import static org.molgenis.data.index.meta.IndexPackage.PACKAGE_INDEX;
 import static org.molgenis.data.meta.AttributeType.ENUM;
 import static org.molgenis.data.meta.AttributeType.INT;
 import static org.molgenis.data.meta.AttributeType.TEXT;
-import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
@@ -29,8 +28,8 @@ public class IndexActionMetadata extends SystemEntityType {
   /** The creation time of the index action. */
   public static final String CREATION_DATE_TIME = "creationDateTime";
 
-  /** The group that this index action belongs to. */
-  public static final String INDEX_ACTION_GROUP_ATTR = "indexActionGroup";
+  /** The transaction that caused this index action. */
+  public static final String TRANSACTION_ID = "transactionId";
 
   /** The order in which the action is registered within its IndexActionJob */
   public static final String ACTION_ORDER = "actionOrder";
@@ -49,13 +48,11 @@ public class IndexActionMetadata extends SystemEntityType {
   public static final String INDEX_STATUS = "indexStatus";
 
   private final IndexPackage indexPackage;
-  private IndexActionGroupMetadata indexActionGroupMetaData;
 
   public IndexActionMetadata(
-      IndexPackage indexPackage, IndexActionGroupMetadata indexActionGroupMetaData) {
+      IndexPackage indexPackage) {
     super(SIMPLE_NAME, PACKAGE_INDEX);
     this.indexPackage = requireNonNull(indexPackage);
-    this.indexActionGroupMetaData = requireNonNull(indexActionGroupMetaData);
   }
 
   @Override
@@ -65,11 +62,10 @@ public class IndexActionMetadata extends SystemEntityType {
 
     addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false);
     addAttribute(CREATION_DATE_TIME, ROLE_LABEL).setDataType(AttributeType.DATE_TIME).setAuto(true);
-    addAttribute(INDEX_ACTION_GROUP_ATTR)
-        .setDescription("The group that this index action belongs to")
-        .setDataType(XREF)
-        .setRefEntity(indexActionGroupMetaData);
-    addAttribute(ACTION_ORDER)
+    addAttribute(TRANSACTION_ID)
+        .setDescription("The id of the transaction that caused this index action")
+        .setNillable(true); //TODO nillable=false has migration issues
+    addAttribute(ACTION_ORDER) // TODO remove
         .setDataType(INT)
         .setDescription("The order in which the action is registered within its IndexActionJob")
         .setNillable(false);
