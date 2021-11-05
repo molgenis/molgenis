@@ -2,73 +2,85 @@ package org.molgenis.data.elasticsearch.client;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
-import java.net.InetSocketAddress;
-import org.elasticsearch.client.Client;
-import org.elasticsearch.cluster.node.DiscoveryNode;
-import org.elasticsearch.common.transport.TransportAddress;
-import org.elasticsearch.transport.client.PreBuiltTransportClient;
+import java.io.IOException;
+import org.apache.http.HttpHost;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.test.AbstractMockitoTest;
+import org.springframework.retry.RetryContext;
 import org.springframework.retry.support.RetryTemplate;
 
+@ExtendWith(MockitoExtension.class)
 class ClientFactoryTest extends AbstractMockitoTest {
-  @Mock private PreBuiltTransportClientFactory preBuildClientFactory;
-  @Mock private PreBuiltTransportClient unConnectedClient;
-  @Mock private PreBuiltTransportClient connectedClient;
-  @Mock private DiscoveryNode node;
-  private RetryTemplate retryTemplate = new RetryTemplate();
+  @Mock private RetryTemplate retryTemplate;
+  @Mock private RestHighLevelClient client;
+  @Mock private RetryContext retryContext;
+
+  private ClientFactory clientFactory;
+
+  @BeforeEach
+  void setup() {
+    clientFactory =
+        new ClientFactory(retryTemplate, singletonList(new HttpHost("localhost", 8032)));
+  }
 
   @Test
-  void testCreateClient() throws Exception {
-    initMockClient();
-    int port = 8032;
-    String clusterName = "testCluster";
+  void testCreateClientFails() throws Throwable {
+    doThrow(new MolgenisDataException("Failed")).when(retryTemplate).execute(any());
+    assertThrows(MolgenisDataException.class, () -> clientFactory.createClient());
+  }
 
-    when(preBuildClientFactory.build(clusterName, null))
-        .thenReturn(unConnectedClient, unConnectedClient, connectedClient);
-
-    ClientFactory clientFactory =
-        new ClientFactory(
-            retryTemplate,
-            clusterName,
-            singletonList(new InetSocketAddress(port)),
-            preBuildClientFactory);
-    Client client = clientFactory.createClient();
-
-    assertEquals(connectedClient, client);
-    verify(preBuildClientFactory, times(3)).build(clusterName, null);
-    verify(unConnectedClient, times(2)).close();
+  @Test
+  void testCreateClientSuccess() throws Throwable {
+    when(retryTemplate.execute(any())).thenReturn(client);
+    assertDoesNotThrow(() -> clientFactory.createClient());
   }
 
   @Test
   void testCreateClientNullAddresses() {
-    assertThrows(
-        NullPointerException.class,
-        () -> new ClientFactory(retryTemplate, "testCluster", null, preBuildClientFactory));
+    assertThrows(NullPointerException.class, () -> new ClientFactory(retryTemplate, null));
   }
 
   @Test
   void testCreateClientEmptyAddresses() {
     assertThrows(
-        IllegalArgumentException.class,
-        () -> new ClientFactory(retryTemplate, "testCluster", emptyList(), preBuildClientFactory));
+        IllegalArgumentException.class, () -> new ClientFactory(retryTemplate, emptyList()));
   }
 
-  private void initMockClient() {
-    when(connectedClient.addTransportAddresses(any(TransportAddress.class)))
-        .thenReturn(connectedClient);
-    when(unConnectedClient.addTransportAddresses(any(TransportAddress.class)))
-        .thenReturn(unConnectedClient);
+  @Test
+  void testTryPingSuccess() throws InterruptedException, IOException {
+    when(client.ping(RequestOptions.DEFAULT)).thenReturn(true);
 
-    when(connectedClient.connectedNodes()).thenReturn(singletonList(node));
-    when(unConnectedClient.connectedNodes()).thenReturn(emptyList());
+    assertDoesNotThrow(() -> ClientFactory.tryPing(client, "localhost:9022", retryContext));
+  }
+
+  @Test
+  void testTryPingFail() throws InterruptedException, IOException {
+    when(client.ping(RequestOptions.DEFAULT)).thenReturn(false);
+
+    assertThrows(
+        MolgenisDataException.class,
+        () -> ClientFactory.tryPing(client, "localhost:9022", retryContext));
+  }
+
+  @Test
+  void testTryPingThrown() throws IOException {
+    doThrow(new IOException()).when(client).ping(RequestOptions.DEFAULT);
+
+    assertThrows(
+        MolgenisDataException.class,
+        () -> ClientFactory.tryPing(client, "localhost:9022", retryContext));
   }
 }

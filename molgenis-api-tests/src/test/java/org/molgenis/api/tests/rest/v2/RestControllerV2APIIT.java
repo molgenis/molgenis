@@ -79,7 +79,7 @@ class RestControllerV2APIIT extends AbstractApiTests {
     LOG.info("Importing Done");
 
     testUserName = "api_v2_test_user" + System.currentTimeMillis();
-    createUser(adminToken, testUserName, REST_TEST_USER_PASSWORD);
+    createUser(adminToken, testUserName, REST_TEST_USER_PASSWORD, false);
 
     setGrantedRepositoryPermissions(
         adminToken,

@@ -84,7 +84,7 @@ class RestControllerV2IT extends AbstractApiTests {
     LOG.info("Importing Done");
 
     testUsername = "rest_test_v2" + System.currentTimeMillis();
-    createUser(adminToken, testUsername, REST_TEST_USER_PASSWORD);
+    createUser(adminToken, testUsername, REST_TEST_USER_PASSWORD, false);
 
     ImmutableMap.Builder<String, Permission> permissionsBuilder = ImmutableMap.builder();
     permissionsBuilder

@@ -42,7 +42,7 @@ class TwoFactorAuthenticationAPIIT extends AbstractApiTests {
     adminToken = AbstractApiTests.getAdminToken();
 
     testUsername = "two_fa_auth_test_user" + System.currentTimeMillis();
-    createUser(adminToken, testUsername, TWO_FA_AUTH_TEST_USER_PASSWORD);
+    createUser(adminToken, testUsername, TWO_FA_AUTH_TEST_USER_PASSWORD, false);
   }
 
   @Test

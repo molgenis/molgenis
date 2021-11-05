@@ -42,7 +42,7 @@ class IndexedRepositoryDecorator extends AbstractRepositoryDecorator<Entity> {
   private final IndexJobScheduler indexJobScheduler;
 
   /** Operators NOT supported by the decorated repository. */
-  private Set<Operator> unsupportedOperators;
+  private final Set<Operator> unsupportedOperators;
 
   IndexedRepositoryDecorator(
       Repository<Entity> delegateRepository,

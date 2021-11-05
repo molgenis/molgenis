@@ -40,8 +40,7 @@ class QueryClauseSearchQueryGeneratorTest {
   void mapQueryRuleAllAttributeSearch() {
     when(queryRule.getValue()).thenReturn("val");
     QueryBuilder queryBuilder = searchQueryGenerator.mapQueryRule(queryRule, entityType);
-    QueryBuilder expectedQueryBuilder =
-        simpleQueryStringQuery("val").defaultOperator(AND).useAllFields(true);
+    QueryBuilder expectedQueryBuilder = simpleQueryStringQuery("val").defaultOperator(AND);
     assertQueryBuilderEquals(expectedQueryBuilder, queryBuilder);
   }
 

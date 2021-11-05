@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.molgenis</groupId>
     <artifactId>molgenis</artifactId>
-    <version>9.1.0-SNAPSHOT</version>
+    <version>10.0.0-SNAPSHOT</version>
   </parent>
   <artifactId>molgenis-platform-integration-tests</artifactId>
 
@@ -18,9 +18,7 @@
         <configuration>
           <systemPropertyVariables combine.children="append">
             <!-- These override molgenis-server.properties for the integration test -->
-            <elasticsearch.transport.addresses>${elasticsearch.transport.addresses}
-            </elasticsearch.transport.addresses>
-            <elasticsearch.cluster.name>${elasticsearch.cluster.name}</elasticsearch.cluster.name>
+            <elasticsearch.hosts>${elasticsearch.hosts}</elasticsearch.hosts>
             <db_uri>jdbc:postgresql://localhost:${it_db_port}/${it_db_name}</db_uri>
             <db_user>${it_db_user}</db_user>
             <db_password>${it_db_password}</db_password>
@@ -151,13 +149,6 @@
     <dependency>
       <groupId>org.molgenis</groupId>
       <artifactId>molgenis-ontology-core</artifactId>
-      <version>${project.version}</version>
-      <type>test-jar</type>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.molgenis</groupId>
-      <artifactId>molgenis-data-elasticsearch</artifactId>
       <version>${project.version}</version>
       <type>test-jar</type>
       <scope>test</scope>

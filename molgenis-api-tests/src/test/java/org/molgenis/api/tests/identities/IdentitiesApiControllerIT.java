@@ -45,9 +45,9 @@ class IdentitiesApiControllerIT extends AbstractApiTests {
     testUserName1 = "identities_user1_" + System.currentTimeMillis();
     testUserName2 = "identities_user2_" + System.currentTimeMillis();
     testUserName3 = "identities_user3_" + System.currentTimeMillis();
-    createUser(adminToken, testUserName1, REST_TEST_USER_PASSWORD);
-    createUser(adminToken, testUserName2, REST_TEST_USER_PASSWORD);
-    createUser(adminToken, testUserName3, REST_TEST_USER_PASSWORD);
+    createUser(adminToken, testUserName1, REST_TEST_USER_PASSWORD, false);
+    createUser(adminToken, testUserName2, REST_TEST_USER_PASSWORD, false);
+    createUser(adminToken, testUserName3, REST_TEST_USER_PASSWORD, false);
 
     anonymousID =
         given()

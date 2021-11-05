@@ -5,48 +5,54 @@ import static ch.qos.logback.classic.Level.ERROR;
 import static ch.qos.logback.classic.Level.TRACE;
 import static ch.qos.logback.classic.Level.WARN;
 import static java.util.Collections.emptyList;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.argThat;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.quality.Strictness.LENIENT;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import com.google.common.collect.ImmutableList;
+import java.io.IOException;
+import java.util.List;
 import java.util.stream.Stream;
 import org.elasticsearch.ElasticsearchException;
+import org.elasticsearch.ElasticsearchStatusException;
 import org.elasticsearch.ResourceAlreadyExistsException;
 import org.elasticsearch.ResourceNotFoundException;
-import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
-import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
-import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequestBuilder;
-import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
-import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequestBuilder;
-import org.elasticsearch.action.admin.indices.refresh.RefreshRequestBuilder;
+import org.elasticsearch.action.OriginalIndices;
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
+import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
-import org.elasticsearch.action.delete.DeleteRequestBuilder;
-import org.elasticsearch.action.delete.DeleteResponse;
-import org.elasticsearch.action.explain.ExplainRequestBuilder;
-import org.elasticsearch.action.explain.ExplainResponse;
-import org.elasticsearch.action.index.IndexRequestBuilder;
+import org.elasticsearch.action.delete.DeleteRequest;
+import org.elasticsearch.action.explain.ExplainRequest;
+import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
-import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.ShardSearchFailure;
 import org.elasticsearch.action.support.DefaultShardOperationFailedException;
+import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.action.support.replication.ReplicationResponse.ShardInfo;
-import org.elasticsearch.client.AdminClient;
-import org.elasticsearch.client.Client;
-import org.elasticsearch.client.IndicesAdminClient;
-import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.client.IndicesClient;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.core.CountRequest;
+import org.elasticsearch.client.core.CountResponse;
+import org.elasticsearch.client.indices.CreateIndexRequest;
+import org.elasticsearch.client.indices.CreateIndexResponse;
+import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.core.TimeValue;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.shard.ShardId;
 import org.elasticsearch.rest.RestStatus;
@@ -55,7 +61,10 @@ import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.molgenis.data.elasticsearch.client.model.SearchHit;
 import org.molgenis.data.elasticsearch.generator.model.Document;
 import org.molgenis.data.elasticsearch.generator.model.FieldMapping;
@@ -63,8 +72,19 @@ import org.molgenis.data.elasticsearch.generator.model.Index;
 import org.molgenis.data.elasticsearch.generator.model.IndexSettings;
 import org.molgenis.data.elasticsearch.generator.model.Mapping;
 import org.molgenis.data.elasticsearch.generator.model.MappingType;
+import org.molgenis.data.index.exception.AggregationException;
+import org.molgenis.data.index.exception.AggregationTimeoutException;
+import org.molgenis.data.index.exception.DocumentDeleteException;
+import org.molgenis.data.index.exception.DocumentIndexException;
+import org.molgenis.data.index.exception.ExplainException;
 import org.molgenis.data.index.exception.IndexAlreadyExistsException;
-import org.molgenis.data.index.exception.IndexException;
+import org.molgenis.data.index.exception.IndexCountException;
+import org.molgenis.data.index.exception.IndexCreateException;
+import org.molgenis.data.index.exception.IndexDeleteException;
+import org.molgenis.data.index.exception.IndexExistsException;
+import org.molgenis.data.index.exception.IndexRefreshException;
+import org.molgenis.data.index.exception.IndexSearchException;
+import org.molgenis.data.index.exception.IndexSearchTimeoutException;
 import org.molgenis.data.index.exception.UnknownIndexException;
 import org.slf4j.LoggerFactory;
 
@@ -72,74 +92,57 @@ import org.slf4j.LoggerFactory;
  * Unit tests for the exception flows of the ClientFacade. We assume the other flows are
  * sufficiently covered by the integration tests.
  */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = LENIENT)
 class ClientFacadeTest {
-  @Mock private Client client;
+  @Mock private RestHighLevelClient client;
 
-  @Mock private AdminClient adminClient;
-
-  @Mock private IndicesAdminClient indicesAdminClient;
-
-  @Mock private CreateIndexRequestBuilder createIndexRequestBuilder;
+  @Mock private IndicesClient indicesClient;
 
   @Mock private CreateIndexResponse createIndexResponse;
 
-  @Mock private IndicesExistsRequestBuilder indicesExistsRequestBuilder;
-
-  @Mock private DeleteIndexRequestBuilder deleteIndexRequestBuilder;
-
-  @Mock private DeleteIndexResponse deleteIndexResponse;
-
-  @Mock private RefreshRequestBuilder refreshRequestBuilder;
+  @Mock private AcknowledgedResponse deleteIndexResponse;
 
   @Mock private RefreshResponse refreshResponse;
 
-  @Mock private SearchRequestBuilder searchRequestBuilder;
-
   @Mock private SearchResponse searchResponse;
+
+  @Mock private CountResponse countResponse;
 
   @Mock private QueryBuilder queryBuilder;
 
   @Mock private AggregationBuilder aggregationBuilder;
 
-  @Mock private ExplainRequestBuilder explainRequestBuilder;
-
-  @Mock private ExplainResponse explainResponse;
-
-  @Mock IndexRequestBuilder indexRequestBuilder;
-
   @Mock IndexResponse indexResponse;
 
-  @Mock DeleteRequestBuilder deleteRequestBuilder;
-
-  @Mock DeleteResponse deleteResponse;
-
   @Mock Document document;
-
-  @Mock private XContentBuilder xContentBuilder;
 
   @Mock private ShardInfo shardInfo;
 
   @Mock private Appender<ILoggingEvent> mockAppender;
 
   private ClientFacade clientFacade;
+  private XContentBuilder xContentBuilder;
   private Level originalLogLevel;
   private ch.qos.logback.classic.Logger logbackLogger =
       (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(ClientFacade.class);
   private final DefaultShardOperationFailedException[] singleShardFailure =
       new DefaultShardOperationFailedException[] {
-        new DefaultShardOperationFailedException("index", 0, null)
+        new DefaultShardOperationFailedException("index", 0, new Exception())
       };
 
   private final org.elasticsearch.index.Index index =
       new org.elasticsearch.index.Index("index", "uuid");
   private final ShardSearchFailure[] singleShardSearchFailure =
       new ShardSearchFailure[] {
-        new ShardSearchFailure("reason", new SearchShardTarget("node", index, 1))
+        new ShardSearchFailure(
+            new IOException("reason"),
+            new SearchShardTarget("node", new ShardId(index, 1), "cluster", OriginalIndices.NONE))
       };
   private final ShardInfo.Failure[] singleShardIndexResponseFailure =
       new ShardInfo.Failure[] {
         new ShardInfo.Failure(
-            new ShardId(index, 0), "node", null, RestStatus.FAILED_DEPENDENCY, true)
+            new ShardId(index, 0), "node", new Exception(), RestStatus.FAILED_DEPENDENCY, true)
       };
 
   private static ILoggingEvent matcher(Level level, String message) {
@@ -149,41 +152,17 @@ class ClientFacadeTest {
 
   @BeforeEach
   void setUp() throws Exception {
-    initMocks(this);
     when(mockAppender.getName()).thenReturn("MOCK");
     originalLogLevel = logbackLogger.getLevel();
     logbackLogger.setLevel(Level.ALL);
     logbackLogger.addAppender(mockAppender);
 
-    reset(
-        client,
-        adminClient,
-        indicesAdminClient,
-        createIndexRequestBuilder,
-        createIndexResponse,
-        indicesExistsRequestBuilder,
-        deleteIndexRequestBuilder,
-        deleteIndexResponse,
-        refreshRequestBuilder,
-        refreshResponse,
-        searchRequestBuilder,
-        searchResponse,
-        queryBuilder,
-        aggregationBuilder,
-        explainRequestBuilder,
-        explainResponse,
-        indexRequestBuilder,
-        indexResponse,
-        shardInfo,
-        deleteRequestBuilder,
-        deleteResponse,
-        document,
-        xContentBuilder,
-        shardInfo,
-        mockAppender);
     clientFacade = new ClientFacade(client);
-    when(client.admin()).thenReturn(adminClient);
-    when(adminClient.indices()).thenReturn(indicesAdminClient);
+    when(client.indices()).thenReturn(indicesClient);
+    xContentBuilder = XContentFactory.contentBuilder(XContentType.JSON);
+    xContentBuilder.startObject();
+    xContentBuilder.field("foo", "bar");
+    xContentBuilder.endObject();
   }
 
   @AfterEach
@@ -192,67 +171,53 @@ class ClientFacadeTest {
   }
 
   @Test
-  void testCreateIndexAlreadyExists() {
+  void testCreateIndexAlreadyExists() throws IOException {
     Index index = Index.create("indexname");
     IndexSettings indexSettings = IndexSettings.create(1, 1);
     FieldMapping idField = FieldMapping.create("id", MappingType.TEXT, emptyList());
     Mapping mapping = Mapping.create("type", ImmutableList.of(idField));
     Stream<Mapping> mappings = Stream.of(mapping);
 
-    when(indicesAdminClient.prepareCreate(any())).thenReturn(createIndexRequestBuilder);
-    when(createIndexRequestBuilder.setSettings(any(Settings.class)))
-        .thenReturn(createIndexRequestBuilder);
-    when(createIndexRequestBuilder.addMapping(any(), any(XContentBuilder.class)))
-        .thenReturn(createIndexRequestBuilder);
-
-    when(createIndexRequestBuilder.get())
+    when(indicesClient.create(any(CreateIndexRequest.class), eq(RequestOptions.DEFAULT)))
         .thenThrow(new ResourceAlreadyExistsException("Index already exists"));
 
-    assertThrows(
-        IndexAlreadyExistsException.class,
-        () -> clientFacade.createIndex(index, indexSettings, mappings));
+    var exception =
+        assertThrows(
+            IndexAlreadyExistsException.class,
+            () -> clientFacade.createIndex(index, indexSettings, mappings));
+    assertEquals(List.of("indexname"), exception.getIndices());
   }
 
   @Test
-  void testCreateIndexThrowsElasticsearchException() {
+  void testCreateIndexThrowsElasticsearchException() throws IOException {
     Index index = Index.create("indexname");
     IndexSettings indexSettings = IndexSettings.create(1, 1);
     FieldMapping idField = FieldMapping.create("id", MappingType.TEXT, emptyList());
     Mapping mapping = Mapping.create("type", ImmutableList.of(idField));
     Stream<Mapping> mappings = Stream.of(mapping);
 
-    when(indicesAdminClient.prepareCreate("indexname")).thenReturn(createIndexRequestBuilder);
-    when(createIndexRequestBuilder.setSettings(any(Settings.class)))
-        .thenReturn(createIndexRequestBuilder);
-    when(createIndexRequestBuilder.addMapping(eq("type"), any(Mapping.class)))
-        .thenReturn(createIndexRequestBuilder);
-
-    when(createIndexRequestBuilder.get())
+    when(indicesClient.create(any(CreateIndexRequest.class), eq(RequestOptions.DEFAULT)))
         .thenThrow(new ElasticsearchException("error creating index"));
 
-    Exception exception =
+    var exception =
         assertThrows(
-            IndexException.class, () -> clientFacade.createIndex(index, indexSettings, mappings));
-    assertThat(exception.getMessage()).containsPattern("Error creating index 'indexname'\\.");
+            IndexCreateException.class,
+            () -> clientFacade.createIndex(index, indexSettings, mappings));
+    assertEquals(List.of("indexname"), exception.getIndices());
   }
 
   @Test
-  void testCreateIndexResponseNotAcknowledgedNoExceptions() {
+  void testCreateIndexResponseNotAcknowledgedNoExceptions() throws IOException {
     Index index = Index.create("indexname");
     IndexSettings indexSettings = IndexSettings.create(1, 1);
     FieldMapping idField = FieldMapping.create("id", MappingType.TEXT, emptyList());
     Mapping mapping = Mapping.create("type", ImmutableList.of(idField));
     Stream<Mapping> mappings = Stream.of(mapping);
 
-    when(indicesAdminClient.prepareCreate("indexname")).thenReturn(createIndexRequestBuilder);
-    when(createIndexRequestBuilder.setSettings(any(Settings.class)))
-        .thenReturn(createIndexRequestBuilder);
-    when(createIndexRequestBuilder.addMapping(eq("type"), any(Mapping.class)))
-        .thenReturn(createIndexRequestBuilder);
-
-    when(createIndexRequestBuilder.get()).thenReturn(createIndexResponse);
+    when(indicesClient.create(any(CreateIndexRequest.class), eq(RequestOptions.DEFAULT)))
+        .thenReturn(createIndexResponse);
     when(createIndexResponse.isAcknowledged()).thenReturn(false);
-    when(createIndexResponse.isShardsAcked()).thenReturn(false);
+    when(createIndexResponse.isShardsAcknowledged()).thenReturn(false);
 
     clientFacade.createIndex(index, indexSettings, mappings);
 
@@ -267,379 +232,349 @@ class ClientFacadeTest {
   }
 
   @Test
-  void testIndexesExistThrowsException() {
+  void testIndexesExistThrowsException() throws IOException {
     Index index = Index.create("index");
 
-    when(indicesAdminClient.prepareExists("index")).thenReturn(indicesExistsRequestBuilder);
-    when(indicesExistsRequestBuilder.get()).thenThrow(new ElasticsearchException("exception"));
+    when(indicesClient.exists(any(GetIndexRequest.class), eq(RequestOptions.DEFAULT)))
+        .thenThrow(new ElasticsearchException("exception"));
 
-    Exception exception =
-        assertThrows(IndexException.class, () -> clientFacade.indexesExist(index));
-    assertThat(exception.getMessage())
-        .containsPattern("Error determining index\\(es\\) 'index' existence\\.");
+    var exception =
+        assertThrows(IndexExistsException.class, () -> clientFacade.indexesExist(index));
+    assertEquals(List.of("index"), exception.getIndices());
   }
 
   @Test
-  void testDeleteIndexThrowsException() {
+  void testDeleteIndexThrowsException() throws IOException {
     Index index = Index.create("index");
 
-    when(indicesAdminClient.prepareDelete("index")).thenReturn(deleteIndexRequestBuilder);
-    when(deleteIndexRequestBuilder.get()).thenThrow(new ElasticsearchException("exception"));
+    when(indicesClient.delete(any(DeleteIndexRequest.class), eq(RequestOptions.DEFAULT)))
+        .thenThrow(new ElasticsearchException("exception"));
 
-    Exception exception = assertThrows(IndexException.class, () -> clientFacade.deleteIndex(index));
-    assertThat(exception.getMessage()).containsPattern("Error deleting index\\(es\\) 'index'\\.");
+    var exception = assertThrows(IndexDeleteException.class, () -> clientFacade.deleteIndex(index));
+    assertEquals(List.of("index"), exception.getIndices());
   }
 
   @Test
-  void testDeleteIndexNotAcknowledged() {
+  void testDeleteIndexNotAcknowledged() throws IOException {
     Index index = Index.create("index");
 
-    when(indicesAdminClient.prepareDelete("index")).thenReturn(deleteIndexRequestBuilder);
-    when(deleteIndexRequestBuilder.get()).thenReturn(deleteIndexResponse);
+    when(indicesClient.delete(any(DeleteIndexRequest.class), eq(RequestOptions.DEFAULT)))
+        .thenReturn(deleteIndexResponse);
     when(deleteIndexResponse.isAcknowledged()).thenReturn(false);
 
-    Exception exception = assertThrows(IndexException.class, () -> clientFacade.deleteIndex(index));
-    assertThat(exception.getMessage()).containsPattern("Error deleting index\\(es\\) 'index'\\.");
+    var exception = assertThrows(IndexDeleteException.class, () -> clientFacade.deleteIndex(index));
+    assertEquals(List.of("index"), exception.getIndices());
   }
 
   @Test
-  void testRefreshIndicesThrowsException() {
-    when(indicesAdminClient.prepareRefresh("_all")).thenReturn(refreshRequestBuilder);
-    when(refreshRequestBuilder.get()).thenThrow(new ElasticsearchException("exception"));
+  void testRefreshIndicesThrowsException() throws IOException {
+    when(indicesClient.refresh(any(RefreshRequest.class), eq(RequestOptions.DEFAULT)))
+        .thenThrow(new ElasticsearchException("exception"));
 
-    Exception exception = assertThrows(IndexException.class, () -> clientFacade.refreshIndexes());
-    assertThat(exception.getMessage()).containsPattern("Error refreshing index\\(es\\) '_all'\\.");
+    var exception = assertThrows(IndexRefreshException.class, () -> clientFacade.refreshIndexes());
+    assertEquals(List.of("_all"), exception.getIndices());
   }
 
   @Test
-  void testRefreshIndicesNotFound() {
-    when(indicesAdminClient.prepareRefresh("_all")).thenReturn(refreshRequestBuilder);
-    when(refreshRequestBuilder.get()).thenThrow(new ResourceNotFoundException("exception"));
+  void testRefreshIndicesNotFound() throws IOException {
+    when(indicesClient.refresh(any(RefreshRequest.class), eq(RequestOptions.DEFAULT)))
+        .thenThrow(new ResourceNotFoundException("exception"));
 
-    Exception exception =
-        assertThrows(UnknownIndexException.class, () -> clientFacade.refreshIndexes());
-    assertThat(exception.getMessage()).containsPattern("One or more indexes '_all' not found\\.");
+    var exception = assertThrows(UnknownIndexException.class, () -> clientFacade.refreshIndexes());
+    assertEquals(List.of("_all"), exception.getIndices());
   }
 
   @Test
-  void testRefreshIndicesFailedShards() {
-    when(indicesAdminClient.prepareRefresh("_all")).thenReturn(refreshRequestBuilder);
-    when(refreshRequestBuilder.get()).thenReturn(refreshResponse);
+  void testRefreshIndicesFailedShards() throws IOException {
+    when(indicesClient.refresh(any(RefreshRequest.class), eq(RequestOptions.DEFAULT)))
+        .thenReturn(refreshResponse);
     when(refreshResponse.getFailedShards()).thenReturn(1);
     when(refreshResponse.getShardFailures()).thenReturn(singleShardFailure);
 
-    Exception exception = assertThrows(IndexException.class, () -> clientFacade.refreshIndexes());
-    assertThat(exception.getMessage()).containsPattern("Error refreshing index\\(es\\) '_all'\\.");
+    var exception = assertThrows(IndexRefreshException.class, () -> clientFacade.refreshIndexes());
+    assertEquals(List.of("_all"), exception.getIndices());
   }
 
   @Test
-  void testGetCountThrowsException() {
+  void testGetCountThrowsException() throws IOException {
     Index index = Index.create("index");
+    when(client.count(any(CountRequest.class), eq(RequestOptions.DEFAULT)))
+        .thenThrow(new ElasticsearchException("exception"));
 
-    when(client.prepareSearch("index")).thenReturn(searchRequestBuilder);
-    when(searchRequestBuilder.get()).thenThrow(new ElasticsearchException("exception"));
-
-    Exception exception = assertThrows(IndexException.class, () -> clientFacade.getCount(index));
-    assertThat(exception.getMessage())
-        .containsPattern("Error counting docs in index\\(es\\) 'index'\\.");
+    var exception = assertThrows(IndexCountException.class, () -> clientFacade.getCount(index));
+    assertEquals(List.of("index"), exception.getIndices());
   }
 
   @Test
-  void testGetCountThrowsResourceNotFoundException() {
+  void testGetCountThrowsNotFoundException() throws IOException {
     Index index = Index.create("index");
 
-    when(client.prepareSearch("index")).thenReturn(searchRequestBuilder);
-    when(searchRequestBuilder.get()).thenThrow(new ResourceNotFoundException("exception"));
+    when(client.count(any(CountRequest.class), eq(RequestOptions.DEFAULT)))
+        .thenThrow(new ElasticsearchStatusException("exception", RestStatus.NOT_FOUND));
 
-    Exception exception =
-        assertThrows(UnknownIndexException.class, () -> clientFacade.getCount(index));
-    assertThat(exception.getMessage()).containsPattern("One or more indexes 'index' not found\\.");
+    var exception = assertThrows(UnknownIndexException.class, () -> clientFacade.getCount(index));
+    assertEquals(List.of("index"), exception.getIndices());
   }
 
   @Test
-  void testGetGetCountFailedShards() {
+  void testGetGetCountFailedShards() throws IOException {
     Index index = Index.create("index");
 
-    when(client.prepareSearch("index")).thenReturn(searchRequestBuilder);
-    when(searchRequestBuilder.get()).thenReturn(searchResponse);
+    when(client.count(any(CountRequest.class), eq(RequestOptions.DEFAULT)))
+        .thenReturn(countResponse);
+    when(countResponse.getFailedShards()).thenReturn(1);
+    when(countResponse.getShardFailures()).thenReturn(singleShardSearchFailure);
+
+    var exception = assertThrows(IndexCountException.class, () -> clientFacade.getCount(index));
+    assertEquals(List.of("index"), exception.getIndices());
+  }
+
+  @Test
+  void testGetGetCountTimeout() throws IOException {
+    Index index = Index.create("index");
+
+    when(client.count(any(CountRequest.class), eq(RequestOptions.DEFAULT)))
+        .thenReturn(countResponse);
+    when(countResponse.getFailedShards()).thenReturn(0);
+    when(countResponse.isTerminatedEarly()).thenReturn(true);
+
+    var exception = assertThrows(IndexCountException.class, () -> clientFacade.getCount(index));
+    assertEquals(List.of("index"), exception.getIndices());
+  }
+
+  @Test
+  void testSearchTimedOut() throws IOException {
+    Index index = Index.create("index");
+
+    when(client.search(any(SearchRequest.class), eq(RequestOptions.DEFAULT)))
+        .thenReturn(searchResponse);
+    when(searchResponse.getFailedShards()).thenReturn(0);
+    when(searchResponse.isTimedOut()).thenReturn(true);
+    when(searchResponse.getTook()).thenReturn(TimeValue.timeValueMillis(200));
+
+    var indices = List.of(index);
+    var exception =
+        assertThrows(
+            IndexSearchTimeoutException.class,
+            () -> clientFacade.search(queryBuilder, 0, 100, indices));
+    assertEquals(List.of("index"), exception.getIndices());
+    assertEquals("", exception.getQuery());
+    assertEquals(200L, exception.getMillis());
+  }
+
+  @Test
+  void testSearchFailedShards() throws IOException {
+    Index index = Index.create("index");
+
+    when(client.search(any(SearchRequest.class), eq(RequestOptions.DEFAULT)))
+        .thenReturn(searchResponse);
     when(searchResponse.getFailedShards()).thenReturn(1);
     when(searchResponse.getShardFailures()).thenReturn(singleShardSearchFailure);
 
-    Exception exception = assertThrows(IndexException.class, () -> clientFacade.getCount(index));
-    assertThat(exception.getMessage())
-        .containsPattern("Error counting docs in index\\(es\\) 'index'\\.");
-  }
-
-  @Test
-  void testGetGetCountTimeout() {
-    Index index = Index.create("index");
-
-    when(client.prepareSearch("index")).thenReturn(searchRequestBuilder);
-    when(searchRequestBuilder.get()).thenReturn(searchResponse);
-    when(searchResponse.getFailedShards()).thenReturn(0);
-    when(searchResponse.isTimedOut()).thenReturn(true);
-
-    Exception exception = assertThrows(IndexException.class, () -> clientFacade.getCount(index));
-    assertThat(exception.getMessage())
-        .containsPattern("Timeout while counting docs in index\\(es\\) 'index'\\.");
-  }
-
-  @Test
-  void testSearchTimedOut() {
-    Index index = Index.create("index");
-
-    when(client.prepareSearch("index")).thenReturn(searchRequestBuilder);
-    when(searchRequestBuilder.get()).thenReturn(searchResponse);
-    when(searchResponse.getFailedShards()).thenReturn(0);
-    when(searchResponse.isTimedOut()).thenReturn(true);
-    when(queryBuilder.toString()).thenReturn("a == b");
-
-    Exception exception =
+    var indices = List.of(index);
+    var exception =
         assertThrows(
-            IndexException.class,
-            () -> clientFacade.search(queryBuilder, 0, 100, ImmutableList.of(index)));
-    assertThat(exception.getMessage())
-        .containsPattern(
-            "Timeout searching counting docs in index\\(es\\) 'index'  with query 'a == b'\\.");
+            IndexSearchException.class, () -> clientFacade.search(queryBuilder, 0, 100, indices));
+    assertEquals(List.of("index"), exception.getIndices());
+    assertEquals("", exception.getQuery());
   }
 
   @Test
-  void testSearchFailedShards() {
+  void testSearchIndexNotFound() throws IOException {
     Index index = Index.create("index");
 
-    when(client.prepareSearch("index")).thenReturn(searchRequestBuilder);
-    when(searchRequestBuilder.get()).thenReturn(searchResponse);
-    when(searchResponse.getFailedShards()).thenReturn(1);
-    when(searchResponse.getShardFailures()).thenReturn(singleShardSearchFailure);
+    when(client.search(any(SearchRequest.class), eq(RequestOptions.DEFAULT)))
+        .thenThrow(new ResourceNotFoundException("Exception"));
     when(queryBuilder.toString()).thenReturn("a == b");
 
-    Exception exception =
+    var indices = ImmutableList.of(index);
+    var exception =
         assertThrows(
-            IndexException.class,
-            () -> clientFacade.search(queryBuilder, 0, 100, ImmutableList.of(index)));
-    assertThat(exception.getMessage())
-        .containsPattern("Error searching docs in index\\(es\\) 'index' with query 'a == b'\\.");
+            UnknownIndexException.class, () -> clientFacade.search(queryBuilder, 0, 100, indices));
+    assertEquals(List.of("index"), exception.getIndices());
   }
 
   @Test
-  void testSearchIndexNotFound() {
+  void testSearchThrowsException() throws IOException {
     Index index = Index.create("index");
 
-    when(client.prepareSearch("index")).thenReturn(searchRequestBuilder);
-    when(searchRequestBuilder.get()).thenThrow(new ResourceNotFoundException("Exception"));
+    when(client.search(any(SearchRequest.class), eq(RequestOptions.DEFAULT)))
+        .thenThrow(new ElasticsearchException("Exception"));
     when(queryBuilder.toString()).thenReturn("a == b");
 
-    Exception exception =
+    var indices = List.of(index);
+    var exception =
+        assertThrows(
+            IndexSearchException.class, () -> clientFacade.search(queryBuilder, 0, 100, indices));
+    assertEquals(List.of("index"), exception.getIndices());
+    assertEquals("", exception.getQuery());
+  }
+
+  @Test
+  void testAggregateThrowsException() throws IOException {
+    Index index = Index.create("index");
+
+    when(client.search(any(SearchRequest.class), eq(RequestOptions.DEFAULT)))
+        .thenThrow(new ElasticsearchException("Exception"));
+    when(queryBuilder.toString()).thenReturn("a == b");
+
+    var aggregations = List.of(aggregationBuilder);
+    var exception =
+        assertThrows(
+            AggregationException.class,
+            () -> clientFacade.aggregate(aggregations, queryBuilder, index));
+    assertEquals(List.of("index"), exception.getIndices());
+  }
+
+  @Test
+  void testAggregateThrowsResourceNotFoundException() throws IOException {
+    Index index = Index.create("index");
+
+    when(client.search(any(SearchRequest.class), eq(RequestOptions.DEFAULT)))
+        .thenThrow(new ResourceNotFoundException("Exception"));
+    when(queryBuilder.toString()).thenReturn("a == b");
+
+    var aggregations = ImmutableList.of(aggregationBuilder);
+    var exception =
         assertThrows(
             UnknownIndexException.class,
-            () -> clientFacade.search(queryBuilder, 0, 100, ImmutableList.of(index)));
-    assertThat(exception.getMessage()).containsPattern("One or more indexes 'index' not found\\.");
+            () -> clientFacade.aggregate(aggregations, queryBuilder, index));
+    assertEquals(List.of("index"), exception.getIndices());
   }
 
   @Test
-  void testSearchThrowsException() {
+  void testAggregateResultHasShardFailures() throws IOException {
     Index index = Index.create("index");
 
-    when(client.prepareSearch("index")).thenReturn(searchRequestBuilder);
-    when(searchRequestBuilder.get()).thenThrow(new ElasticsearchException("Exception"));
-    when(queryBuilder.toString()).thenReturn("a == b");
-
-    Exception exception =
-        assertThrows(
-            IndexException.class,
-            () -> clientFacade.search(queryBuilder, 0, 100, ImmutableList.of(index)));
-    assertThat(exception.getMessage())
-        .containsPattern("Error searching docs in index\\(es\\) 'index' with query 'a == b'\\.");
-  }
-
-  @Test
-  void testAggregateThrowsException() {
-    Index index = Index.create("index");
-
-    when(client.prepareSearch("index")).thenReturn(searchRequestBuilder);
-    when(searchRequestBuilder.get()).thenThrow(new ElasticsearchException("Exception"));
-    when(queryBuilder.toString()).thenReturn("a == b");
-
-    Exception exception =
-        assertThrows(
-            IndexException.class,
-            () ->
-                clientFacade.aggregate(ImmutableList.of(aggregationBuilder), queryBuilder, index));
-    assertThat(exception.getMessage())
-        .containsPattern("Error aggregating docs in index\\(es\\) 'index'\\.");
-  }
-
-  @Test
-  void testAggregateThrowsResourceNotFoundException() {
-    Index index = Index.create("index");
-
-    when(client.prepareSearch("index")).thenReturn(searchRequestBuilder);
-    when(searchRequestBuilder.get()).thenThrow(new ResourceNotFoundException("Exception"));
-    when(queryBuilder.toString()).thenReturn("a == b");
-
-    Exception exception =
-        assertThrows(
-            UnknownIndexException.class,
-            () ->
-                clientFacade.aggregate(ImmutableList.of(aggregationBuilder), queryBuilder, index));
-    assertThat(exception.getMessage()).containsPattern("One or more indexes 'index' not found\\.");
-  }
-
-  @Test
-  void testAggregateResultHasShardFailures() {
-    Index index = Index.create("index");
-
-    when(client.prepareSearch("index")).thenReturn(searchRequestBuilder);
-    when(searchRequestBuilder.get()).thenReturn(searchResponse);
+    when(client.search(any(SearchRequest.class), eq(RequestOptions.DEFAULT)))
+        .thenReturn(searchResponse);
     when(searchResponse.getFailedShards()).thenReturn(1);
     when(searchResponse.getShardFailures()).thenReturn(singleShardSearchFailure);
-    when(queryBuilder.toString()).thenReturn("a == b");
 
-    Exception exception =
+    var aggregations = List.of(aggregationBuilder);
+    var exception =
         assertThrows(
-            IndexException.class,
-            () ->
-                clientFacade.aggregate(ImmutableList.of(aggregationBuilder), queryBuilder, index));
-    assertThat(exception.getMessage())
-        .containsPattern("Error aggregating docs in index\\(es\\) 'index'\\.");
+            AggregationException.class,
+            () -> clientFacade.aggregate(aggregations, queryBuilder, index));
+    assertEquals(List.of("index"), exception.getIndices());
+    assertEquals(
+        "indices:index, detailMessage:{\"shard\":1,\"index\":\"cluster:index\",\"node\":\"node\",\"reason\":{\"type\":\"i_o_exception\",\"reason\":\"reason\"}}",
+        exception.getMessage());
   }
 
   @Test
-  void testAggregateTimeout() {
+  void testAggregateTimeout() throws IOException {
     Index index = Index.create("index");
 
-    when(client.prepareSearch("index")).thenReturn(searchRequestBuilder);
-    when(searchRequestBuilder.get()).thenReturn(searchResponse);
+    when(client.search(any(SearchRequest.class), eq(RequestOptions.DEFAULT)))
+        .thenReturn(searchResponse);
     when(searchResponse.getFailedShards()).thenReturn(0);
     when(searchResponse.isTimedOut()).thenReturn(true);
-    when(queryBuilder.toString()).thenReturn("a == b");
+    when(searchResponse.getTook()).thenReturn(TimeValue.timeValueMillis(200));
 
-    Exception exception =
+    var aggregations = ImmutableList.of(aggregationBuilder);
+    var exception =
         assertThrows(
-            IndexException.class,
-            () ->
-                clientFacade.aggregate(ImmutableList.of(aggregationBuilder), queryBuilder, index));
-    assertThat(exception.getMessage())
-        .containsPattern("Timeout aggregating docs in index\\(es\\) 'index'\\.");
+            AggregationTimeoutException.class,
+            () -> clientFacade.aggregate(aggregations, queryBuilder, index));
+    assertEquals(List.of("index"), exception.getIndices());
+    assertEquals(200L, exception.getMillis());
   }
 
   @Test
-  void testExplainThrowsException() {
+  void testExplainThrowsException() throws IOException {
     SearchHit searchHit = SearchHit.create("id", "index");
 
-    when(client.prepareExplain("index", "index", "id")).thenReturn(explainRequestBuilder);
-    when(explainRequestBuilder.setQuery(any())).thenReturn(explainRequestBuilder);
-    when(explainRequestBuilder.get()).thenThrow(new ElasticsearchException("exception"));
-    when(queryBuilder.toString()).thenReturn("a == b");
+    var cause = new ElasticsearchException("exception");
+    when(client.explain(any(ExplainRequest.class), eq(RequestOptions.DEFAULT))).thenThrow(cause);
 
-    Exception exception =
-        assertThrows(IndexException.class, () -> clientFacade.explain(searchHit, queryBuilder));
-    assertThat(exception.getMessage())
-        .containsPattern(
-            "Error explaining doc with id 'id' in index 'index' for query 'a == b'\\.");
+    var exception =
+        assertThrows(ExplainException.class, () -> clientFacade.explain(searchHit, queryBuilder));
+    assertEquals(List.of("index"), exception.getIndices());
+    assertEquals("", exception.getQuery());
+    assertSame(cause, exception.getCause());
   }
 
   @Test
-  void testIndexThrowsException() {
+  void testIndexThrowsException() throws IOException {
     Index index = Index.create("index");
 
     when(document.getContent()).thenReturn(xContentBuilder);
     when(document.getId()).thenReturn("id");
 
-    when(client.prepareIndex()).thenReturn(indexRequestBuilder);
-    when(indexRequestBuilder.setIndex("index")).thenReturn(indexRequestBuilder);
-    when(indexRequestBuilder.setType(any())).thenReturn(indexRequestBuilder);
-    when(indexRequestBuilder.setId("id")).thenReturn(indexRequestBuilder);
-    when(indexRequestBuilder.setSource(xContentBuilder)).thenReturn(indexRequestBuilder);
+    var cause = new ElasticsearchException("exception");
+    when(client.index(any(IndexRequest.class), eq(RequestOptions.DEFAULT))).thenThrow(cause);
 
-    when(indexRequestBuilder.get()).thenThrow(new ElasticsearchException("exception"));
-
-    Exception exception =
-        assertThrows(IndexException.class, () -> clientFacade.index(index, document));
-    assertThat(exception.getMessage())
-        .containsPattern("Error indexing doc with id 'id' in index 'index'\\.");
+    var exception =
+        assertThrows(DocumentIndexException.class, () -> clientFacade.index(index, document));
+    assertEquals(List.of("index"), exception.getIndices());
+    assertSame(cause, exception.getCause());
   }
 
   @Test
-  void testIndexThrowsResourceNotFoundException() {
+  void testIndexThrowsResourceNotFoundException() throws IOException {
     Index index = Index.create("index");
 
     when(document.getContent()).thenReturn(xContentBuilder);
     when(document.getId()).thenReturn("id");
 
-    when(client.prepareIndex()).thenReturn(indexRequestBuilder);
-    when(indexRequestBuilder.setIndex("index")).thenReturn(indexRequestBuilder);
-    when(indexRequestBuilder.setType(any())).thenReturn(indexRequestBuilder);
-    when(indexRequestBuilder.setId("id")).thenReturn(indexRequestBuilder);
-    when(indexRequestBuilder.setSource(xContentBuilder)).thenReturn(indexRequestBuilder);
+    var cause = new ResourceNotFoundException("exception");
+    when(client.index(any(IndexRequest.class), eq(RequestOptions.DEFAULT))).thenThrow(cause);
 
-    when(indexRequestBuilder.get()).thenThrow(new ResourceNotFoundException("exception"));
-
-    Exception exception =
+    var exception =
         assertThrows(UnknownIndexException.class, () -> clientFacade.index(index, document));
-    assertThat(exception.getMessage()).containsPattern("Index 'index' not found\\.");
+    assertEquals(List.of("index"), exception.getIndices());
+    assertSame(cause, exception.getCause());
   }
 
   @Test
-  void testIndexShardFailure() {
+  void testIndexShardFailure() throws IOException {
     Index index = Index.create("index");
 
     when(document.getContent()).thenReturn(xContentBuilder);
     when(document.getId()).thenReturn("id");
 
-    when(client.prepareIndex()).thenReturn(indexRequestBuilder);
-    when(indexRequestBuilder.setIndex("index")).thenReturn(indexRequestBuilder);
-    when(indexRequestBuilder.setType(any())).thenReturn(indexRequestBuilder);
-    when(indexRequestBuilder.setId("id")).thenReturn(indexRequestBuilder);
-    when(indexRequestBuilder.setSource(xContentBuilder)).thenReturn(indexRequestBuilder);
-
-    when(indexRequestBuilder.get()).thenReturn(indexResponse);
+    when(client.index(any(IndexRequest.class), eq(RequestOptions.DEFAULT)))
+        .thenReturn(indexResponse);
     when(indexResponse.getShardInfo()).thenReturn(shardInfo);
 
     when(shardInfo.getSuccessful()).thenReturn(0);
     when(shardInfo.getFailures()).thenReturn(singleShardIndexResponseFailure);
 
-    Exception exception =
-        assertThrows(IndexException.class, () -> clientFacade.index(index, document));
-    assertThat(exception.getMessage())
-        .containsPattern("Error indexing doc with id 'id' in index 'index'\\.");
+    var exception =
+        assertThrows(DocumentIndexException.class, () -> clientFacade.index(index, document));
+    assertEquals(List.of("index"), exception.getIndices());
+    assertEquals("id", exception.getDocumentId());
   }
 
   @Test
-  void testDeleteThrowsException() {
+  void testDeleteThrowsException() throws IOException {
     Index index = Index.create("index");
 
     when(document.getId()).thenReturn("id");
 
-    when(client.prepareDelete()).thenReturn(deleteRequestBuilder);
-    when(deleteRequestBuilder.setIndex("index")).thenReturn(deleteRequestBuilder);
-    when(deleteRequestBuilder.setType(any())).thenReturn(deleteRequestBuilder);
-    when(deleteRequestBuilder.setId("id")).thenReturn(deleteRequestBuilder);
+    var cause = new ElasticsearchException("exception");
+    when(client.delete(any(DeleteRequest.class), eq(RequestOptions.DEFAULT))).thenThrow(cause);
 
-    when(deleteRequestBuilder.get()).thenThrow(new ElasticsearchException("exception"));
-
-    Exception exception =
-        assertThrows(IndexException.class, () -> clientFacade.deleteById(index, document));
-    assertThat(exception.getMessage())
-        .containsPattern("Error deleting doc with id 'id' in index 'index'\\.");
+    var exception =
+        assertThrows(DocumentDeleteException.class, () -> clientFacade.deleteById(index, document));
+    assertEquals(List.of("index"), exception.getIndices());
+    assertSame(cause, exception.getCause());
+    assertEquals("id", exception.getDocumentId());
   }
 
   @Test
-  void testDeleteResourceNotFound() {
+  void testDeleteResourceNotFound() throws IOException {
     Index index = Index.create("index");
 
     when(document.getId()).thenReturn("id");
 
-    when(client.prepareDelete()).thenReturn(deleteRequestBuilder);
-    when(deleteRequestBuilder.setIndex("index")).thenReturn(deleteRequestBuilder);
-    when(deleteRequestBuilder.setType(any())).thenReturn(deleteRequestBuilder);
-    when(deleteRequestBuilder.setId("id")).thenReturn(deleteRequestBuilder);
+    when(client.delete(any(DeleteRequest.class), eq(RequestOptions.DEFAULT)))
+        .thenThrow(new ResourceNotFoundException("exception"));
 
-    when(deleteRequestBuilder.get()).thenThrow(new ResourceNotFoundException("exception"));
-
-    Exception exception =
+    var exception =
         assertThrows(UnknownIndexException.class, () -> clientFacade.deleteById(index, document));
-    assertThat(exception.getMessage()).containsPattern("Index 'index' not found\\.");
+    assertEquals(List.of("index"), exception.getIndices());
   }
 
   @Test

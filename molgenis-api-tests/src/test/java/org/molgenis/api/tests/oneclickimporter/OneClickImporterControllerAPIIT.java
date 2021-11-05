@@ -72,7 +72,8 @@ class OneClickImporterControllerAPIIT extends AbstractApiTests {
     RestTestUtils.createPackage(adminToken, "base");
 
     oneClickImporterTestUsername = "one_click_importer_test_user" + System.currentTimeMillis();
-    createUser(adminToken, oneClickImporterTestUsername, ONE_CLICK_IMPORTER_TEST_USER_PASSWORD);
+    createUser(
+        adminToken, oneClickImporterTestUsername, ONE_CLICK_IMPORTER_TEST_USER_PASSWORD, false);
 
     setGrantedRepositoryPermissions(
         adminToken,
