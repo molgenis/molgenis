@@ -125,6 +125,7 @@ public class AppManagerServiceImpl implements AppManagerService {
   }
 
   @Override
+  @Transactional
   public String uploadApp(InputStream zipData, String zipFileName, String formFieldName)
       throws IOException {
     String tempFilesDir = "extracted_" + zipFileName;
@@ -150,17 +151,7 @@ public class AppManagerServiceImpl implements AppManagerService {
 
   @Override
   public AppConfig checkAndObtainConfig(String tempDir, String configContent) throws IOException {
-    if (configContent.isEmpty() || !isConfigContentValidJson(configContent)) {
-      fileStore.deleteDirectory(APPS_TMP_DIR);
-      throw new InvalidAppConfigException();
-    }
-
-    AppConfig appConfig = gson.fromJson(configContent, AppConfig.class);
-    List<String> missingAppConfigParams = buildMissingConfigParams(appConfig);
-    if (!missingAppConfigParams.isEmpty()) {
-      fileStore.deleteDirectory(APPS_TMP_DIR);
-      throw new AppConfigMissingParametersException(missingAppConfigParams);
-    }
+    AppConfig appConfig = getAppConfig(gson, fileStore, configContent);
 
     if (appConfig.getName().contains("/")) {
       fileStore.deleteDirectory(APPS_TMP_DIR);
@@ -173,6 +164,25 @@ public class AppManagerServiceImpl implements AppManagerService {
     }
 
     fileStore.move(tempDir, APPS_DIR + separator + appConfig.getName());
+    fileStore.deleteDirectory(APPS_TMP_DIR);
+
+    return appConfig;
+  }
+
+  @Override
+  public AppConfig updateApp(String appId, String tempDir, String configContent)
+      throws IOException {
+
+    AppConfig appConfig = getAppConfig(gson, fileStore, configContent);
+
+    App app = getAppById(appId);
+
+    try {
+      deleteDirectory(fileStore.getFileUnchecked(APPS_DIR + separator + app.getName()));
+    } catch (IOException err) {
+      throw new CouldNotDeleteAppException(appId);
+    }
+    fileStore.move(tempDir, APPS_DIR + separator + app.getName());
     fileStore.deleteDirectory(APPS_TMP_DIR);
 
     return appConfig;
@@ -202,6 +212,34 @@ public class AppManagerServiceImpl implements AppManagerService {
     newApp.setName(appConfig.getName());
 
     dataService.add(AppMetadata.APP, newApp);
+  }
+
+  @Override
+  @Transactional
+  public void configureUpdatedApp(
+      String appId, AppConfig newAppConfig, String htmlTemplate, boolean overwriteConfig) {
+
+    Map<String, Object> newRuntimeOptions = newAppConfig.getRuntimeOptions();
+
+    if (newRuntimeOptions == null) {
+      newRuntimeOptions = Maps.newHashMap();
+    }
+
+    App app = getAppById(appId);
+
+    app.setLabel(newAppConfig.getLabel());
+    app.setDescription(newAppConfig.getDescription());
+    app.setAppVersion(newAppConfig.getVersion());
+    app.setApiDependency(newAppConfig.getApiDependency());
+    app.setTemplateContent(htmlTemplate);
+    app.setIncludeMenuAndFooter(newAppConfig.getIncludeMenuAndFooter());
+    app.setAppConfig(
+        overwriteConfig
+            ? gson.toJson(newRuntimeOptions)
+            : app.getAppConfig()); // getAppConfig = RuntimeOptions field.
+    app.setActive(true);
+
+    dataService.update(AppMetadata.APP, app);
   }
 
   @Override
@@ -280,5 +318,27 @@ public class AppManagerServiceImpl implements AppManagerService {
     }
 
     return missingConfigParameters;
+  }
+
+  private AppConfig getAppConfig(Gson gson, FileStore fileStore, String configContent)
+      throws IOException {
+    if (configContent.isEmpty() || !isConfigContentValidJson(configContent)) {
+      fileStore.deleteDirectory(APPS_TMP_DIR);
+      throw new InvalidAppConfigException();
+    }
+
+    AppConfig appConfig = gson.fromJson(configContent, AppConfig.class);
+    List<String> missingAppConfigParams = buildMissingConfigParams(appConfig);
+    if (!missingAppConfigParams.isEmpty()) {
+      fileStore.deleteDirectory(APPS_TMP_DIR);
+      throw new AppConfigMissingParametersException(missingAppConfigParams);
+    }
+
+    if (appConfig.getName().contains("/")) {
+      fileStore.deleteDirectory(APPS_TMP_DIR);
+      throw new IllegalAppNameException(appConfig.getName());
+    }
+
+    return appConfig;
   }
 }
