@@ -68,12 +68,32 @@ public interface AppManagerService {
   AppConfig checkAndObtainConfig(String tempDir, String configContent) throws IOException;
 
   /**
+   * Check the app-configuration and obtain the {@link AppConfig} if the configuration is valid
+   *
+   * @param appId The id of an App
+   * @param tempDir temporary directory with uploaded app-content
+   * @return appConfig
+   * @throws IOException
+   */
+  AppConfig updateApp(String appId, String tempDir, String configContent) throws IOException;
+
+  /**
    * Configure app in database.
    *
    * @param appConfig app configuration object
    * @param htmlTemplate HTML template based on the packaged index.html
    */
   void configureApp(AppConfig appConfig, String htmlTemplate);
+
+  /**
+   * Update app configuration in database.
+   *
+   * @param newAppConfig new app configuration object
+   * @param htmlTemplate HTML template based on the packaged index.html
+   * @param overwriteConfig overwrite runtime options if set to true
+   */
+  void configureUpdatedApp(
+      String appId, AppConfig newAppConfig, String htmlTemplate, boolean overwriteConfig);
 
   /**
    * Get the UTF-8 file-content of a file served by an app

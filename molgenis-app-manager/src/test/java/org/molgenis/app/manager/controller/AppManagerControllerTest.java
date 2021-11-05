@@ -1,10 +1,13 @@
 package org.molgenis.app.manager.controller;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.molgenis.app.manager.service.impl.AppManagerServiceImpl.ZIP_CONFIG_FILE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
@@ -14,6 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import com.google.gson.Gson;
+import java.io.InputStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -112,10 +116,42 @@ class AppManagerControllerTest {
   void testUploadApp() throws Exception {
     AppConfig appConfig = mock(AppConfig.class);
     when(appConfig.getName()).thenReturn("");
-    when(appManagerService.checkAndObtainConfig(null, null)).thenReturn(appConfig);
+
+    when(appManagerService.uploadApp(any(InputStream.class), eq(""), eq("file")))
+        .thenReturn("temp_dir");
+    when(appManagerService.extractFileContent("temp_dir", ZIP_CONFIG_FILE))
+        .thenReturn("config: 'test_config'");
+    when(appManagerService.checkAndObtainConfig("temp_dir", "config: 'test_config'"))
+        .thenReturn(appConfig);
     String testFile = AppManagerControllerTest.class.getResource("/test-app.zip").getFile();
+
     mockMvc
         .perform(multipart(AppManagerController.URI + "/upload").file("file", testFile.getBytes()))
+        .andExpect(status().is(200));
+  }
+
+  @Test
+  void testUpdateApp() throws Exception {
+    App app = mock(App.class);
+    when(app.getName()).thenReturn("app1");
+
+    AppConfig appConfig = mock(AppConfig.class);
+    when(appConfig.getName()).thenReturn("app1");
+
+    when(dataService.findOneById(AppMetadata.APP, "id", App.class)).thenReturn(app);
+    // originalFileName is not mockable, so therefor ""
+    when(appManagerService.uploadApp(any(InputStream.class), eq(""), eq("app1")))
+        .thenReturn("temp_dir");
+    when(appManagerService.extractFileContent("temp_dir", ZIP_CONFIG_FILE))
+        .thenReturn("config: 'test_config'");
+    when(appManagerService.updateApp("id", "temp_dir", "config: 'test_config'"))
+        .thenReturn(appConfig);
+
+    String testFile = AppManagerControllerTest.class.getResource("/test-app.zip").getFile();
+
+    mockMvc
+        .perform(
+            multipart(AppManagerController.URI + "/update/id").file("file", testFile.getBytes()))
         .andExpect(status().is(200));
   }
 }

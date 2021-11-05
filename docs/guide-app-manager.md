@@ -62,12 +62,20 @@ and now we are interested in apps having to with Biobanks or Bio
 
 ![am07 - after search](./images/app-manager/am07-after-search.png)
 
+### Updating an app
+Once we want to update an app, we can press the update button.
+A modal will appear where you can select the new app.
+
+> Note: Make sure it is the same app!
+
+In the modal you can choose if you want to overwrite your config.
+If you check that box, you will overwrite your application runtime config, with the new json file in your zip.
+
+![am04 - after activate](./images/app-manager/am04-after-activate.png)
+
+
 
 ### Deleting an app
-Once we want to update an app, we will have to disable and remove the older one first.
 Toggle our example to inactive, and delete!
 
 ![am08 - delete app](./images/app-manager/am08-delete-app.png)
-
-You are now free to make changes to the config, descriptions, name, and resources.
-After making your changes you can upload the archive again and use the app as you see fit!

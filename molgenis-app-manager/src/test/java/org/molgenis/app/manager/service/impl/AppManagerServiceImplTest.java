@@ -310,6 +310,24 @@ class AppManagerServiceImplTest {
   }
 
   @Test
+  void testUpdateApp() throws IOException {
+    String tempDir = "apps_tmp";
+    String appUri = "app1";
+    InputStream configFile =
+        AppManagerServiceImplTest.class.getResource("/config.json").openStream();
+    String configContent = IOUtils.toString(configFile, UTF_8);
+    File file = mock(File.class);
+    when(dataService.findOneById(AppMetadata.APP, "id", App.class)).thenReturn(app);
+    when(fileStore.getFileUnchecked(APPS_DIR + separator + appUri)).thenReturn(file);
+    when(fileStore.getFileUnchecked(APPS_DIR + separator + appUri).exists()).thenReturn(false);
+
+    appManagerServiceImpl.updateApp("id", tempDir, configContent);
+
+    verify(fileStore).move(tempDir, APPS_DIR + separator + appUri);
+    verify(fileStore).deleteDirectory(tempDir);
+  }
+
+  @Test
   void testCheckAndObtainConfigInvalidJsonConfigFile() throws IOException {
     String appUri = "";
     File appDir = mock(File.class);
@@ -372,5 +390,23 @@ class AppManagerServiceImplTest {
     appManagerServiceImpl.configureApp(appConfig, "<h1>Test</h1>");
 
     verify(dataService).add(AppMetadata.APP, app);
+  }
+
+  @Test
+  void TestConfigureUpdatedApp() {
+    when(appFactory.create()).thenReturn(app);
+    when(dataService.findOneById(AppMetadata.APP, "id", App.class)).thenReturn(app);
+
+    AppConfig appConfig = mock(AppConfig.class);
+    when(appConfig.getLabel()).thenReturn("test-app");
+    when(appConfig.getDescription()).thenReturn("Test app description");
+    when(appConfig.getIncludeMenuAndFooter()).thenReturn(true);
+    when(appConfig.getVersion()).thenReturn("1.0");
+    when(appConfig.getName()).thenReturn("app1");
+    when(appConfig.getApiDependency()).thenReturn("v2.0");
+
+    appManagerServiceImpl.configureUpdatedApp("id", appConfig, "<h1>Test</h1>", false);
+
+    verify(dataService).update(AppMetadata.APP, app);
   }
 }

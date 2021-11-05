@@ -33,6 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Controller
 @RequestMapping(AppManagerController.URI)
 public class AppManagerController extends PluginController {
+
   public static final String ID = "appmanager";
   public static final String URI = PluginController.PLUGIN_URI_PREFIX + ID;
 
@@ -91,6 +92,36 @@ public class AppManagerController extends PluginController {
           appManagerService.extractFileContent(
               APPS_DIR + separator + appConfig.getName(), ZIP_INDEX_FILE);
       appManagerService.configureApp(appConfig, htmlTemplate);
+    } catch (IOException err) {
+      throw new CouldNotUploadAppException(filename);
+    }
+  }
+
+  @ResponseStatus(HttpStatus.OK)
+  @PostMapping("/update/{id}")
+  public void updateApp(
+      @RequestParam("file") MultipartFile multipartFile,
+      @PathVariable("id") String id,
+      @RequestParam(value = "updateRuntimeOptions", required = false)
+          boolean updateRuntimeOptions) {
+
+    App app = getApp(id);
+
+    // get filename for possible error
+    String filename = multipartFile.getOriginalFilename();
+    String formFieldName = app.getName();
+    try (InputStream fileInputStream = multipartFile.getInputStream()) {
+
+      String tempDir = appManagerService.uploadApp(fileInputStream, filename, formFieldName);
+      String configFile = appManagerService.extractFileContent(tempDir, ZIP_CONFIG_FILE);
+
+      AppConfig appConfig = appManagerService.updateApp(id, tempDir, configFile);
+
+      String htmlTemplate =
+          appManagerService.extractFileContent(
+              APPS_DIR + separator + appConfig.getName(), ZIP_INDEX_FILE);
+
+      appManagerService.configureUpdatedApp(id, appConfig, htmlTemplate, updateRuntimeOptions);
     } catch (IOException err) {
       throw new CouldNotUploadAppException(filename);
     }
