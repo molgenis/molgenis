@@ -27,6 +27,9 @@ public class IndexActionMetadata extends SystemEntityType {
   /** The creation time of the index action. */
   public static final String CREATION_DATE_TIME = "creationDateTime";
 
+  /** The time at which this index action was finished (for whichever reason) */
+  public static final String END_DATE_TIME = "endDateTime";
+
   /** The transaction that caused this index action. */
   public static final String TRANSACTION_ID = "transactionId";
 
@@ -57,6 +60,7 @@ public class IndexActionMetadata extends SystemEntityType {
 
     addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false);
     addAttribute(CREATION_DATE_TIME, ROLE_LABEL).setDataType(AttributeType.DATE_TIME).setAuto(true);
+    addAttribute(END_DATE_TIME).setDataType(AttributeType.DATE_TIME).setNillable(true);
     addAttribute(TRANSACTION_ID)
         .setDescription("The id of the transaction that caused this index action")
         .setNillable(true); // TODO nillable=false has migration issues

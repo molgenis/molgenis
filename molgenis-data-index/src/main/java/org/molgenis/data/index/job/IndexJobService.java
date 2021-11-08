@@ -2,9 +2,12 @@ package org.molgenis.data.index.job;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.index.meta.IndexActionMetadata.INDEX_ACTION;
+import static org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus.FAILED;
+import static org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus.FINISHED;
 import static org.molgenis.data.util.EntityUtils.getTypedValue;
 
 import io.micrometer.core.annotation.Timed;
+import java.time.Instant;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
@@ -79,7 +82,8 @@ public class IndexJobService {
   }
 
   /**
-   * Updates the {@link IndexStatus} of a IndexAction and stores the change.
+   * Updates the {@link IndexStatus} of an IndexAction and stores the change. Also sets the end date
+   * if the action has finished in any way.
    *
    * @param indexAction the IndexAction of which the status is updated
    * @param status the new {@link IndexStatus}
@@ -87,6 +91,9 @@ public class IndexJobService {
   @RunAsSystem
   public void updateIndexActionStatus(
       IndexAction indexAction, IndexActionMetadata.IndexStatus status) {
+    if (status == FAILED || status == FINISHED) {
+      indexAction.setEndDateTime(Instant.now());
+    }
     indexAction.setIndexStatus(status);
     dataService.update(INDEX_ACTION, indexAction);
   }

@@ -20,5 +20,5 @@ public interface IndexJobScheduler {
 
   void waitForIndexToBeStableIncludingReferences(EntityType entityType) throws InterruptedException;
 
-  void cleanupJobExecutions();
+  void cleanupIndexActions();
 }

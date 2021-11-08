@@ -1,5 +1,7 @@
 package org.molgenis.data.index.meta;
 
+import static org.molgenis.data.index.meta.IndexActionMetadata.CREATION_DATE_TIME;
+import static org.molgenis.data.index.meta.IndexActionMetadata.END_DATE_TIME;
 import static org.molgenis.data.index.meta.IndexActionMetadata.ENTITY_ID;
 import static org.molgenis.data.index.meta.IndexActionMetadata.ENTITY_TYPE_ID;
 import static org.molgenis.data.index.meta.IndexActionMetadata.ID;
@@ -7,6 +9,7 @@ import static org.molgenis.data.index.meta.IndexActionMetadata.INDEX_STATUS;
 import static org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus;
 import static org.molgenis.data.index.meta.IndexActionMetadata.TRANSACTION_ID;
 
+import java.time.Instant;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -38,6 +41,22 @@ public class IndexAction extends StaticEntity {
   public IndexAction setId(String id) {
     set(ID, id);
     return this;
+  }
+
+  public Instant getCreationDateTime() {
+    return getInstant(CREATION_DATE_TIME);
+  }
+
+  public void setCreationDateTime(Instant value) {
+    set(CREATION_DATE_TIME, value);
+  }
+
+  public Instant getEndDateTime() {
+    return getInstant(CREATION_DATE_TIME);
+  }
+
+  public void setEndDateTime(Instant value) {
+    set(END_DATE_TIME, value);
   }
 
   public String getTransactionId() {
