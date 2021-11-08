@@ -1,51 +1,51 @@
-//package org.molgenis.data.index.bootstrap;
+// package org.molgenis.data.index.bootstrap;
 //
-//import static java.util.Collections.singletonList;
-//import static java.util.stream.Collectors.toList;
-//import static org.junit.jupiter.api.Assertions.assertEquals;
-//import static org.mockito.ArgumentMatchers.any;
-//import static org.mockito.Mockito.eq;
-//import static org.mockito.Mockito.mock;
-//import static org.mockito.Mockito.never;
-//import static org.mockito.Mockito.reset;
-//import static org.mockito.Mockito.times;
-//import static org.mockito.Mockito.verify;
-//import static org.mockito.Mockito.when;
-//import static org.molgenis.jobs.model.JobExecutionMetaData.FAILED;
+// import static java.util.Collections.singletonList;
+// import static java.util.stream.Collectors.toList;
+// import static org.junit.jupiter.api.Assertions.assertEquals;
+// import static org.mockito.ArgumentMatchers.any;
+// import static org.mockito.Mockito.eq;
+// import static org.mockito.Mockito.mock;
+// import static org.mockito.Mockito.never;
+// import static org.mockito.Mockito.reset;
+// import static org.mockito.Mockito.times;
+// import static org.mockito.Mockito.verify;
+// import static org.mockito.Mockito.when;
+// import static org.molgenis.jobs.model.JobExecutionMetaData.FAILED;
 //
-//import java.util.Arrays;
-//import java.util.List;
-//import java.util.stream.Stream;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.Test;
-//import org.mockito.ArgumentCaptor;
-//import org.mockito.Mock;
-//import org.mockito.junit.jupiter.MockitoSettings;
-//import org.mockito.quality.Strictness;
-//import org.molgenis.data.AbstractMolgenisSpringTest;
-//import org.molgenis.data.DataService;
-//import org.molgenis.data.Entity;
-//import org.molgenis.data.Repository;
-//import org.molgenis.data.index.IndexActionRegisterService;
-//import org.molgenis.data.index.IndexService;
-//import org.molgenis.data.index.meta.IndexAction;
-//import org.molgenis.data.index.meta.IndexActionMetadata;
-//import org.molgenis.data.meta.AttributeType;
-//import org.molgenis.data.meta.MetaDataService;
-//import org.molgenis.data.meta.model.Attribute;
-//import org.molgenis.data.meta.model.AttributeMetadata;
-//import org.molgenis.data.meta.model.EntityType;
-//import org.molgenis.data.meta.model.EntityTypeMetadata;
-//import org.molgenis.data.support.QueryImpl;
-//import org.molgenis.jobs.model.JobExecutionMetaData;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.context.annotation.Bean;
-//import org.springframework.context.annotation.Configuration;
-//import org.springframework.test.context.ContextConfiguration;
+// import java.util.Arrays;
+// import java.util.List;
+// import java.util.stream.Stream;
+// import org.junit.jupiter.api.BeforeEach;
+// import org.junit.jupiter.api.Test;
+// import org.mockito.ArgumentCaptor;
+// import org.mockito.Mock;
+// import org.mockito.junit.jupiter.MockitoSettings;
+// import org.mockito.quality.Strictness;
+// import org.molgenis.data.AbstractMolgenisSpringTest;
+// import org.molgenis.data.DataService;
+// import org.molgenis.data.Entity;
+// import org.molgenis.data.Repository;
+// import org.molgenis.data.index.IndexActionRegisterService;
+// import org.molgenis.data.index.IndexService;
+// import org.molgenis.data.index.meta.IndexAction;
+// import org.molgenis.data.index.meta.IndexActionMetadata;
+// import org.molgenis.data.meta.AttributeType;
+// import org.molgenis.data.meta.MetaDataService;
+// import org.molgenis.data.meta.model.Attribute;
+// import org.molgenis.data.meta.model.AttributeMetadata;
+// import org.molgenis.data.meta.model.EntityType;
+// import org.molgenis.data.meta.model.EntityTypeMetadata;
+// import org.molgenis.data.support.QueryImpl;
+// import org.molgenis.jobs.model.JobExecutionMetaData;
+// import org.springframework.beans.factory.annotation.Autowired;
+// import org.springframework.context.annotation.Bean;
+// import org.springframework.context.annotation.Configuration;
+// import org.springframework.test.context.ContextConfiguration;
 //
-//@MockitoSettings(strictness = Strictness.LENIENT)
-//@ContextConfiguration(classes = {IndexBootstrapperTest.Config.class})
-//class IndexBootstrapperTest extends AbstractMolgenisSpringTest {
+// @MockitoSettings(strictness = Strictness.LENIENT)
+// @ContextConfiguration(classes = {IndexBootstrapperTest.Config.class})
+// class IndexBootstrapperTest extends AbstractMolgenisSpringTest {
 //  @Autowired private Config config;
 //  @Autowired private MetaDataService metaDataService;
 //  @Autowired private IndexService indexService;
@@ -221,4 +221,4 @@
 //      reset(indexService, indexActionRegisterService, metaDataService, attributeMetadata);
 //    }
 //  }
-//}
+// }

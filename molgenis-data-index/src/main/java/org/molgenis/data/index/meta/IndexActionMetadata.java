@@ -3,7 +3,6 @@ package org.molgenis.data.index.meta;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.index.meta.IndexPackage.PACKAGE_INDEX;
 import static org.molgenis.data.meta.AttributeType.ENUM;
-import static org.molgenis.data.meta.AttributeType.INT;
 import static org.molgenis.data.meta.AttributeType.TEXT;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
@@ -46,8 +45,7 @@ public class IndexActionMetadata extends SystemEntityType {
 
   private final IndexPackage indexPackage;
 
-  public IndexActionMetadata(
-      IndexPackage indexPackage) {
+  public IndexActionMetadata(IndexPackage indexPackage) {
     super(SIMPLE_NAME, PACKAGE_INDEX);
     this.indexPackage = requireNonNull(indexPackage);
   }
@@ -61,7 +59,7 @@ public class IndexActionMetadata extends SystemEntityType {
     addAttribute(CREATION_DATE_TIME, ROLE_LABEL).setDataType(AttributeType.DATE_TIME).setAuto(true);
     addAttribute(TRANSACTION_ID)
         .setDescription("The id of the transaction that caused this index action")
-        .setNillable(true); //TODO nillable=false has migration issues
+        .setNillable(true); // TODO nillable=false has migration issues
     addAttribute(ENTITY_TYPE_ID)
         .setDescription("The id of the entity type that needs to be indexed (e.g. myEntityType).")
         .setNillable(false);

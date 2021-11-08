@@ -72,7 +72,8 @@ public class IndexBootstrapper {
   }
 
   private void registerNewIndexAction(IndexAction action) {
-    LOG.info("Indexing of {}{} was interrupted during shutdown, rescheduling... ",
+    LOG.info(
+        "Indexing of {}{} was interrupted during shutdown, rescheduling... ",
         action.getEntityTypeId(),
         action.getEntityId() != null ? "." + action.getEntityId() : "");
 

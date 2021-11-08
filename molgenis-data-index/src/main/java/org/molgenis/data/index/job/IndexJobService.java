@@ -19,7 +19,7 @@ import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-//TODO rename
+// TODO rename
 /** Executes the {@link IndexAction}s triggered by a transaction. */
 public class IndexJobService {
   private static final Logger LOG = LoggerFactory.getLogger(IndexJobService.class);

@@ -145,37 +145,38 @@ public class IndexJobSchedulerImpl implements IndexJobScheduler {
     }
   }
 
-// TODO implement
-  public void cleanupJobExecutions(){};
-//  /**
-//   * Cleans up successful IndexJobExecutions that finished longer than five minutes ago. delay for a
-//   * minute to allow the transaction manager to become available
-//   */
-//  @Scheduled(initialDelay = 60 * 1000, fixedRate = 5 * 60 * 1000)
-//  @Override
-//  public void cleanupJobExecutions() {
-//    runAsSystem(
-//        () -> {
-//          LOGGER.trace("Clean up Index job executions...");
-//          Instant fiveMinutesAgo = Instant.now().minus(5, ChronoUnit.MINUTES);
-//          boolean indexJobExecutionExists =
-//              dataService.hasRepository(IndexJobExecutionMetadata.INDEX_JOB_EXECUTION);
-//          if (indexJobExecutionExists) {
-//            Stream<Entity> executions =
-//                dataService
-//                    .getRepository(IndexJobExecutionMetadata.INDEX_JOB_EXECUTION)
-//                    .query()
-//                    .lt(END_DATE, fiveMinutesAgo)
-//                    .and()
-//                    .eq(STATUS, SUCCESS.toString())
-//                    .findAll();
-//            dataService.delete(IndexJobExecutionMetadata.INDEX_JOB_EXECUTION, executions);
-//            LOGGER.debug("Cleaned up Index job executions.");
-//          } else {
-//            LOGGER.warn("{} does not exist", IndexJobExecutionMetadata.INDEX_JOB_EXECUTION);
-//          }
-//        });
-//  }
+  // TODO implement
+  public void cleanupJobExecutions() {};
+  //  /**
+  //   * Cleans up successful IndexJobExecutions that finished longer than five minutes ago. delay
+  // for a
+  //   * minute to allow the transaction manager to become available
+  //   */
+  //  @Scheduled(initialDelay = 60 * 1000, fixedRate = 5 * 60 * 1000)
+  //  @Override
+  //  public void cleanupJobExecutions() {
+  //    runAsSystem(
+  //        () -> {
+  //          LOGGER.trace("Clean up Index job executions...");
+  //          Instant fiveMinutesAgo = Instant.now().minus(5, ChronoUnit.MINUTES);
+  //          boolean indexJobExecutionExists =
+  //              dataService.hasRepository(IndexJobExecutionMetadata.INDEX_JOB_EXECUTION);
+  //          if (indexJobExecutionExists) {
+  //            Stream<Entity> executions =
+  //                dataService
+  //                    .getRepository(IndexJobExecutionMetadata.INDEX_JOB_EXECUTION)
+  //                    .query()
+  //                    .lt(END_DATE, fiveMinutesAgo)
+  //                    .and()
+  //                    .eq(STATUS, SUCCESS.toString())
+  //                    .findAll();
+  //            dataService.delete(IndexJobExecutionMetadata.INDEX_JOB_EXECUTION, executions);
+  //            LOGGER.debug("Cleaned up Index job executions.");
+  //          } else {
+  //            LOGGER.warn("{} does not exist", IndexJobExecutionMetadata.INDEX_JOB_EXECUTION);
+  //          }
+  //        });
+  //  }
 
   private boolean isAllIndicesStable() {
     return indexActions.isEmpty();

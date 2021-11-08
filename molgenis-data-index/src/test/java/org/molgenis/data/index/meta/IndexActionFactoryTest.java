@@ -1,12 +1,12 @@
-//package org.molgenis.data.index.meta;
+// package org.molgenis.data.index.meta;
 //
-//import org.junit.jupiter.api.Test;
-//import org.molgenis.data.config.EntityBaseTestConfig;
-//import org.molgenis.data.meta.AbstractEntityFactoryTest;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.test.context.ContextConfiguration;
+// import org.junit.jupiter.api.Test;
+// import org.molgenis.data.config.EntityBaseTestConfig;
+// import org.molgenis.data.meta.AbstractEntityFactoryTest;
+// import org.springframework.beans.factory.annotation.Autowired;
+// import org.springframework.test.context.ContextConfiguration;
 //
-//@ContextConfiguration(
+// @ContextConfiguration(
 //    classes = {
 //      EntityBaseTestConfig.class,
 //      IndexActionMetadata.class,
@@ -14,7 +14,7 @@
 //      IndexActionGroupMetadata.class,
 //      IndexPackage.class
 //    })
-//public class IndexActionFactoryTest extends AbstractEntityFactoryTest {
+// public class IndexActionFactoryTest extends AbstractEntityFactoryTest {
 //
 //  @Autowired IndexActionFactory factory;
 //
@@ -35,4 +35,4 @@
 //  public void testCreateWithEntity() {
 //    super.testCreateWithEntity(factory, IndexAction.class);
 //  }
-//}
+// }

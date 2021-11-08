@@ -1,16 +1,16 @@
-//package org.molgenis.data.index.meta;
+// package org.molgenis.data.index.meta;
 //
-//import java.util.HashMap;
-//import java.util.Map;
-//import org.junit.jupiter.api.Test;
-//import org.molgenis.data.config.EntityBaseTestConfig;
-//import org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus;
-//import org.molgenis.data.meta.AbstractSystemEntityTest;
-//import org.molgenis.util.Pair;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.test.context.ContextConfiguration;
+// import java.util.HashMap;
+// import java.util.Map;
+// import org.junit.jupiter.api.Test;
+// import org.molgenis.data.config.EntityBaseTestConfig;
+// import org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus;
+// import org.molgenis.data.meta.AbstractSystemEntityTest;
+// import org.molgenis.util.Pair;
+// import org.springframework.beans.factory.annotation.Autowired;
+// import org.springframework.test.context.ContextConfiguration;
 //
-//@ContextConfiguration(
+// @ContextConfiguration(
 //    classes = {
 //      EntityBaseTestConfig.class,
 //      IndexActionMetadata.class,
@@ -18,7 +18,7 @@
 //      IndexActionGroupMetadata.class,
 //      IndexPackage.class
 //    })
-//public class IndexActionTest extends AbstractSystemEntityTest {
+// public class IndexActionTest extends AbstractSystemEntityTest {
 //
 //  @Autowired IndexActionMetadata metadata;
 //  @Autowired IndexActionFactory factory;
@@ -41,4 +41,4 @@
 //    internalTestAttributes(
 //        metadata, IndexAction.class, factory, getOverriddenReturnTypes(), getExcludedAttrs());
 //  }
-//}
+// }

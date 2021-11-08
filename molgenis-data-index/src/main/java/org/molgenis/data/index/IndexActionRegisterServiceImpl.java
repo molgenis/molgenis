@@ -113,8 +113,7 @@ public class IndexActionRegisterServiceImpl
 
     IndexDependencyModel dependencyModel = createIndexDependencyModel(changes);
     List<IndexAction> indexActions =
-        indexingStrategy.determineImpact(changes, dependencyModel)
-            .stream()
+        indexingStrategy.determineImpact(changes, dependencyModel).stream()
             .filter(key -> !excludedEntities.contains(key.getEntityTypeId()))
             .map(impact -> createIndexAction(transactionId, impact))
             .toList();

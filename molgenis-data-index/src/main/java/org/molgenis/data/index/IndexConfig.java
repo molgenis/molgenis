@@ -53,8 +53,8 @@ public class IndexConfig {
 
   @PostConstruct
   public void register() {
-    //TODO exclude IndexAction?
-//    indexActionRegisterService.addExcludedEntity(INDEX_JOB_EXECUTION);
+    // TODO exclude IndexAction?
+    //    indexActionRegisterService.addExcludedEntity(INDEX_JOB_EXECUTION);
   }
 
   @Bean

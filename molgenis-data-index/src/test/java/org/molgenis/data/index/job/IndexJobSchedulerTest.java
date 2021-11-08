@@ -1,48 +1,48 @@
-//package org.molgenis.data.index.job;
+// package org.molgenis.data.index.job;
 //
-//import static java.time.Duration.between;
-//import static java.time.Instant.now;
-//import static org.junit.jupiter.api.Assertions.assertEquals;
-//import static org.junit.jupiter.api.Assertions.assertTrue;
-//import static org.mockito.Mockito.any;
-//import static org.mockito.Mockito.never;
-//import static org.mockito.Mockito.reset;
-//import static org.mockito.Mockito.verify;
-//import static org.mockito.Mockito.when;
-//import static org.molgenis.data.index.job.IndexJobExecutionMetadata.INDEX_JOB_EXECUTION;
-//import static org.molgenis.data.index.meta.IndexActionGroupMetadata.INDEX_ACTION_GROUP;
-//import static org.molgenis.data.util.MolgenisDateFormat.parseInstant;
+// import static java.time.Duration.between;
+// import static java.time.Instant.now;
+// import static org.junit.jupiter.api.Assertions.assertEquals;
+// import static org.junit.jupiter.api.Assertions.assertTrue;
+// import static org.mockito.Mockito.any;
+// import static org.mockito.Mockito.never;
+// import static org.mockito.Mockito.reset;
+// import static org.mockito.Mockito.verify;
+// import static org.mockito.Mockito.when;
+// import static org.molgenis.data.index.job.IndexJobExecutionMetadata.INDEX_JOB_EXECUTION;
+// import static org.molgenis.data.index.meta.IndexActionGroupMetadata.INDEX_ACTION_GROUP;
+// import static org.molgenis.data.util.MolgenisDateFormat.parseInstant;
 //
-//import java.util.regex.Matcher;
-//import java.util.regex.Pattern;
-//import java.util.stream.Stream;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.Test;
-//import org.mockito.ArgumentCaptor;
-//import org.mockito.Captor;
-//import org.mockito.Mock;
-//import org.molgenis.data.AbstractMolgenisSpringTest;
-//import org.molgenis.data.DataService;
-//import org.molgenis.data.Entity;
-//import org.molgenis.data.Query;
-//import org.molgenis.data.Repository;
-//import org.molgenis.data.index.IndexActionRegisterServiceImpl;
-//import org.molgenis.data.index.IndexConfig;
-//import org.molgenis.data.index.IndexService;
-//import org.molgenis.data.index.config.IndexTestConfig;
-//import org.molgenis.data.support.QueryImpl;
-//import org.molgenis.data.transaction.TransactionListener;
-//import org.molgenis.data.transaction.TransactionManager;
-//import org.molgenis.jobs.JobExecutor;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.context.annotation.Bean;
-//import org.springframework.context.annotation.Configuration;
-//import org.springframework.context.annotation.Import;
-//import org.springframework.mail.MailSender;
-//import org.springframework.test.context.ContextConfiguration;
+// import java.util.regex.Matcher;
+// import java.util.regex.Pattern;
+// import java.util.stream.Stream;
+// import org.junit.jupiter.api.BeforeEach;
+// import org.junit.jupiter.api.Test;
+// import org.mockito.ArgumentCaptor;
+// import org.mockito.Captor;
+// import org.mockito.Mock;
+// import org.molgenis.data.AbstractMolgenisSpringTest;
+// import org.molgenis.data.DataService;
+// import org.molgenis.data.Entity;
+// import org.molgenis.data.Query;
+// import org.molgenis.data.Repository;
+// import org.molgenis.data.index.IndexActionRegisterServiceImpl;
+// import org.molgenis.data.index.IndexConfig;
+// import org.molgenis.data.index.IndexService;
+// import org.molgenis.data.index.config.IndexTestConfig;
+// import org.molgenis.data.support.QueryImpl;
+// import org.molgenis.data.transaction.TransactionListener;
+// import org.molgenis.data.transaction.TransactionManager;
+// import org.molgenis.jobs.JobExecutor;
+// import org.springframework.beans.factory.annotation.Autowired;
+// import org.springframework.context.annotation.Bean;
+// import org.springframework.context.annotation.Configuration;
+// import org.springframework.context.annotation.Import;
+// import org.springframework.mail.MailSender;
+// import org.springframework.test.context.ContextConfiguration;
 //
-//@ContextConfiguration(classes = {IndexJobSchedulerTest.Config.class, IndexTestConfig.class})
-//class IndexJobSchedulerTest extends AbstractMolgenisSpringTest {
+// @ContextConfiguration(classes = {IndexJobSchedulerTest.Config.class, IndexTestConfig.class})
+// class IndexJobSchedulerTest extends AbstractMolgenisSpringTest {
 //  @Autowired private DataService dataService;
 //
 //  @Autowired private TransactionManager transactionManager;
@@ -137,4 +137,4 @@
 //      return mailSender;
 //    }
 //  }
-//}
+// }

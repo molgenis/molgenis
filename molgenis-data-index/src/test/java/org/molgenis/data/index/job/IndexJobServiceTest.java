@@ -1,61 +1,61 @@
-//package org.molgenis.data.index.job;
+// package org.molgenis.data.index.job;
 //
-//import static com.google.common.collect.Lists.newArrayList;
-//import static java.util.stream.Collectors.toList;
-//import static java.util.stream.Stream.empty;
-//import static java.util.stream.Stream.of;
-//import static org.junit.jupiter.api.Assertions.assertEquals;
-//import static org.junit.jupiter.api.Assertions.assertSame;
-//import static org.mockito.Mockito.any;
-//import static org.mockito.Mockito.atLeast;
-//import static org.mockito.Mockito.doThrow;
-//import static org.mockito.Mockito.eq;
-//import static org.mockito.Mockito.mock;
-//import static org.mockito.Mockito.never;
-//import static org.mockito.Mockito.reset;
-//import static org.mockito.Mockito.times;
-//import static org.mockito.Mockito.verify;
-//import static org.mockito.Mockito.when;
-//import static org.molgenis.data.index.meta.IndexActionGroupMetadata.INDEX_ACTION_GROUP;
-//import static org.molgenis.data.index.meta.IndexActionMetadata.INDEX_ACTION;
-//import static org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus.FAILED;
-//import static org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus.FINISHED;
+// import static com.google.common.collect.Lists.newArrayList;
+// import static java.util.stream.Collectors.toList;
+// import static java.util.stream.Stream.empty;
+// import static java.util.stream.Stream.of;
+// import static org.junit.jupiter.api.Assertions.assertEquals;
+// import static org.junit.jupiter.api.Assertions.assertSame;
+// import static org.mockito.Mockito.any;
+// import static org.mockito.Mockito.atLeast;
+// import static org.mockito.Mockito.doThrow;
+// import static org.mockito.Mockito.eq;
+// import static org.mockito.Mockito.mock;
+// import static org.mockito.Mockito.never;
+// import static org.mockito.Mockito.reset;
+// import static org.mockito.Mockito.times;
+// import static org.mockito.Mockito.verify;
+// import static org.mockito.Mockito.when;
+// import static org.molgenis.data.index.meta.IndexActionGroupMetadata.INDEX_ACTION_GROUP;
+// import static org.molgenis.data.index.meta.IndexActionMetadata.INDEX_ACTION;
+// import static org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus.FAILED;
+// import static org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus.FINISHED;
 //
-//import java.util.Optional;
-//import java.util.stream.Stream;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.Test;
-//import org.mockito.ArgumentCaptor;
-//import org.mockito.Captor;
-//import org.mockito.Mock;
-//import org.mockito.junit.jupiter.MockitoSettings;
-//import org.mockito.quality.Strictness;
-//import org.molgenis.data.AbstractMolgenisSpringTest;
-//import org.molgenis.data.DataService;
-//import org.molgenis.data.Entity;
-//import org.molgenis.data.EntityTestHarness;
-//import org.molgenis.data.MolgenisDataException;
-//import org.molgenis.data.Query;
-//import org.molgenis.data.TestHarnessConfig;
-//import org.molgenis.data.index.IndexService;
-//import org.molgenis.data.index.config.IndexTestConfig;
-//import org.molgenis.data.index.meta.IndexAction;
-//import org.molgenis.data.index.meta.IndexActionFactory;
-//import org.molgenis.data.index.meta.IndexActionMetadata;
-//import org.molgenis.data.meta.MetaDataService;
-//import org.molgenis.data.meta.model.EntityType;
-//import org.molgenis.data.meta.model.EntityTypeFactory;
-//import org.molgenis.jobs.Progress;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.context.annotation.Bean;
-//import org.springframework.context.annotation.Configuration;
-//import org.springframework.context.annotation.Import;
-//import org.springframework.security.core.Authentication;
-//import org.springframework.test.context.ContextConfiguration;
+// import java.util.Optional;
+// import java.util.stream.Stream;
+// import org.junit.jupiter.api.BeforeEach;
+// import org.junit.jupiter.api.Test;
+// import org.mockito.ArgumentCaptor;
+// import org.mockito.Captor;
+// import org.mockito.Mock;
+// import org.mockito.junit.jupiter.MockitoSettings;
+// import org.mockito.quality.Strictness;
+// import org.molgenis.data.AbstractMolgenisSpringTest;
+// import org.molgenis.data.DataService;
+// import org.molgenis.data.Entity;
+// import org.molgenis.data.EntityTestHarness;
+// import org.molgenis.data.MolgenisDataException;
+// import org.molgenis.data.Query;
+// import org.molgenis.data.TestHarnessConfig;
+// import org.molgenis.data.index.IndexService;
+// import org.molgenis.data.index.config.IndexTestConfig;
+// import org.molgenis.data.index.meta.IndexAction;
+// import org.molgenis.data.index.meta.IndexActionFactory;
+// import org.molgenis.data.index.meta.IndexActionMetadata;
+// import org.molgenis.data.meta.MetaDataService;
+// import org.molgenis.data.meta.model.EntityType;
+// import org.molgenis.data.meta.model.EntityTypeFactory;
+// import org.molgenis.jobs.Progress;
+// import org.springframework.beans.factory.annotation.Autowired;
+// import org.springframework.context.annotation.Bean;
+// import org.springframework.context.annotation.Configuration;
+// import org.springframework.context.annotation.Import;
+// import org.springframework.security.core.Authentication;
+// import org.springframework.test.context.ContextConfiguration;
 //
-//@MockitoSettings(strictness = Strictness.LENIENT)
-//@ContextConfiguration(classes = {IndexJobServiceTest.Config.class})
-//class IndexJobServiceTest extends AbstractMolgenisSpringTest {
+// @MockitoSettings(strictness = Strictness.LENIENT)
+// @ContextConfiguration(classes = {IndexJobServiceTest.Config.class})
+// class IndexJobServiceTest extends AbstractMolgenisSpringTest {
 //  @Captor private ArgumentCaptor<Stream<Entity>> streamCaptor;
 //
 //  @Autowired private Progress progress;
@@ -123,7 +123,8 @@
 //  void testCreateQueryGetAllIndexActions() {
 //    Query<IndexAction> q = IndexJobService.createQueryGetAllIndexActions("testme");
 //    assertEquals(
-//        "rules=['indexActionGroup' = 'testme'], sort=Sort [orders=[Order [attr=actionOrder, direction=ASC]]]",
+//        "rules=['indexActionGroup' = 'testme'], sort=Sort [orders=[Order [attr=actionOrder,
+// direction=ASC]]]",
 //        q.toString());
 //  }
 //
@@ -401,4 +402,4 @@
 //      reset(progress, authentication, indexService, mds);
 //    }
 //  }
-//}
+// }
