@@ -58,7 +58,7 @@ public class RunnableIndexAction implements Runnable {
   public boolean isContainedBy(RunnableIndexAction other) {
     return other.concerns(indexAction.getEntityTypeId())
         && Optional.ofNullable(other.indexAction.getEntityId())
-            .map(singleRowId -> singleRowId.equals(other.indexAction.getEntityId()))
+            .map(singleRowId -> singleRowId.equals(indexAction.getEntityId()))
             .orElse(true);
   }
 

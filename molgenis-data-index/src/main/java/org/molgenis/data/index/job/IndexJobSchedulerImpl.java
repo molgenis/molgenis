@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -71,13 +72,11 @@ public class IndexJobSchedulerImpl implements IndexJobScheduler {
   @RunAsSystem
   public void schedule(IndexAction indexAction) {
     var task = new RunnableIndexAction(indexAction, indexJobService);
-    if (indexActions.stream().anyMatch(other -> other.contains(task))) {
-      LOGGER.info(
-          "An action containing the work of index action {} is already scheduled, skipping!",
-          indexAction);
-      task.setStatus(IndexStatus.CANCELED);
+
+    if (workExists(indexAction, task)) {
       return;
     }
+
     indexActions.stream()
         .filter(other -> other.isContainedBy(task))
         .filter(other -> other.getStatus() == PENDING)
@@ -92,6 +91,23 @@ public class IndexJobSchedulerImpl implements IndexJobScheduler {
 
     addTask(task);
     CompletableFuture.runAsync(task, executorService).whenComplete((a, b) -> removeTask(task));
+  }
+
+  private boolean workExists(IndexAction indexAction, RunnableIndexAction task) {
+    AtomicBoolean exists = new AtomicBoolean(false);
+    indexActions.stream()
+        .filter(other -> other.contains(task))
+        .findAny()
+        .ifPresent(
+            other -> {
+              LOGGER.info(
+                  "Skipping index action {} because the work is already contained in action {}",
+                  indexAction,
+                  other);
+              task.setStatus(IndexStatus.CANCELED);
+              exists.set(true);
+            });
+    return exists.get();
   }
 
   void addTask(RunnableIndexAction task) {
