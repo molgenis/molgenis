@@ -31,9 +31,6 @@ public class IndexActionMetadata extends SystemEntityType {
   /** The transaction that caused this index action. */
   public static final String TRANSACTION_ID = "transactionId";
 
-  /** The order in which the action is registered within its IndexActionJob */
-  public static final String ACTION_ORDER = "actionOrder";
-
   /** The name of the entity type ID that needs to be indexed */
   public static final String ENTITY_TYPE_ID = "entityTypeId";
 
@@ -65,10 +62,6 @@ public class IndexActionMetadata extends SystemEntityType {
     addAttribute(TRANSACTION_ID)
         .setDescription("The id of the transaction that caused this index action")
         .setNillable(true); //TODO nillable=false has migration issues
-    addAttribute(ACTION_ORDER) // TODO remove
-        .setDataType(INT)
-        .setDescription("The order in which the action is registered within its IndexActionJob")
-        .setNillable(false);
     addAttribute(ENTITY_TYPE_ID)
         .setDescription("The id of the entity type that needs to be indexed (e.g. myEntityType).")
         .setNillable(false);

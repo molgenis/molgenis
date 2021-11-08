@@ -1,6 +1,5 @@
 package org.molgenis.data.index.meta;
 
-import static org.molgenis.data.index.meta.IndexActionMetadata.ACTION_ORDER;
 import static org.molgenis.data.index.meta.IndexActionMetadata.ENTITY_ID;
 import static org.molgenis.data.index.meta.IndexActionMetadata.ENTITY_TYPE_ID;
 import static org.molgenis.data.index.meta.IndexActionMetadata.ID;
@@ -47,15 +46,6 @@ public class IndexAction extends StaticEntity {
 
   public IndexAction setTransactionId(String transactionId) {
     set(TRANSACTION_ID, transactionId);
-    return this;
-  }
-
-  public int getActionOrder() {
-    return getInt(ACTION_ORDER);
-  }
-
-  public IndexAction setActionOrder(int actionOrder) {
-    set(ACTION_ORDER, actionOrder);
     return this;
   }
 

@@ -1,27 +1,20 @@
 package org.molgenis.data.index.job;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.QueryRule.Operator.EQUALS;
-import static org.molgenis.data.index.meta.IndexActionMetadata.ACTION_ORDER;
 import static org.molgenis.data.index.meta.IndexActionMetadata.INDEX_ACTION;
-import static org.molgenis.data.index.meta.IndexActionMetadata.TRANSACTION_ID;
 import static org.molgenis.data.util.EntityUtils.getTypedValue;
 
 import io.micrometer.core.annotation.Timed;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule;
 import org.molgenis.data.Repository;
-import org.molgenis.data.Sort;
 import org.molgenis.data.index.IndexService;
 import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionMetadata;
 import org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -133,15 +126,6 @@ public class IndexJobService {
     } else {
       throw new MolgenisDataException("Unknown EntityType for entityTypeId: " + entityTypeId);
     }
-  }
-
-  // TODO no longer needed?
-  /** Retrieves the query to get all index actions sorted */
-  static Query<IndexAction> createQueryGetAllIndexActions(String transactionId) {
-    QueryRule rule = new QueryRule(TRANSACTION_ID, EQUALS, transactionId);
-    QueryImpl<IndexAction> q = new QueryImpl<>(rule);
-    q.setSort(new Sort(ACTION_ORDER));
-    return q;
   }
 
   private EntityType getEntityType(IndexAction indexAction) {

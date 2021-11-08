@@ -2,11 +2,9 @@ package org.molgenis.data.index;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Multimaps.synchronizedSetMultimap;
-import static com.google.common.collect.Streams.mapWithIndex;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.molgenis.data.index.Impact.createSingleEntityImpact;
 import static org.molgenis.data.index.IndexDependencyModel.ENTITY_TYPE_FETCH;
@@ -23,7 +21,6 @@ import com.google.common.collect.Sets;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityKey;
 import org.molgenis.data.Fetch;
@@ -46,6 +43,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 @Component
 public class IndexActionRegisterServiceImpl
     implements TransactionInformation, IndexActionRegisterService {
+
   private static final Logger LOG = LoggerFactory.getLogger(IndexActionRegisterServiceImpl.class);
   private static final int LOG_EVERY = 1000;
   private static final int ENTITY_FETCH_PAGE_SIZE = 1000;
@@ -114,14 +112,12 @@ public class IndexActionRegisterServiceImpl
     }
 
     IndexDependencyModel dependencyModel = createIndexDependencyModel(changes);
-    Stream<Impact> impactStream =
-        indexingStrategy.determineImpact(changes, dependencyModel).stream()
-            .filter(key -> !excludedEntities.contains(key.getEntityTypeId()));
     List<IndexAction> indexActions =
-        mapWithIndex(
-                impactStream,
-                (key, actionOrder) -> createIndexAction(transactionId, key, (int) actionOrder))
-            .collect(toList());
+        indexingStrategy.determineImpact(changes, dependencyModel)
+            .stream()
+            .filter(key -> !excludedEntities.contains(key.getEntityTypeId()))
+            .map(impact -> createIndexAction(transactionId, impact))
+            .toList();
     if (indexActions.isEmpty()) {
       return;
     }
@@ -140,8 +136,7 @@ public class IndexActionRegisterServiceImpl
     }
   }
 
-  private IndexAction createIndexAction(
-      String transactionId, Impact key, int actionOrder) {
+  private IndexAction createIndexAction(String transactionId, Impact key) {
     IndexAction indexAction = indexActionFactory.create();
     indexAction.setIndexStatus(PENDING);
     Object entityId = key.getId();
@@ -150,7 +145,6 @@ public class IndexActionRegisterServiceImpl
     }
     indexAction.setEntityTypeId(key.getEntityTypeId());
     indexAction.setTransactionId(transactionId);
-    indexAction.setActionOrder(actionOrder);
     return indexAction;
   }
 
