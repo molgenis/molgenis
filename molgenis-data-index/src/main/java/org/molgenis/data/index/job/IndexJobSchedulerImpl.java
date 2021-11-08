@@ -188,15 +188,17 @@ public class IndexJobSchedulerImpl implements IndexJobScheduler {
                 dataService
                     .getRepository(IndexActionMetadata.INDEX_ACTION)
                     .query()
+                    .nest()
                     .lt(END_DATE_TIME, fiveMinutesAgo)
                     .or()
                     .eq(END_DATE_TIME, null)
+                    .unnest()
                     .and()
                     .not()
                     .in(INDEX_STATUS, asList(STARTED, PENDING))
                     .findAll();
             dataService.delete(INDEX_ACTION, actions);
-            LOGGER.debug("Cleaned up Index job executions.");
+            LOGGER.debug("Cleaned up IndexActions");
           } else {
             LOGGER.warn("{} does not exist", INDEX_ACTION);
           }
