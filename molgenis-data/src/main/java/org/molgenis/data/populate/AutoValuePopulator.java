@@ -65,14 +65,14 @@ public class AutoValuePopulator {
             tags ->
                 tryFind(tags, tag -> hasIDPrefix.getIRI().equals(tag.getRelationIri()))
                     .toJavaUtil()
-                    .map(Tag::getLabel)
+                    .map(Tag::getValue)
                     .flatMap(
                         idPrefix ->
                             tryFind(
                                     tags,
                                     tag -> hasIDDigitCount.getIRI().equals(tag.getRelationIri()))
                                 .toJavaUtil()
-                                .map(Tag::getLabel)
+                                .map(Tag::getValue)
                                 .map(Integer::parseInt)
                                 .map("0"::repeat)
                                 .map(zeroes -> idPrefix + zeroes))

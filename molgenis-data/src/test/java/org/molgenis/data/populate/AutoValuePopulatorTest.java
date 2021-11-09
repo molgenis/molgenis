@@ -123,9 +123,9 @@ class AutoValuePopulatorTest {
   void populateStringFromSequence() {
     when(attrId.getTags()).thenReturn(List.of(idDigitCountTag, idPrefixTag));
     when(idDigitCountTag.getRelationIri()).thenReturn(hasIDDigitCount.getIRI());
-    when(idDigitCountTag.getLabel()).thenReturn("7");
+    when(idDigitCountTag.getValue()).thenReturn("7");
     when(idPrefixTag.getRelationIri()).thenReturn(hasIDPrefix.getIRI());
-    when(idPrefixTag.getLabel()).thenReturn("GEN-");
+    when(idPrefixTag.getValue()).thenReturn("GEN-");
     when(sequences.generateId(attrId)).thenReturn(123L);
 
     Entity entity = new DynamicEntity(entityType);
