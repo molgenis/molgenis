@@ -18,6 +18,7 @@
   * [Questionnaires](guide-questionnaire.md)
   * [Downloading data](guide-data-download.md)
   * [MagmaScript expressions (mapping service)](guide-magma.md)
+  * [Pseudonymisation](guide-pseudonymisation.md)
 * Access control
   * [Users](guide-users.md)
   * [Groups and roles](guide-groups-roles.md)

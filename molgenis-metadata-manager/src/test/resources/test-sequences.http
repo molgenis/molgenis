@@ -1,0 +1,8 @@
+GET http://localhost/plugin/metadata-manager/sequences
+Accept: application/json
+Authorization: Basic admin admin
+
+###
+
+POST http://localhost/plugin/metadata-manager/sequences/pseudonym%239476233e?value=42
+Authorization: Basic admin admin
