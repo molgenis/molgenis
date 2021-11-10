@@ -163,9 +163,10 @@ public class EmxMetadataParser implements MetadataParser {
   private static final String EMX_TAG_IDENTIFIER = "identifier";
   private static final String EMX_TAG_OBJECT_IRI = "objectIRI";
   private static final String EMX_TAG_LABEL = "label";
-  private static final String EMX_TAG_RELATION_LABEL = "relationLabel";
-  private static final String EMX_TAG_CODE_SYSTEM = "codeSystem";
   private static final String EMX_TAG_RELATION_IRI = "relationIRI";
+  private static final String EMX_TAG_RELATION_LABEL = "relationLabel";
+  private static final String EMX_TAG_VALUE = "value";
+  private static final String EMX_TAG_CODE_SYSTEM = "codeSystem";
 
   // Column names in the language sheet
   private static final String EMX_LANGUAGE_CODE = "code";
@@ -549,9 +550,10 @@ public class EmxMetadataParser implements MetadataParser {
     Tag tag = tagFactory.create(id);
     tag.setObjectIri(tagEntity.getString(EMX_TAG_OBJECT_IRI));
     tag.setLabel(tagEntity.getString(EMX_TAG_LABEL));
-    tag.setRelationLabel(tagEntity.getString(EMX_TAG_RELATION_LABEL));
-    tag.setCodeSystem(tagEntity.getString(EMX_TAG_CODE_SYSTEM));
     tag.setRelationIri(tagEntity.getString(EMX_TAG_RELATION_IRI));
+    tag.setRelationLabel(tagEntity.getString(EMX_TAG_RELATION_LABEL));
+    tag.setValue(tagEntity.getString(EMX_TAG_VALUE));
+    tag.setCodeSystem(tagEntity.getString(EMX_TAG_CODE_SYSTEM));
 
     return tag;
   }

@@ -94,7 +94,9 @@ class TagWizardControllerTest extends AbstractMockitoTest {
               Relation.hasSourceId,
               Relation.hasSourceName,
               Relation.isAssociatedWith,
-              Relation.isAudited
+              Relation.isAudited,
+              Relation.hasIDPrefix,
+              Relation.hasIDDigitCount
             });
   }
 }

@@ -22,6 +22,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.molgenis.data.populate.Sequences;
 import org.molgenis.data.security.auth.User;
 import org.molgenis.metadata.manager.model.EditorAttribute;
 import org.molgenis.metadata.manager.model.EditorAttributeIdentifier;
@@ -62,6 +63,8 @@ class MetadataManagerControllerTest extends AbstractMockitoSpringContextTests {
 
   @Mock private LocaleResolver localeResolver;
 
+  @Mock private Sequences sequences;
+
   private MockMvc mockMvc;
 
   @BeforeEach
@@ -78,7 +81,7 @@ class MetadataManagerControllerTest extends AbstractMockitoSpringContextTests {
     when(userAccountService.getCurrentUser()).thenReturn(user);
 
     MetadataManagerController metadataEditorController =
-        new MetadataManagerController(menuReaderService, metadataManagerService);
+        new MetadataManagerController(menuReaderService, metadataManagerService, sequences);
 
     mockMvc =
         MockMvcBuilders.standaloneSetup(metadataEditorController)

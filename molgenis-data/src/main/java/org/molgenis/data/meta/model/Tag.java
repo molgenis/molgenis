@@ -88,6 +88,16 @@ public class Tag extends StaticEntity {
 
   @Nullable
   @CheckForNull
+  public String getValue() {
+    return getString(TagMetadata.VALUE);
+  }
+
+  public void setValue(String value) {
+    set(TagMetadata.VALUE, value);
+  }
+
+  @Nullable
+  @CheckForNull
   public String getCodeSystem() {
     return getString(TagMetadata.CODE_SYSTEM);
   }
