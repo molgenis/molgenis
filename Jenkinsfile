@@ -106,7 +106,7 @@ pipeline {
                     // the shared pod template defined on the Jenkins server config
                     inheritFrom 'shared'
                     // integration test pod template defined in molgenis/molgenis-jenkins-pipeline repository
-                    yaml libraryResource("pod-templates/molgenis-it-10.yaml")
+                    yaml libraryResource("pod-templates/molgenis-it-9.yaml")
                 }
             }
             stages {
