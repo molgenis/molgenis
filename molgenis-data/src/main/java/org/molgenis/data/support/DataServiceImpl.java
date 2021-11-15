@@ -22,6 +22,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+// TODO remove this comment
 /** Implementation of the DataService interface */
 @Component
 public class DataServiceImpl implements DataService {
