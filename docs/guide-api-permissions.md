@@ -127,7 +127,7 @@ https://molgenis.mydomain.example/api/permissions/types/permissions/entityType
 ```
 
 Response:
-```
+```json
 "data": {
   [
        "READMETA",
@@ -250,7 +250,7 @@ Request:
 GET https://molgenis.mydomain.example/api/objects/entity-hospital_cardiology_patients
 ```
 Response:
-```
+```json
 {
     "page": {
         "size": 100,
@@ -316,7 +316,7 @@ Request:
 GET https://molgenis.mydomain.example/api/permissions/package/hospital_neurology?inheritance=true
 ```
 Response:
-```
+```json
 "data": {
   {
        "permissions": [
@@ -364,7 +364,7 @@ Response:
 ```
 The neurologist and the nurse inherit their READ permissions from the their "NEUROLOGY" role, while the reception inherits the READ permission from the READ permission they have on the parent package "hospital" of the "hospital_neurology" package.
 
-### Getting permissions for one or more users and/or roles for a resource type
+### Getting permissions for a resource type
 ##### Endpoint
 ```
 GET https://molgenis.mydomain.example/api/permissions/{typeId}
@@ -400,7 +400,7 @@ Request:
 https://molgenis.mydomain.example/api/permissions/entityType?q=user==Cardiologist,role==CARDIOLOGY&page=1&pageSize=10
 ```
 Response:
-```
+```json
 {
     "page": {
         "size": 10,
@@ -446,7 +446,7 @@ Response:
 
 
 
-### Getting all permissions for one or more users and/or roles
+### Getting all permissions
 ##### Endpoint
 ```
 GET https://molgenis.mydomain.example/api/permissions
@@ -478,7 +478,7 @@ https://molgenis.mydomain.example/api/permissions?q=user==Cardiologist&inheritan
 ```
 
 Response:
-```
+```json
 {
   "data": {
     "permissions": [
@@ -604,9 +604,9 @@ Response:
 ```
 
 
-## Granting permissions to users and roles
+## Granting permissions
 
-### Creating permissions for one or more users and/or roles for a resource
+### Creating permissions for a resource
 ##### Endpoint
 ```
 POST https://molgenis.mydomain.example/api/permissions/{typeId}/{objectId}
@@ -630,19 +630,19 @@ URL:
 https://molgenis.mydomain.example/api/permissions/entityType/hospital_cardiology_patients
 ```
 Body:
-```
+```json
 {
-   	permissions:[{
-   		permission:READ,
-   		role:CARDIOLOGY
-   	},{
-   		permission:WRITE,
-   		user:Cardiologist
-   	}]
-   }
+  "permissions":[{
+    "permission": "READ",
+    "role": "CARDIOLOGY"
+  },{
+    "permission": "WRITE",
+    "user": "Cardiologist"
+  }]
+}
 ```
 
-### Create permissions for one or more users and/or roles for resources of a certain type
+### Create permissions for multiple resources
 ```
 POST https://molgenis.mydomain.example/api/permissions/{typeId}")
 ``` 
@@ -672,7 +672,7 @@ Body:
 ```json
 { "data": {
     "objects":[{
-        "id": "Patient1",
+        "objectId": "Patient1",
         "permissions": [
         {
           "role": "CARDIOLOGY",
@@ -680,7 +680,7 @@ Body:
         }
       ]
     },{
-        "id": "Patient2",
+        "objectId": "Patient2",
         "permissions": [
         {
           "user": "Cardiologist",
@@ -696,13 +696,14 @@ Body:
 }
 ```
 
-### Update permissions for one or more users and/or roles for a resource type
+### Update permissions and/or ownership for one resource
 ##### Endpoint
 ```
 PATCH https://molgenis.mydomain.example/api/permissions/{typeId}/{objectId}")
 ```
 Request: 
 The endpoint expects a list of permissions, each permission should contain a 'permission' and a 'user' or a 'role'.
+If you want to update ownership, you can also add an 'ownedByUser' or an 'ownedByRole' field.  
 
 ##### Response
 
@@ -719,7 +720,7 @@ URL:
 ```
 https://molgenis.mydomain.example/api/permissions/entityType/hospital_cardiology_patients
 ```
-Body:
+Body example 1: Update permissions (only works if the resource already has permissions):
 ```json
 {
   "permissions": [{
@@ -732,14 +733,32 @@ Body:
 }
 ```
 
-### Update permissions for one or more users and/or roles for resources of a certain type
+Body example 2: Update ownership
+```json
+{
+  "ownedByUser": "Cardiologist"
+}
+```
+
+Body example 3: Update ownership and permissions (only works if the resource already has permissions):
+```json
+{
+  "ownedByUser": "Cardiologist",
+  "permissions": [{
+    "permission": "WRITE",
+    "role": "CARDIOLOGY"
+  }]
+}
+```
+
+### Update permissions and/or ownership for multiple resources
 ```
 PATCH https://molgenis.mydomain.example/api/permissions/{typeId}")
 ``` 
 
 ##### Request
 The endpoint expects a list of resources, each of which should contain the identifier for the
-resource and may contain a list of permissions. Each of these permission should contain a
+resource and may contain a list of permissions. Each of these permissions should contain a
 'permission' and a 'user' or a 'role'.
 If you want to update ownership, you can also add an 'ownedByUser' or an 'ownedByRole' field.
 
@@ -762,7 +781,7 @@ Body:
 {
     "objects": [
       {
-        "id": "Patient1",
+        "objectId": "Patient1",
         "ownedByRole": "CARDIOLOGY",
         "permissions": [
           {
@@ -772,7 +791,7 @@ Body:
         ]
       },
       {
-        "id": "Patient2",
+        "objectId": "Patient2",
         "label": "Patient2",
         "ownedByUser": "Cardiologist",
         "permissions": [
@@ -790,7 +809,7 @@ Body:
 }
 ```
 
-### Removing permissions for one or more users and/or roles for a resource
+### Removing permissions for a resource
 
 ##### Endpoint
 ```
