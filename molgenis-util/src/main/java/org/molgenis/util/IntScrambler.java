@@ -41,6 +41,7 @@ public class IntScrambler {
     a = aCandidate;
   }
 
+  @SuppressWarnings("ResultOfMethodCallIgnored")
   public static IntScrambler forDecimalFormat(DecimalFormat decimalFormat) {
     var matcher = Pattern.compile("0+").matcher(decimalFormat.toPattern());
     matcher.find();

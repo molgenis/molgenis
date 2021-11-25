@@ -11,6 +11,19 @@ GEN-0000003
 etc.
 ```
 
+Besides incrementing sequentially, the digit part of th ids can also be scrambled:
+
+```
+GEN-5720385
+GEN-1398822
+GEN-9401776
+etc.
+```
+These are not random: the generated ids are guaranteed to be unique and are based on the incrementing sequence.
+
+> Note: Be aware that the scrambled identifiers _will_ repeat when all possibilities are exhausted. So
+> make sure that the length of the digit-part is sufficient for your use case!
+
 ## How to configure
 To configure an attribute as an incrementing identifier, first make sure the attribute has the following properties:
 ```
@@ -36,6 +49,12 @@ your EMX file:
 | name      | dataType | nillable | idAttribute | tags                            |
 |-----------|----------|----------|-------------|---------------------------------|
 | pseudonym | string   | false    | AUTO        | hasIDDigitCount7,hasIDPrefixGen |
+
+If you want the identifiers to be scrambled, you should also add the `scrambled` tag to the attribute:
+
+| name      | dataType | nillable | idAttribute | tags                                      |
+|-----------|----------|----------|-------------|-------------------------------------------|
+| pseudonym | string   | false    | AUTO        | hasIDDigitCount7,hasIDPrefixGen,scrambled |
 
 ## Endpoints
 To keep track of a sequence's current value, it is stored in the database. To interact

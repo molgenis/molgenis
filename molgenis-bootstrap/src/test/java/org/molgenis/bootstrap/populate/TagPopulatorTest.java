@@ -26,6 +26,7 @@ class TagPopulatorTest {
   @Mock Tag token;
   @Mock Tag caseSensitive;
   @Mock Tag audited;
+  @Mock Tag scrambled;
   @Mock Repository<Tag> tagRepository;
 
   private TagPopulator tagPopulator;
@@ -40,12 +41,13 @@ class TagPopulatorTest {
     when(tagFactory.create("token")).thenReturn(token);
     when(tagFactory.create("case-sensitive")).thenReturn(caseSensitive);
     when(tagFactory.create("audit-usage")).thenReturn(audited);
+    when(tagFactory.create("scrambled")).thenReturn(scrambled);
 
     when(dataService.getRepository(TagMetadata.TAG, Tag.class)).thenReturn(tagRepository);
 
     tagPopulator.populate();
 
-    verify(tagRepository).upsertBatch(List.of(token, caseSensitive, audited));
+    verify(tagRepository).upsertBatch(List.of(token, caseSensitive, audited, scrambled));
     verify(token).setRelationIri(RDF.TYPE.toString());
     verify(token).setObjectIri(XMLSchema.TOKEN.toString());
 
@@ -54,5 +56,8 @@ class TagPopulatorTest {
 
     verify(audited).setRelationIri(isAudited.getIRI());
     verify(audited).setObjectIri(Vocabulary.AUDIT_USAGE.toString());
+
+    verify(scrambled).setRelationIri(RDF.TYPE.toString());
+    verify(scrambled).setObjectIri(Vocabulary.SCRAMBLED.toString());
   }
 }
