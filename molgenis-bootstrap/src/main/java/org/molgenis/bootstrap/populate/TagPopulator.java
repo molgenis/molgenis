@@ -6,6 +6,7 @@ import static org.molgenis.data.semantic.Relation.isAudited;
 import static org.molgenis.data.semantic.Relation.type;
 import static org.molgenis.data.semantic.Vocabulary.AUDIT_USAGE;
 import static org.molgenis.data.semantic.Vocabulary.CASE_SENSITIVE;
+import static org.molgenis.data.semantic.Vocabulary.SCRAMBLED;
 
 import java.util.List;
 import org.molgenis.data.DataService;
@@ -43,8 +44,14 @@ public class TagPopulator {
     audited.setRelationIri(isAudited.getIRI());
     audited.setRelationLabel(isAudited.getLabel());
 
+    Tag scrambled = tagFactory.create("scrambled");
+    scrambled.setLabel("Scrambled");
+    scrambled.setObjectIri(SCRAMBLED.toString());
+    scrambled.setRelationIri(type.getIRI());
+    scrambled.setRelationLabel(type.getLabel());
+
     dataService
         .getRepository(TAG, Tag.class)
-        .upsertBatch(List.of(isAToken, isCaseSensitive, audited));
+        .upsertBatch(List.of(isAToken, isCaseSensitive, audited, scrambled));
   }
 }
