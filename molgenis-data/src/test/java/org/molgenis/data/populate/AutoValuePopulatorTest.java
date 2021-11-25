@@ -12,6 +12,8 @@ import static org.molgenis.data.meta.AttributeType.DATE_TIME;
 import static org.molgenis.data.meta.AttributeType.STRING;
 import static org.molgenis.data.semantic.Relation.hasIDDigitCount;
 import static org.molgenis.data.semantic.Relation.hasIDPrefix;
+import static org.molgenis.data.semantic.Relation.type;
+import static org.molgenis.data.semantic.Vocabulary.SCRAMBLED;
 
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,6 +46,7 @@ class AutoValuePopulatorTest {
   @Mock private IdGenerator idGenerator;
   @Mock private Tag idDigitCountTag;
   @Mock private Tag idPrefixTag;
+  @Mock private Tag scrambledTag;
 
   @BeforeEach
   void setUpBeforeMethod() {
@@ -132,5 +135,22 @@ class AutoValuePopulatorTest {
     autoValuePopulator.populate(entity);
 
     assertEquals("GEN-0000123", entity.getString(attrId));
+  }
+
+  @Test
+  void populateStringFromSequenceScrambled() {
+    when(attrId.getTags()).thenReturn(List.of(idDigitCountTag, idPrefixTag, scrambledTag));
+    when(idDigitCountTag.getRelationIri()).thenReturn(hasIDDigitCount.getIRI());
+    when(idDigitCountTag.getValue()).thenReturn("7");
+    when(idPrefixTag.getRelationIri()).thenReturn(hasIDPrefix.getIRI());
+    when(idPrefixTag.getValue()).thenReturn("GEN-");
+    when(scrambledTag.getObjectIri()).thenReturn(SCRAMBLED.toString());
+    when(scrambledTag.getRelationIri()).thenReturn(type.getIRI());
+    when(sequences.generateId(attrId)).thenReturn(1L);
+
+    Entity entity = new DynamicEntity(entityType);
+    autoValuePopulator.populate(entity);
+
+    assertEquals("GEN-5184445", entity.getString(attrId));
   }
 }
