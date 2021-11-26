@@ -15,6 +15,7 @@ import org.molgenis.web.PluginController;
 import org.molgenis.web.menu.MenuReaderService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -58,10 +59,22 @@ public class MetadataManagerController extends PluginController {
     return sequences.getSequences();
   }
 
+  @GetMapping("/sequences/{sequenceName}")
+  @ResponseBody
+  public long getValue(@PathVariable String sequenceName) {
+    return sequences.getValue(sequenceName);
+  }
+
   @PostMapping("/sequences/{sequenceName}")
   @ResponseStatus(NO_CONTENT)
   public void setValue(@PathVariable String sequenceName, @RequestParam long value) {
     sequences.setValue(sequenceName, value);
+  }
+
+  @DeleteMapping("/sequences/{sequenceName}")
+  @ResponseStatus(NO_CONTENT)
+  public void deleteSequence(@PathVariable String sequenceName) {
+    sequences.deleteSequence(sequenceName);
   }
 
   @ResponseBody

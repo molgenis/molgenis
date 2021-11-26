@@ -63,9 +63,19 @@ with a sequence there are two endpoints available:
 #### `GET <host>/plugin/metadata-manager/sequences`
 Returns the sequences present in the database.
 
+> Note: Keep in mind that the sequence identifiers contain number signs (#). These need to be URL 
+> escaped with `%23` in the upcoming endpoints.
+
+#### `GET <host>/plugin/metadata-manager/sequences/<sequence_id>`
+Returns the current value of the sequence.
+
+#### `DElETE <host>/plugin/metadata-manager/sequences/<sequence_id>`
+Deletes a sequence in the database. Since sequences are not automatically deleted when an entity type is deleted,
+you can use this endpoint to clean up. This endpoint can also be used to "reset" a sequence: a new sequence
+starting at 1 will be created as soon as a new row is added.
+
 #### `POST <host>/plugin/metadata-manager/sequences/<sequence_id>?value=123`
-Sets a sequence to a specific value. Keep in mind that the sequence identifiers contain number signs (#).
-These need to be URL escaped with `%23`.
+Sets a sequence to a specific value. 
 
 ## Migration
 A sequence's current value is not carried over when copying, exporting, migrating or re-importing a
