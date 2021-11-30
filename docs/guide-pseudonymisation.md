@@ -42,8 +42,8 @@ Here are the tags for the sequence we're looking at:
 | hasIDDigitCount7 | hasIDDigitCount | http://purl.obolibrary.org/obo/IAO_0000596 | 7     |
 | hasIDPrefixGen   | hasIDPrefix     | http://purl.obolibrary.org/obo/IAO_0000599 | GEN-  |
 
-Now it's time to add the tags to your id-attribute. You can do this in the Data Explorer (by going 
-to the Attribute entity type and editing your attribute), or you can make it part of the model in
+Now it's time to add the tags to your id-attribute. You can do this in the Data Explorer (by opening 
+the Attribute table and editing your attribute), or you can make it part of the model in
 your EMX file:
 
 | name      | dataType | nillable | idAttribute | tags                            |
