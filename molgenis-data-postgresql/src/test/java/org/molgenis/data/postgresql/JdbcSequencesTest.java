@@ -27,8 +27,9 @@ class JdbcSequencesTest {
   @Test
   void testGetSequences() {
     when(jdbcOperations.queryForList("SELECT sequence_name FROM information_schema.sequences"))
-        .thenReturn(List.of(Map.of("sequence_name", "seq1"), Map.of("sequence_name", "seq2")));
-    assertEquals(List.of("seq1", "seq2"), jdbcSequences.getSequences());
+        .thenReturn(
+            List.of(Map.of("sequence_name", "seq1"), Map.of("sequence_name", "acl_sid_id_seq")));
+    assertEquals(List.of("seq1"), jdbcSequences.getSequences());
   }
 
   @Test
@@ -77,6 +78,13 @@ class JdbcSequencesTest {
     when(jdbcOperations.queryForList("SELECT sequence_name FROM information_schema.sequences"))
         .thenReturn(List.of(Map.of("sequence_name", "seq1")));
     assertThrows(InvalidKeyException.class, () -> jdbcSequences.deleteSequence("seq2"));
+  }
+
+  @Test
+  void testDeleteSequenceIllegal() {
+    when(jdbcOperations.queryForList("SELECT sequence_name FROM information_schema.sequences"))
+        .thenReturn(List.of(Map.of("sequence_name", "acl_entry_id_seq")));
+    assertThrows(InvalidKeyException.class, () -> jdbcSequences.deleteSequence("acl_entry_id_seq"));
   }
 
   @Test

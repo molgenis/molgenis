@@ -4,6 +4,7 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 import java.util.List;
+import java.util.Set;
 import javax.management.openmbean.InvalidKeyException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.populate.Sequences;
@@ -13,6 +14,9 @@ public class JdbcSequences implements Sequences {
 
   private final JdbcOperations jdbcOperations;
   private final PostgreSqlIdGenerator idGenerator;
+  private static final Set<String> EXCLUSIONS =
+      Set.of(
+          "acl_sid_id_seq", "acl_class_id_seq", "acl_object_identity_id_seq", "acl_entry_id_seq");
 
   public JdbcSequences(PostgreSqlIdGenerator idGenerator, JdbcOperations jdbcOperations) {
     this.idGenerator = idGenerator;
@@ -24,6 +28,7 @@ public class JdbcSequences implements Sequences {
     return jdbcOperations.queryForList("SELECT sequence_name FROM information_schema.sequences")
         .stream()
         .map(row -> (String) row.get("sequence_name"))
+        .filter(s -> !EXCLUSIONS.contains(s))
         .toList();
   }
 
@@ -33,6 +38,8 @@ public class JdbcSequences implements Sequences {
     jdbcOperations.queryForMap("SELECT setval(?, ?)", sequenceName, value);
   }
 
+  @Override
+  @SuppressWarnings("javasecurity:S3649") // sequenceName is validated before it's used in a query
   public long getValue(String sequenceName) {
     validateSequenceName(sequenceName);
     return (Long)
@@ -42,6 +49,7 @@ public class JdbcSequences implements Sequences {
   }
 
   @Override
+  @SuppressWarnings("javasecurity:S3649") // sequenceName is validated before it's used in a query
   public void deleteSequence(String sequenceName) {
     validateSequenceName(sequenceName);
     jdbcOperations.execute(format("DROP SEQUENCE \"%s\"", sequenceName));
