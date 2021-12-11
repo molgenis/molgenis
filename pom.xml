@@ -88,6 +88,8 @@
     <!-- parent version 0.35 depends on org.apache.commons:commons-compress:jar:1.9, 1.18 is required by org.apache.poi:poi:jar:4.0.1 -->
     <webjars-locator-core.version>0.36</webjars-locator-core.version>
     <rest-assured.version>3.3.0</rest-assured.version>
+    <!-- log4j 2.15.0 replace this when parent pom 2.5.8 is released on 23-12-2021 -->
+    <log4j2.version>2.15.0</log4j2.version>
 
     <!-- dependency versions not managed by parent pom -->
     <google.auto-value.version>1.7</google.auto-value.version>
