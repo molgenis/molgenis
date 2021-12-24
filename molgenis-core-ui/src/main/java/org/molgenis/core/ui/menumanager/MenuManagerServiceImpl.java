@@ -27,15 +27,14 @@ public class MenuManagerServiceImpl implements MenuManagerService {
   }
 
   @Override
-  @RunAsSystem
-  @PreAuthorize("hasAnyRole('ROLE_SYSTEM, ROLE_SU')")
+  @PreAuthorize("hasAnyRole('ROLE_SU')")
   @Transactional(readOnly = true)
   public Iterable<Plugin> getPlugins() {
     return dataService.findAll(PluginMetadata.PLUGIN, Plugin.class).collect(toList());
   }
 
   @Override
-  @PreAuthorize("hasAnyRole('ROLE_SYSTEM, ROLE_SU')")
+  @PreAuthorize("hasAnyRole('ROLE_SU')")
   @Transactional
   public void saveMenu(Menu molgenisMenu) {
     appSettings.setMenu(gson.toJson(molgenisMenu));
