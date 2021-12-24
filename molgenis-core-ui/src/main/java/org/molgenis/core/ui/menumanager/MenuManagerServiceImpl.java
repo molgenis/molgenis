@@ -7,7 +7,6 @@ import com.google.gson.Gson;
 import org.molgenis.data.DataService;
 import org.molgenis.data.plugin.model.Plugin;
 import org.molgenis.data.plugin.model.PluginMetadata;
-import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.web.menu.model.Menu;
 import org.springframework.security.access.prepost.PreAuthorize;
