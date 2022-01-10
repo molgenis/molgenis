@@ -4,13 +4,19 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 import java.util.List;
+import java.util.Set;
+import javax.management.openmbean.InvalidKeyException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.populate.Sequences;
 import org.springframework.jdbc.core.JdbcOperations;
 
 public class JdbcSequences implements Sequences {
+
   private final JdbcOperations jdbcOperations;
   private final PostgreSqlIdGenerator idGenerator;
+  private static final Set<String> EXCLUSIONS =
+      Set.of(
+          "acl_sid_id_seq", "acl_class_id_seq", "acl_object_identity_id_seq", "acl_entry_id_seq");
 
   public JdbcSequences(PostgreSqlIdGenerator idGenerator, JdbcOperations jdbcOperations) {
     this.idGenerator = idGenerator;
@@ -22,12 +28,31 @@ public class JdbcSequences implements Sequences {
     return jdbcOperations.queryForList("SELECT sequence_name FROM information_schema.sequences")
         .stream()
         .map(row -> (String) row.get("sequence_name"))
+        .filter(s -> !EXCLUSIONS.contains(s))
         .toList();
   }
 
   @Override
   public void setValue(String sequenceName, long value) {
+    validateSequenceName(sequenceName);
     jdbcOperations.queryForMap("SELECT setval(?, ?)", sequenceName, value);
+  }
+
+  @Override
+  @SuppressWarnings("javasecurity:S3649") // sequenceName is validated before it's used in a query
+  public long getValue(String sequenceName) {
+    validateSequenceName(sequenceName);
+    return (Long)
+        jdbcOperations
+            .queryForMap(format("SELECT last_value FROM \"%s\"", sequenceName))
+            .get("last_value");
+  }
+
+  @Override
+  @SuppressWarnings("javasecurity:S3649") // sequenceName is validated before it's used in a query
+  public void deleteSequence(String sequenceName) {
+    validateSequenceName(sequenceName);
+    jdbcOperations.execute(format("DROP SEQUENCE \"%s\"", sequenceName));
   }
 
   @Override
@@ -35,5 +60,21 @@ public class JdbcSequences implements Sequences {
     var sequenceName = idGenerator.generateSequenceName(attribute);
     jdbcOperations.execute(format("CREATE SEQUENCE IF NOT EXISTS \"%s\"", sequenceName));
     return (Long) jdbcOperations.queryForMap("select nextval(?)", sequenceName).get("nextval");
+  }
+
+  /**
+   * Checks if a sequence exists, throws an InvalidKeyException otherwise.
+   *
+   * <p>Sequence names (like table names) can't be escaped in a prepared statement so to protect
+   * against SQL injection we check if the sequence exists beforehand.
+   *
+   * <p>Also see:
+   * https://stackoverflow.com/questions/11312155/how-to-use-a-tablename-variable-for-a-java-prepared-statement-insert
+   */
+  private void validateSequenceName(String sequenceName) {
+    var sequences = getSequences();
+    if (!sequences.contains(sequenceName)) {
+      throw new InvalidKeyException("Sequence does not exist");
+    }
   }
 }

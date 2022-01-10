@@ -10,6 +10,9 @@ public class Vocabulary {
   public static final IRI CASE_SENSITIVE =
       SimpleValueFactory.getInstance().createIRI("http://purl.obolibrary.org/obo/NCIT_C71490");
 
+  public static final IRI SCRAMBLED =
+      SimpleValueFactory.getInstance().createIRI("http://molgenis.org#scrambled");
+
   public static final IRI AUDIT_USAGE =
       SimpleValueFactory.getInstance().createIRI("http://molgenis.org/audit#usage");
 }

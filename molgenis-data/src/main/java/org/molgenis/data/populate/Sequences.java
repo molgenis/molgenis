@@ -10,12 +10,27 @@ public interface Sequences {
   List<String> getSequences();
 
   /**
-   * Sets the current value a sequence, creating it if it does not yet exist
+   * Sets the current value a sequence, creating it if it does not yet exist.
    *
    * @param sequenceName the name of the sequence
    * @param value the value to set
    */
   void setValue(String sequenceName, long value);
+
+  /**
+   * Returns the current value of a sequence.
+   *
+   * @param sequenceName the name of the sequence
+   * @return the current value of the sequence
+   */
+  long getValue(String sequenceName);
+
+  /**
+   * Deletes a sequence.
+   *
+   * @param sequenceName the name of the sequence
+   */
+  void deleteSequence(String sequenceName);
 
   /**
    * Generates a new value for an id attribute, creating a sequence for it if one is not yet
