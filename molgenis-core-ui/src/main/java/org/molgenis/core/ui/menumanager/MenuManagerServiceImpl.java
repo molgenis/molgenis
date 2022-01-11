@@ -7,7 +7,6 @@ import com.google.gson.Gson;
 import org.molgenis.data.DataService;
 import org.molgenis.data.plugin.model.Plugin;
 import org.molgenis.data.plugin.model.PluginMetadata;
-import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.web.menu.model.Menu;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,15 +26,14 @@ public class MenuManagerServiceImpl implements MenuManagerService {
   }
 
   @Override
-  @RunAsSystem
-  @PreAuthorize("hasAnyRole('ROLE_SYSTEM, ROLE_SU')")
+  @PreAuthorize("hasAnyRole('ROLE_SU')")
   @Transactional(readOnly = true)
   public Iterable<Plugin> getPlugins() {
     return dataService.findAll(PluginMetadata.PLUGIN, Plugin.class).collect(toList());
   }
 
   @Override
-  @PreAuthorize("hasAnyRole('ROLE_SYSTEM, ROLE_SU')")
+  @PreAuthorize("hasAnyRole('ROLE_SU')")
   @Transactional
   public void saveMenu(Menu molgenisMenu) {
     appSettings.setMenu(gson.toJson(molgenisMenu));
