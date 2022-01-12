@@ -15,6 +15,7 @@ import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -24,7 +25,6 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Stream;
-import org.apache.commons.collections.list.SynchronizedList;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.index.meta.IndexAction;
@@ -48,8 +48,9 @@ public class IndexJobSchedulerImpl implements IndexJobScheduler {
   private final Lock lock = new ReentrantLock();
   private final Condition allEntitiesStable = lock.newCondition();
   private final Condition singleEntityStable = lock.newCondition();
-  private final List<RunnableIndexAction> indexActions =
-      SynchronizedList.decorate(new ArrayList<RunnableIndexAction>());
+  private final List<RunnableIndexAction> indexActions = Collections.synchronizedList(
+      new ArrayList<>());
+
 
   private static final Logger LOGGER = LoggerFactory.getLogger(IndexJobSchedulerImpl.class);
 
