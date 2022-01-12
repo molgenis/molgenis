@@ -1,6 +1,7 @@
 package org.molgenis.data.index;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.index.meta.IndexActionMetadata.INDEX_ACTION;
 
 import java.util.concurrent.Executors;
 import javax.annotation.PostConstruct;
@@ -53,8 +54,7 @@ public class IndexConfig {
 
   @PostConstruct
   public void register() {
-    // TODO exclude IndexAction?
-    //    indexActionRegisterService.addExcludedEntity(INDEX_JOB_EXECUTION);
+    indexActionRegisterService.addExcludedEntity(INDEX_ACTION);
   }
 
   @Bean
