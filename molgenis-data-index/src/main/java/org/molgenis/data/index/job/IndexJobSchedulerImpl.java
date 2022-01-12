@@ -54,10 +54,10 @@ public class IndexJobSchedulerImpl implements IndexJobScheduler {
   private static final Logger LOGGER = LoggerFactory.getLogger(IndexJobSchedulerImpl.class);
 
   public IndexJobSchedulerImpl(
-      IndexJobService indexJobService, ExecutorService jobExecutor, DataService dataService) {
+      IndexJobService indexJobService, ExecutorService executorService, DataService dataService) {
     this.dataService = requireNonNull(dataService);
     this.indexJobService = requireNonNull(indexJobService);
-    this.executorService = requireNonNull(jobExecutor);
+    this.executorService = requireNonNull(executorService);
   }
 
   @Override
