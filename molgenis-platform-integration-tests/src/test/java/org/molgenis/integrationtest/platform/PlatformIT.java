@@ -49,7 +49,7 @@ import org.molgenis.data.i18n.model.L10nStringFactory;
 import org.molgenis.data.i18n.model.L10nStringMetadata;
 import org.molgenis.data.i18n.model.LanguageFactory;
 import org.molgenis.data.index.IndexActionRegisterServiceImpl;
-import org.molgenis.data.index.job.IndexJobScheduler;
+import org.molgenis.data.index.job.IndexActionScheduler;
 import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionMetadata;
 import org.molgenis.data.listeners.EntityListenersService;
@@ -90,7 +90,7 @@ class PlatformIT extends AbstractMockitoSpringContextTests {
   private static EntityType refEntityTypeDynamic;
   private static EntityType selfXrefEntityType;
 
-  @Autowired private IndexJobScheduler indexService;
+  @Autowired private IndexActionScheduler indexService;
   @Autowired private EntityTestHarness testHarness;
   @Autowired private EntitySelfXrefTestHarness entitySelfXrefTestHarness;
   @Autowired private DataService dataService;
@@ -104,12 +104,12 @@ class PlatformIT extends AbstractMockitoSpringContextTests {
   @Autowired private PermissionService testPermissionService;
 
   static void waitForWorkToBeFinished(ApplicationContext applicationContext, Logger log) {
-    IndexJobScheduler indexJobScheduler = applicationContext.getBean(IndexJobScheduler.class);
-    waitForWorkToBeFinished(indexJobScheduler, log);
+    IndexActionScheduler indexActionScheduler = applicationContext.getBean(IndexActionScheduler.class);
+    waitForWorkToBeFinished(indexActionScheduler, log);
   }
 
   /** Wait till the whole index is stable. Index job is done a-synchronized. */
-  static void waitForWorkToBeFinished(IndexJobScheduler indexService, Logger log) {
+  static void waitForWorkToBeFinished(IndexActionScheduler indexService, Logger log) {
     try {
       indexService.waitForAllIndicesStable();
       log.info("All work finished");
@@ -126,7 +126,7 @@ class PlatformIT extends AbstractMockitoSpringContextTests {
    * @param entityType name of the entity whose index needs to be stable
    */
   static void waitForIndexToBeStable(
-      EntityType entityType, IndexJobScheduler indexService, Logger log) {
+      EntityType entityType, IndexActionScheduler indexService, Logger log) {
     try {
       indexService.waitForIndexToBeStableIncludingReferences(entityType);
       log.info("Index for entity [{}] incl. references is stable", entityType.getId());
@@ -177,7 +177,7 @@ class PlatformIT extends AbstractMockitoSpringContextTests {
   @AfterAll
   static void setUpAfterAll(ApplicationContext applicationContext) {
     DataService dataService = applicationContext.getBean(DataService.class);
-    IndexJobScheduler indexJobScheduler = applicationContext.getBean(IndexJobScheduler.class);
+    IndexActionScheduler indexActionScheduler = applicationContext.getBean(IndexActionScheduler.class);
     MetaDataService metaDataService = applicationContext.getBean(MetaDataService.class);
 
     runAsSystem(
@@ -188,11 +188,11 @@ class PlatformIT extends AbstractMockitoSpringContextTests {
           dataService.deleteAll(refEntityTypeDynamic.getId());
           dataService.deleteAll(selfXrefEntityType.getId());
         });
-    waitForIndexToBeStable(entityTypeStatic, indexJobScheduler, LOG);
-    waitForIndexToBeStable(refEntityTypeStatic, indexJobScheduler, LOG);
-    waitForIndexToBeStable(entityTypeDynamic, indexJobScheduler, LOG);
-    waitForIndexToBeStable(refEntityTypeDynamic, indexJobScheduler, LOG);
-    waitForIndexToBeStable(selfXrefEntityType, indexJobScheduler, LOG);
+    waitForIndexToBeStable(entityTypeStatic, indexActionScheduler, LOG);
+    waitForIndexToBeStable(refEntityTypeStatic, indexActionScheduler, LOG);
+    waitForIndexToBeStable(entityTypeDynamic, indexActionScheduler, LOG);
+    waitForIndexToBeStable(refEntityTypeDynamic, indexActionScheduler, LOG);
+    waitForIndexToBeStable(selfXrefEntityType, indexActionScheduler, LOG);
     cleanupUserPermissions(applicationContext, getObjectIdentityPermissionSetMap(), USERNAME);
 
     runAsSystem(

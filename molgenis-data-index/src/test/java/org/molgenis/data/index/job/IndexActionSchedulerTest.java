@@ -39,8 +39,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.mail.MailSender;
 import org.springframework.test.context.ContextConfiguration;
 
-@ContextConfiguration(classes = {IndexJobSchedulerTest.Config.class, IndexTestConfig.class})
-class IndexJobSchedulerTest extends AbstractMolgenisSpringTest {
+@ContextConfiguration(classes = {IndexActionSchedulerTest.Config.class, IndexTestConfig.class})
+class IndexActionSchedulerTest extends AbstractMolgenisSpringTest {
 
   @Autowired private DataService dataService;
 
@@ -48,7 +48,7 @@ class IndexJobSchedulerTest extends AbstractMolgenisSpringTest {
 
   @Mock private Repository<Entity> repository;
 
-  @Autowired private IndexJobScheduler indexJobScheduler;
+  @Autowired private IndexActionScheduler indexActionScheduler;
 
   @Mock private Stream<Entity> jobExecutions;
 
@@ -65,7 +65,7 @@ class IndexJobSchedulerTest extends AbstractMolgenisSpringTest {
   void testRebuildIndexDoesNothingIfNoIndexActionJobIsFound() {
     when(dataService.findOneById(INDEX_ACTION, "abcde")).thenReturn(null);
 
-    indexJobScheduler.scheduleIndexActions("abcde");
+    indexActionScheduler.scheduleIndexActions("abcde");
 
     verify(jobExecutor, never()).submit(any());
   }
@@ -77,7 +77,7 @@ class IndexJobSchedulerTest extends AbstractMolgenisSpringTest {
     when(repository.findAll(queryCaptor.capture())).thenReturn(jobExecutions);
     when(dataService.hasRepository(INDEX_ACTION)).thenReturn(true);
 
-    indexJobScheduler.cleanupIndexActions();
+    indexActionScheduler.cleanupIndexActions();
 
     verify(dataService).delete(INDEX_ACTION, jobExecutions);
 

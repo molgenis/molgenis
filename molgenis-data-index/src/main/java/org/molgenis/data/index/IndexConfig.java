@@ -6,8 +6,8 @@ import static org.molgenis.data.index.meta.IndexActionMetadata.INDEX_ACTION;
 import java.util.concurrent.Executors;
 import javax.annotation.PostConstruct;
 import org.molgenis.data.DataService;
-import org.molgenis.data.index.job.IndexJobScheduler;
-import org.molgenis.data.index.job.IndexJobSchedulerImpl;
+import org.molgenis.data.index.job.IndexActionScheduler;
+import org.molgenis.data.index.job.IndexActionSchedulerImpl;
 import org.molgenis.data.index.job.IndexJobService;
 import org.molgenis.data.index.meta.IndexActionFactory;
 import org.molgenis.data.index.meta.IndexActionMetadata;
@@ -58,17 +58,18 @@ public class IndexConfig {
   }
 
   @Bean
-  public IndexTransactionListener indexTransactionListener(IndexJobScheduler indexJobScheduler) {
+  public IndexTransactionListener indexTransactionListener(
+      IndexActionScheduler indexActionScheduler) {
     final IndexTransactionListener indexTransactionListener =
-        new IndexTransactionListener(indexJobScheduler, indexActionRegisterService);
+        new IndexTransactionListener(indexActionScheduler, indexActionRegisterService);
     transactionManager.addTransactionListener(indexTransactionListener);
     return indexTransactionListener;
   }
 
   @Bean
-  public IndexJobScheduler indexJobScheduler(IndexJobService indexJobService) {
+  public IndexActionScheduler indexJobScheduler(IndexJobService indexJobService) {
     var executors = Executors.newFixedThreadPool(5);
-    return new IndexJobSchedulerImpl(indexJobService, executors, dataService);
+    return new IndexActionSchedulerImpl(indexJobService, executors, dataService);
   }
 
   @Bean

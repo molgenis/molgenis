@@ -71,7 +71,7 @@ import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.file.model.FileMeta;
 import org.molgenis.data.file.model.FileMetaFactory;
-import org.molgenis.data.index.job.IndexJobScheduler;
+import org.molgenis.data.index.job.IndexActionScheduler;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.EntityIdentity;
 import org.molgenis.data.security.EntityTypeIdentity;
@@ -1108,10 +1108,10 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
         applicationContext.getBean(TestEntityStaticMetaData.class);
     TestRefEntityStaticMetaData refEntityTypeStatic =
         applicationContext.getBean(TestRefEntityStaticMetaData.class);
-    IndexJobScheduler indexJobScheduler = applicationContext.getBean(IndexJobScheduler.class);
+    IndexActionScheduler indexActionScheduler = applicationContext.getBean(IndexActionScheduler.class);
 
-    waitForIndexToBeStable(entityType, indexJobScheduler, LOG);
-    waitForIndexToBeStable(refEntityType, indexJobScheduler, LOG);
+    waitForIndexToBeStable(entityType, indexActionScheduler, LOG);
+    waitForIndexToBeStable(refEntityType, indexActionScheduler, LOG);
 
     dataService.getMeta().deleteEntityTypes(asList(entityType.getId(), refEntityType.getId()));
     dataService.delete(entityTypeStatic.getId(), staticEntities.stream());
@@ -1121,9 +1121,9 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
   }
 
   private static void waitForAllIndicesStable(ApplicationContext applicationContext) {
-    IndexJobScheduler indexJobScheduler = applicationContext.getBean(IndexJobScheduler.class);
+    IndexActionScheduler indexActionScheduler = applicationContext.getBean(IndexActionScheduler.class);
     try {
-      indexJobScheduler.waitForAllIndicesStable();
+      indexActionScheduler.waitForAllIndicesStable();
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
     }
@@ -1136,7 +1136,7 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
    * @param entityType name of the entity whose index needs to be stable
    */
   static void waitForIndexToBeStable(
-      EntityType entityType, IndexJobScheduler indexService, Logger log) {
+      EntityType entityType, IndexActionScheduler indexService, Logger log) {
     try {
       indexService.waitForIndexToBeStableIncludingReferences(entityType);
       log.info("Index for entity [{}] incl. references is stable", entityType.getId());

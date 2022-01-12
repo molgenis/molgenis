@@ -52,7 +52,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.OneToManyTestHarness;
-import org.molgenis.data.index.job.IndexJobScheduler;
+import org.molgenis.data.index.job.IndexActionScheduler;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.permission.PermissionService;
 import org.molgenis.data.security.permission.model.Permission;
@@ -81,7 +81,7 @@ public class OneToManyIT extends AbstractMockitoSpringContextTests {
   private static final Logger LOG = LoggerFactory.getLogger(OneToManyIT.class);
   private static final String USERNAME = "onetomany-user";
 
-  @Autowired private IndexJobScheduler indexService;
+  @Autowired private IndexActionScheduler indexService;
   @Autowired private OneToManyTestHarness oneToManyTestHarness;
   @Autowired private DataService dataService;
 

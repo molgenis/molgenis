@@ -14,7 +14,7 @@ import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.index.SearchService;
-import org.molgenis.data.index.job.IndexJobScheduler;
+import org.molgenis.data.index.job.IndexActionScheduler;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
@@ -65,7 +65,7 @@ public class IndexMetadataCUDOperationsPlatformIT {
       AttributeFactory attributeFactory,
       ElasticsearchService searchService,
       MetaDataService metaDataService,
-      IndexJobScheduler indexService) {
+      IndexActionScheduler indexService) {
     // 1. Create new compound to test delete
     Attribute compound = attributeFactory.create();
     compound.setName("test_compound");

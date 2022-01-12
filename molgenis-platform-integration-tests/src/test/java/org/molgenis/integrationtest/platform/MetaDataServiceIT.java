@@ -64,7 +64,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityTestHarness;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.UnknownEntityTypeException;
-import org.molgenis.data.index.job.IndexJobScheduler;
+import org.molgenis.data.index.job.IndexActionScheduler;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
@@ -457,9 +457,9 @@ public class MetaDataServiceIT extends AbstractMockitoSpringContextTests {
   }
 
   private static void waitForAllIndicesStable(ApplicationContext applicationContext) {
-    IndexJobScheduler indexJobScheduler = applicationContext.getBean(IndexJobScheduler.class);
+    IndexActionScheduler indexActionScheduler = applicationContext.getBean(IndexActionScheduler.class);
     try {
-      indexJobScheduler.waitForAllIndicesStable();
+      indexActionScheduler.waitForAllIndicesStable();
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
     }

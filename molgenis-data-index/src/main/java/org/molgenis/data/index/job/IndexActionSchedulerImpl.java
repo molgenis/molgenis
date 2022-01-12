@@ -39,7 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 
-public class IndexJobSchedulerImpl implements IndexJobScheduler {
+public class IndexActionSchedulerImpl implements IndexActionScheduler {
 
   private final ExecutorService executorService;
   private final IndexJobService indexJobService;
@@ -52,9 +52,9 @@ public class IndexJobSchedulerImpl implements IndexJobScheduler {
       new ArrayList<>());
 
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(IndexJobSchedulerImpl.class);
+  private static final Logger LOG = LoggerFactory.getLogger(IndexActionSchedulerImpl.class);
 
-  public IndexJobSchedulerImpl(
+  public IndexActionSchedulerImpl(
       IndexJobService indexJobService, ExecutorService executorService, DataService dataService) {
     this.dataService = requireNonNull(dataService);
     this.indexJobService = requireNonNull(indexJobService);
@@ -64,7 +64,9 @@ public class IndexJobSchedulerImpl implements IndexJobScheduler {
   @Override
   @RunAsSystem
   public void scheduleIndexActions(String transactionId) {
-    LOGGER.trace("Index transaction with id {}...", transactionId);
+    if (LOG.isTraceEnabled()){
+      LOG.trace("Index transaction with id {}...", transactionId);
+    }
     var query = new QueryImpl<IndexAction>().eq(TRANSACTION_ID, transactionId);
     dataService.findAll(INDEX_ACTION, query, IndexAction.class).forEach(this::schedule);
   }
@@ -83,7 +85,7 @@ public class IndexJobSchedulerImpl implements IndexJobScheduler {
         .filter(other -> other.getStatus() == PENDING)
         .forEach(
             other -> {
-              LOGGER.info(
+              LOG.info(
                   "Canceled pending index action {} contained by the work of index action {}!",
                   other,
                   indexAction);
@@ -101,7 +103,7 @@ public class IndexJobSchedulerImpl implements IndexJobScheduler {
         .findAny()
         .ifPresent(
             other -> {
-              LOGGER.info(
+              LOG.info(
                   "Skipping index action {} because the work is already contained in action {}",
                   indexAction,
                   other);
@@ -182,7 +184,7 @@ public class IndexJobSchedulerImpl implements IndexJobScheduler {
   public void cleanupIndexActions() {
     runAsSystem(
         () -> {
-          LOGGER.trace("Clean up IndexActions...");
+          LOG.trace("Clean up IndexActions...");
           Instant fiveMinutesAgo = Instant.now().minus(5, ChronoUnit.MINUTES);
           if (dataService.hasRepository(INDEX_ACTION)) {
             Stream<Entity> actions =
@@ -199,9 +201,9 @@ public class IndexJobSchedulerImpl implements IndexJobScheduler {
                     .in(INDEX_STATUS, asList(STARTED, PENDING))
                     .findAll();
             dataService.delete(INDEX_ACTION, actions);
-            LOGGER.debug("Cleaned up IndexActions");
+            LOG.debug("Cleaned up IndexActions");
           } else {
-            LOGGER.warn("{} does not exist", INDEX_ACTION);
+            LOG.warn("{} does not exist", INDEX_ACTION);
           }
         });
   }
