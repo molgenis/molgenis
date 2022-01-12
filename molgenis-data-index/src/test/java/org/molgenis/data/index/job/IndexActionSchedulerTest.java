@@ -62,12 +62,17 @@ class IndexActionSchedulerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  void testRebuildIndexDoesNothingIfNoIndexActionJobIsFound() {
+  void testRebuildIndexDoesNothingIfNoIndexActionsAreFound() {
     when(dataService.findOneById(INDEX_ACTION, "abcde")).thenReturn(null);
 
     indexActionScheduler.scheduleIndexActions("abcde");
 
     verify(jobExecutor, never()).submit(any());
+  }
+
+  @Test
+  void testSchedule(){
+    //TODO
   }
 
   @Test
