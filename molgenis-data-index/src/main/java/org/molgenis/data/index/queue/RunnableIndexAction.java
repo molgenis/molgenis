@@ -8,7 +8,7 @@ import static org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus.PENDI
 import static org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus.STARTED;
 
 import java.util.Optional;
-import org.molgenis.data.index.job.IndexJobService;
+import org.molgenis.data.index.job.IndexActionService;
 import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionMetadata;
 import org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus;
@@ -16,12 +16,12 @@ import org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus;
 public class RunnableIndexAction implements Runnable {
 
   private final IndexAction indexAction;
-  private final IndexJobService indexJobService;
+  private final IndexActionService indexActionService;
   private volatile IndexActionMetadata.IndexStatus status;
 
-  public RunnableIndexAction(IndexAction indexAction, IndexJobService indexJobService) {
+  public RunnableIndexAction(IndexAction indexAction, IndexActionService indexActionService) {
     this.indexAction = requireNonNull(indexAction);
-    this.indexJobService = requireNonNull(indexJobService);
+    this.indexActionService = requireNonNull(indexActionService);
     this.status = PENDING;
   }
 
@@ -32,7 +32,7 @@ public class RunnableIndexAction implements Runnable {
     }
     setStatus(STARTED);
     try {
-      var success = indexJobService.performAction(indexAction);
+      var success = indexActionService.performAction(indexAction);
       setStatus(success ? FINISHED : FAILED);
     } catch (Exception e) {
       setStatus(FAILED);
@@ -42,7 +42,7 @@ public class RunnableIndexAction implements Runnable {
 
   public synchronized void setStatus(IndexStatus status) {
     this.status = status;
-    indexJobService.updateIndexActionStatus(indexAction, status);
+    indexActionService.updateIndexActionStatus(indexAction, status);
   }
 
   public synchronized IndexStatus getStatus() {

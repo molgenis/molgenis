@@ -8,7 +8,7 @@ import javax.annotation.PostConstruct;
 import org.molgenis.data.DataService;
 import org.molgenis.data.index.job.IndexActionScheduler;
 import org.molgenis.data.index.job.IndexActionSchedulerImpl;
-import org.molgenis.data.index.job.IndexJobService;
+import org.molgenis.data.index.job.IndexActionService;
 import org.molgenis.data.index.meta.IndexActionFactory;
 import org.molgenis.data.index.meta.IndexActionMetadata;
 import org.molgenis.data.index.meta.IndexPackage;
@@ -67,13 +67,13 @@ public class IndexConfig {
   }
 
   @Bean
-  public IndexActionScheduler indexJobScheduler(IndexJobService indexJobService) {
+  public IndexActionScheduler indexJobScheduler(IndexActionService indexActionService) {
     var executors = Executors.newFixedThreadPool(5);
-    return new IndexActionSchedulerImpl(indexJobService, executors, dataService);
+    return new IndexActionSchedulerImpl(indexActionService, executors, dataService);
   }
 
   @Bean
-  public IndexJobService indexJobService() {
-    return new IndexJobService(dataService, indexService, entityTypeFactory);
+  public IndexActionService indexJobService() {
+    return new IndexActionService(dataService, indexService, entityTypeFactory);
   }
 }

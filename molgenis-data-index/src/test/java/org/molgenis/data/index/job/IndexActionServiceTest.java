@@ -36,8 +36,8 @@
  import org.springframework.test.context.ContextConfiguration;
 
  @MockitoSettings(strictness = Strictness.LENIENT)
- @ContextConfiguration(classes = {IndexJobServiceTest.Config.class})
- class IndexJobServiceTest extends AbstractMolgenisSpringTest {
+ @ContextConfiguration(classes = {IndexActionServiceTest.Config.class})
+ class IndexActionServiceTest extends AbstractMolgenisSpringTest {
   @Autowired private IndexService indexService;
   @Autowired private MetaDataService mds;
   @Autowired private Config config;
@@ -47,14 +47,14 @@
 
   @Autowired private EntityTypeFactory entityTypeFactory;
   private final String transactionId = "aabbcc";
-  private IndexJobService indexJobService;
+  private IndexActionService indexActionService;
   private EntityType testEntityType;
   private Entity toIndexEntity;
 
   @BeforeEach
   void beforeMethod() {
     config.resetMocks();
-    indexJobService = new IndexJobService(dataService, indexService, entityTypeFactory);
+    indexActionService = new IndexActionService(dataService, indexService, entityTypeFactory);
     when(dataService.getMeta()).thenReturn(mds);
     testEntityType = harness.createDynamicRefEntityType();
     when(mds.getEntityType("TypeTestRefDynamic")).thenReturn(Optional.of(testEntityType));
@@ -81,7 +81,7 @@
 
     when(dataService.hasRepository("TypeTestRefDynamic")).thenReturn(true);
 
-    indexJobService.performAction(indexAction);
+    indexActionService.performAction(indexAction);
 
     assertEquals(STARTED, indexAction.getIndexStatus());
     verify(indexService).deleteById(testEntityType, "entityId");
@@ -98,7 +98,7 @@
             .setIndexStatus(STARTED);
     when(dataService.hasRepository("TypeTestRefDynamic")).thenReturn(true);
 
-    indexJobService.performAction(indexAction);
+    indexActionService.performAction(indexAction);
 
     assertEquals(STARTED, indexAction.getIndexStatus());
     verify(this.indexService).index(testEntityType, toIndexEntity);
@@ -118,7 +118,7 @@
             .setEntityId(null)
             .setIndexStatus(STARTED);
 
-    indexJobService.performAction(indexAction);
+    indexActionService.performAction(indexAction);
 
     assertEquals(STARTED, indexAction.getIndexStatus());
     verify(this.indexService).rebuildIndex(this.dataService.getRepository("any"));
@@ -136,7 +136,7 @@
             .setEntityId(null)
             .setIndexStatus(STARTED);
 
-    indexJobService.performAction(indexAction);
+    indexActionService.performAction(indexAction);
 
     assertEquals(STARTED, indexAction.getIndexStatus());
     verify(this.indexService).rebuildIndex(this.dataService.getRepository("any"));
@@ -162,7 +162,7 @@
 
     when(indexService.hasIndex(any(EntityType.class))).thenReturn(true);
 
-    indexJobService.performAction(indexAction);
+    indexActionService.performAction(indexAction);
 
     assertEquals(STARTED, indexAction.getIndexStatus());
     ArgumentCaptor<EntityType> entityTypeCaptor = ArgumentCaptor.forClass(EntityType.class);

@@ -3,7 +3,7 @@ package org.molgenis.data.index.job;
 import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.meta.model.EntityType;
 
-/** Schedules {@link IndexJobService}s. */
+/** Schedules {@link IndexActionService}s. */
 public interface IndexActionScheduler {
   /**
    * Schedules index actions that will rebuild index for all changes made in the context of a

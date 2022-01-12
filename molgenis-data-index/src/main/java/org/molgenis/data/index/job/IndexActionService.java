@@ -22,16 +22,15 @@ import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// TODO rename
-/** Executes the {@link IndexAction}s triggered by a transaction. */
-public class IndexJobService {
-  private static final Logger LOG = LoggerFactory.getLogger(IndexJobService.class);
+/** Executes {@link IndexAction}s. */
+public class IndexActionService {
+  private static final Logger LOG = LoggerFactory.getLogger(IndexActionService.class);
 
   private final DataService dataService;
   private final IndexService indexService;
   private final EntityTypeFactory entityTypeFactory;
 
-  public IndexJobService(
+  public IndexActionService(
       DataService dataService, IndexService indexService, EntityTypeFactory entityTypeFactory) {
     this.dataService = requireNonNull(dataService);
     this.indexService = requireNonNull(indexService);
@@ -41,7 +40,7 @@ public class IndexJobService {
   /**
    * Performs a single IndexAction
    *
-   * @param indexAction Entity of type IndexActionMetaData
+   * @param indexAction Entity of type IndexAction
    * @return boolean indicating success or failure
    */
   @Timed(

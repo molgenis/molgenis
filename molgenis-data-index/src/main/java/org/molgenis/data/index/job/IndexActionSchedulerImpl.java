@@ -42,7 +42,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 public class IndexActionSchedulerImpl implements IndexActionScheduler {
 
   private final ExecutorService executorService;
-  private final IndexJobService indexJobService;
+  private final IndexActionService indexActionService;
   private final DataService dataService;
 
   private final Lock lock = new ReentrantLock();
@@ -55,9 +55,9 @@ public class IndexActionSchedulerImpl implements IndexActionScheduler {
   private static final Logger LOG = LoggerFactory.getLogger(IndexActionSchedulerImpl.class);
 
   public IndexActionSchedulerImpl(
-      IndexJobService indexJobService, ExecutorService executorService, DataService dataService) {
+      IndexActionService indexActionService, ExecutorService executorService, DataService dataService) {
     this.dataService = requireNonNull(dataService);
-    this.indexJobService = requireNonNull(indexJobService);
+    this.indexActionService = requireNonNull(indexActionService);
     this.executorService = requireNonNull(executorService);
   }
 
@@ -74,7 +74,7 @@ public class IndexActionSchedulerImpl implements IndexActionScheduler {
   @Override
   @RunAsSystem
   public void schedule(IndexAction indexAction) {
-    var task = new RunnableIndexAction(indexAction, indexJobService);
+    var task = new RunnableIndexAction(indexAction, indexActionService);
 
     if (workExists(indexAction, task)) {
       return;
