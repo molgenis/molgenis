@@ -171,7 +171,8 @@ public class DynamicDecoratorIT extends AbstractMockitoSpringContextTests {
   public static void tearDownAfterClass(ApplicationContext applicationContext) {
     DataService dataService = applicationContext.getBean(DataService.class);
     MetaDataService metaDataService = applicationContext.getBean(MetaDataService.class);
-    IndexActionScheduler indexActionScheduler = applicationContext.getBean(IndexActionScheduler.class);
+    IndexActionScheduler indexActionScheduler =
+        applicationContext.getBean(IndexActionScheduler.class);
 
     runAsSystem(
         () -> {

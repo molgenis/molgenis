@@ -104,7 +104,8 @@ class PlatformIT extends AbstractMockitoSpringContextTests {
   @Autowired private PermissionService testPermissionService;
 
   static void waitForWorkToBeFinished(ApplicationContext applicationContext, Logger log) {
-    IndexActionScheduler indexActionScheduler = applicationContext.getBean(IndexActionScheduler.class);
+    IndexActionScheduler indexActionScheduler =
+        applicationContext.getBean(IndexActionScheduler.class);
     waitForWorkToBeFinished(indexActionScheduler, log);
   }
 
@@ -177,7 +178,8 @@ class PlatformIT extends AbstractMockitoSpringContextTests {
   @AfterAll
   static void setUpAfterAll(ApplicationContext applicationContext) {
     DataService dataService = applicationContext.getBean(DataService.class);
-    IndexActionScheduler indexActionScheduler = applicationContext.getBean(IndexActionScheduler.class);
+    IndexActionScheduler indexActionScheduler =
+        applicationContext.getBean(IndexActionScheduler.class);
     MetaDataService metaDataService = applicationContext.getBean(MetaDataService.class);
 
     runAsSystem(

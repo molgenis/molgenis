@@ -68,8 +68,8 @@ class IndexActionSchedulerTest extends AbstractMolgenisSpringTest {
   }
 
   @Test
-  void testSchedule(){
-    //TODO
+  void testSchedule() {
+    // TODO
   }
 
   @Test

@@ -15,7 +15,8 @@ public class IndexTransactionListener implements TransactionListener {
   private IndexActionRegisterService indexActionRegisterService;
 
   public IndexTransactionListener(
-      IndexActionScheduler indexActionScheduler, IndexActionRegisterService indexActionRegisterService) {
+      IndexActionScheduler indexActionScheduler,
+      IndexActionRegisterService indexActionRegisterService) {
     this.indexActionScheduler = requireNonNull(indexActionScheduler);
     this.indexActionRegisterService = requireNonNull(indexActionRegisterService);
   }

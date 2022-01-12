@@ -48,14 +48,15 @@ public class IndexActionSchedulerImpl implements IndexActionScheduler {
   private final Lock lock = new ReentrantLock();
   private final Condition allEntitiesStable = lock.newCondition();
   private final Condition singleEntityStable = lock.newCondition();
-  private final List<RunnableIndexAction> indexActions = Collections.synchronizedList(
-      new ArrayList<>());
-
+  private final List<RunnableIndexAction> indexActions =
+      Collections.synchronizedList(new ArrayList<>());
 
   private static final Logger LOG = LoggerFactory.getLogger(IndexActionSchedulerImpl.class);
 
   public IndexActionSchedulerImpl(
-      IndexActionService indexActionService, ExecutorService executorService, DataService dataService) {
+      IndexActionService indexActionService,
+      ExecutorService executorService,
+      DataService dataService) {
     this.dataService = requireNonNull(dataService);
     this.indexActionService = requireNonNull(indexActionService);
     this.executorService = requireNonNull(executorService);
@@ -64,7 +65,7 @@ public class IndexActionSchedulerImpl implements IndexActionScheduler {
   @Override
   @RunAsSystem
   public void scheduleIndexActions(String transactionId) {
-    if (LOG.isTraceEnabled()){
+    if (LOG.isTraceEnabled()) {
       LOG.trace("Index transaction with id {}...", transactionId);
     }
     var query = new QueryImpl<IndexAction>().eq(TRANSACTION_ID, transactionId);

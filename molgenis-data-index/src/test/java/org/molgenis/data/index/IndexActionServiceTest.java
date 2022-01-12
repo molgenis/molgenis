@@ -1,42 +1,42 @@
- package org.molgenis.data.index;
+package org.molgenis.data.index;
 
- import static org.junit.jupiter.api.Assertions.assertEquals;
- import static org.mockito.Mockito.any;
- import static org.mockito.Mockito.mock;
- import static org.mockito.Mockito.reset;
- import static org.mockito.Mockito.verify;
- import static org.mockito.Mockito.when;
- import static org.mockito.MockitoAnnotations.openMocks;
- import static org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus.STARTED;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.openMocks;
+import static org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus.STARTED;
 
- import java.util.Optional;
- import org.junit.jupiter.api.BeforeEach;
- import org.junit.jupiter.api.Test;
- import org.mockito.ArgumentCaptor;
- import org.mockito.Mock;
- import org.mockito.junit.jupiter.MockitoSettings;
- import org.mockito.quality.Strictness;
- import org.molgenis.data.AbstractMolgenisSpringTest;
- import org.molgenis.data.DataService;
- import org.molgenis.data.Entity;
- import org.molgenis.data.EntityTestHarness;
- import org.molgenis.data.TestHarnessConfig;
- import org.molgenis.data.index.config.IndexTestConfig;
- import org.molgenis.data.index.meta.IndexAction;
- import org.molgenis.data.index.meta.IndexActionFactory;
- import org.molgenis.data.meta.MetaDataService;
- import org.molgenis.data.meta.model.EntityType;
- import org.molgenis.data.meta.model.EntityTypeFactory;
- import org.springframework.beans.factory.annotation.Autowired;
- import org.springframework.context.annotation.Bean;
- import org.springframework.context.annotation.Configuration;
- import org.springframework.context.annotation.Import;
- import org.springframework.security.core.Authentication;
- import org.springframework.test.context.ContextConfiguration;
+import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import org.molgenis.data.AbstractMolgenisSpringTest;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityTestHarness;
+import org.molgenis.data.TestHarnessConfig;
+import org.molgenis.data.index.config.IndexTestConfig;
+import org.molgenis.data.index.meta.IndexAction;
+import org.molgenis.data.index.meta.IndexActionFactory;
+import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.EntityTypeFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.security.core.Authentication;
+import org.springframework.test.context.ContextConfiguration;
 
- @MockitoSettings(strictness = Strictness.LENIENT)
- @ContextConfiguration(classes = {IndexActionServiceTest.Config.class})
- class IndexActionServiceTest extends AbstractMolgenisSpringTest {
+@MockitoSettings(strictness = Strictness.LENIENT)
+@ContextConfiguration(classes = {IndexActionServiceTest.Config.class})
+class IndexActionServiceTest extends AbstractMolgenisSpringTest {
   @Autowired private IndexService indexService;
   @Autowired private MetaDataService mds;
   @Autowired private Config config;
@@ -65,7 +65,6 @@
     when(dataService.getEntityType("entityType")).thenReturn(testEntityType);
   }
 
-
   @Test
   void rebuildIndexDeleteSingleEntityTest() {
     when(dataService.findOneById("TypeTestRefDynamic", "entityId")).thenReturn(null);
@@ -86,7 +85,7 @@
     verify(indexService).deleteById(testEntityType, "entityId");
   }
 
-    @Test
+  @Test
   void rebuildIndexCreateSingleEntityTest() {
     IndexAction indexAction =
         indexActionFactory
@@ -201,4 +200,4 @@
       reset(authentication, indexService, mds);
     }
   }
- }
+}

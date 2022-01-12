@@ -1108,7 +1108,8 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
         applicationContext.getBean(TestEntityStaticMetaData.class);
     TestRefEntityStaticMetaData refEntityTypeStatic =
         applicationContext.getBean(TestRefEntityStaticMetaData.class);
-    IndexActionScheduler indexActionScheduler = applicationContext.getBean(IndexActionScheduler.class);
+    IndexActionScheduler indexActionScheduler =
+        applicationContext.getBean(IndexActionScheduler.class);
 
     waitForIndexToBeStable(entityType, indexActionScheduler, LOG);
     waitForIndexToBeStable(refEntityType, indexActionScheduler, LOG);
@@ -1121,7 +1122,8 @@ public class DataServiceIT extends AbstractMockitoSpringContextTests {
   }
 
   private static void waitForAllIndicesStable(ApplicationContext applicationContext) {
-    IndexActionScheduler indexActionScheduler = applicationContext.getBean(IndexActionScheduler.class);
+    IndexActionScheduler indexActionScheduler =
+        applicationContext.getBean(IndexActionScheduler.class);
     try {
       indexActionScheduler.waitForAllIndicesStable();
     } catch (InterruptedException e) {

@@ -457,7 +457,8 @@ public class MetaDataServiceIT extends AbstractMockitoSpringContextTests {
   }
 
   private static void waitForAllIndicesStable(ApplicationContext applicationContext) {
-    IndexActionScheduler indexActionScheduler = applicationContext.getBean(IndexActionScheduler.class);
+    IndexActionScheduler indexActionScheduler =
+        applicationContext.getBean(IndexActionScheduler.class);
     try {
       indexActionScheduler.waitForAllIndicesStable();
     } catch (InterruptedException e) {
