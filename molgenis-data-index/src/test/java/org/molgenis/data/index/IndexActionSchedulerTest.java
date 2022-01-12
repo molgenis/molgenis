@@ -1,4 +1,4 @@
-package org.molgenis.data.index.job;
+package org.molgenis.data.index;
 
 import static java.time.Duration.between;
 import static java.time.Instant.now;
@@ -25,9 +25,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
-import org.molgenis.data.index.IndexActionRegisterServiceImpl;
-import org.molgenis.data.index.IndexConfig;
-import org.molgenis.data.index.IndexService;
 import org.molgenis.data.index.config.IndexTestConfig;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.transaction.TransactionManager;

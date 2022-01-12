@@ -1,4 +1,4 @@
-package org.molgenis.data.index.job;
+package org.molgenis.data.index;
 
 import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.meta.model.EntityType;

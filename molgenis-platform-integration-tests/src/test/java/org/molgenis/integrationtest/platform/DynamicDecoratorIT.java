@@ -29,7 +29,7 @@ import org.molgenis.data.decorator.meta.DecoratorParameters;
 import org.molgenis.data.decorator.meta.DecoratorParametersFactory;
 import org.molgenis.data.decorator.meta.DecoratorParametersMetadata;
 import org.molgenis.data.decorator.meta.DynamicDecorator;
-import org.molgenis.data.index.job.IndexActionScheduler;
+import org.molgenis.data.index.IndexActionScheduler;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.security.EntityTypeIdentity;

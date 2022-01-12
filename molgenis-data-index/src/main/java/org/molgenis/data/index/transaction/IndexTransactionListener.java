@@ -3,7 +3,7 @@ package org.molgenis.data.index.transaction;
 import static java.util.Objects.requireNonNull;
 
 import org.molgenis.data.index.IndexActionRegisterService;
-import org.molgenis.data.index.job.IndexActionScheduler;
+import org.molgenis.data.index.IndexActionScheduler;
 import org.molgenis.data.transaction.TransactionListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

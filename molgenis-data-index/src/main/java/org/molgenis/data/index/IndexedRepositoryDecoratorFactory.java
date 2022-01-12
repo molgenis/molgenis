@@ -4,7 +4,6 @@ import static java.util.Objects.requireNonNull;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.molgenis.data.index.job.IndexActionScheduler;
 import org.springframework.stereotype.Component;
 
 @Component

@@ -1,4 +1,4 @@
-package org.molgenis.data.index.job;
+package org.molgenis.data.index;
 
 import static com.google.common.collect.Streams.stream;
 import static java.util.Arrays.asList;

@@ -1,4 +1,4 @@
- package org.molgenis.data.index.job;
+ package org.molgenis.data.index;
 
  import static org.junit.jupiter.api.Assertions.assertEquals;
  import static org.mockito.Mockito.any;
@@ -21,7 +21,6 @@
  import org.molgenis.data.Entity;
  import org.molgenis.data.EntityTestHarness;
  import org.molgenis.data.TestHarnessConfig;
- import org.molgenis.data.index.IndexService;
  import org.molgenis.data.index.config.IndexTestConfig;
  import org.molgenis.data.index.meta.IndexAction;
  import org.molgenis.data.index.meta.IndexActionFactory;

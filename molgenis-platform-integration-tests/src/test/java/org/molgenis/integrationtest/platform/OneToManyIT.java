@@ -52,7 +52,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.OneToManyTestHarness;
-import org.molgenis.data.index.job.IndexActionScheduler;
+import org.molgenis.data.index.IndexActionScheduler;
 import org.molgenis.data.security.EntityTypeIdentity;
 import org.molgenis.data.security.permission.PermissionService;
 import org.molgenis.data.security.permission.model.Permission;

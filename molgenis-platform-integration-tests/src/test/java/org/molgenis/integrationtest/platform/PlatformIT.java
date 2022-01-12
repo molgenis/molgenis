@@ -49,7 +49,7 @@ import org.molgenis.data.i18n.model.L10nStringFactory;
 import org.molgenis.data.i18n.model.L10nStringMetadata;
 import org.molgenis.data.i18n.model.LanguageFactory;
 import org.molgenis.data.index.IndexActionRegisterServiceImpl;
-import org.molgenis.data.index.job.IndexActionScheduler;
+import org.molgenis.data.index.IndexActionScheduler;
 import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionMetadata;
 import org.molgenis.data.listeners.EntityListenersService;

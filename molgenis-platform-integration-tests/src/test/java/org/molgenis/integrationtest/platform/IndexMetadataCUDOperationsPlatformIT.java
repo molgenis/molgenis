@@ -14,7 +14,7 @@ import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.index.SearchService;
-import org.molgenis.data.index.job.IndexActionScheduler;
+import org.molgenis.data.index.IndexActionScheduler;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;

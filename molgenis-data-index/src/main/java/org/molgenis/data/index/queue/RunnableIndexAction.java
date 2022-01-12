@@ -8,7 +8,7 @@ import static org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus.PENDI
 import static org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus.STARTED;
 
 import java.util.Optional;
-import org.molgenis.data.index.job.IndexActionService;
+import org.molgenis.data.index.IndexActionService;
 import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionMetadata;
 import org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus;

@@ -47,7 +47,6 @@ import org.molgenis.data.Sort;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.index.exception.UnknownIndexException;
-import org.molgenis.data.index.job.IndexActionScheduler;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.AggregateQueryImpl;

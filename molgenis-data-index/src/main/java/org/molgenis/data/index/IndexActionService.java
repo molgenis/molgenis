@@ -1,4 +1,4 @@
-package org.molgenis.data.index.job;
+package org.molgenis.data.index;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.index.meta.IndexActionMetadata.INDEX_ACTION;
@@ -12,7 +12,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
-import org.molgenis.data.index.IndexService;
 import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionMetadata;
 import org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus;

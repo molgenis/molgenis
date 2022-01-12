@@ -25,7 +25,6 @@ import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.index.exception.UnknownIndexException;
-import org.molgenis.data.index.job.IndexActionScheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
