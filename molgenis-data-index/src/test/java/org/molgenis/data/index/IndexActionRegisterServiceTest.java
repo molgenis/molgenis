@@ -1,43 +1,42 @@
- package org.molgenis.data.index;
+package org.molgenis.data.index;
 
- import static com.google.common.collect.Lists.newArrayList;
- import static java.util.Collections.singleton;
- import static java.util.stream.Collectors.toList;
- import static org.junit.jupiter.api.Assertions.assertEquals;
- import static org.junit.jupiter.api.Assertions.assertFalse;
- import static org.junit.jupiter.api.Assertions.assertTrue;
- import static org.mockito.Mockito.doReturn;
- import static org.mockito.Mockito.eq;
- import static org.mockito.Mockito.mock;
- import static org.mockito.Mockito.verify;
- import static org.mockito.Mockito.verifyNoInteractions;
- import static org.mockito.Mockito.verifyNoMoreInteractions;
- import static org.mockito.Mockito.verifyZeroInteractions;
- import static org.mockito.Mockito.when;
- import static org.molgenis.data.index.meta.IndexActionMetadata.INDEX_ACTION;
- import static org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus.PENDING;
- import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
+import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Collections.singleton;
+import static java.util.stream.Collectors.toList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+import static org.molgenis.data.index.meta.IndexActionMetadata.INDEX_ACTION;
+import static org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus.PENDING;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 
- import java.util.stream.Stream;
- import org.junit.jupiter.api.AfterEach;
- import org.junit.jupiter.api.BeforeEach;
- import org.junit.jupiter.api.Test;
- import org.mockito.ArgumentCaptor;
- import org.mockito.Captor;
- import org.mockito.Mock;
- import org.molgenis.data.DataService;
- import org.molgenis.data.Entity;
- import org.molgenis.data.EntityKey;
- import org.molgenis.data.Query;
- import org.molgenis.data.index.meta.IndexAction;
- import org.molgenis.data.index.meta.IndexActionFactory;
- import org.molgenis.data.meta.model.AttributeMetadata;
- import org.molgenis.data.meta.model.EntityType;
- import org.molgenis.data.transaction.TransactionConstants;
- import org.molgenis.test.AbstractMockitoTest;
- import org.springframework.transaction.support.TransactionSynchronizationManager;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityKey;
+import org.molgenis.data.Query;
+import org.molgenis.data.index.meta.IndexAction;
+import org.molgenis.data.index.meta.IndexActionFactory;
+import org.molgenis.data.meta.model.AttributeMetadata;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.transaction.TransactionConstants;
+import org.molgenis.test.AbstractMockitoTest;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
- class IndexActionRegisterServiceTest extends AbstractMockitoTest {
+class IndexActionRegisterServiceTest extends AbstractMockitoTest {
   private IndexActionRegisterServiceImpl indexActionRegisterServiceImpl;
   @Mock private IndexActionFactory indexActionFactory;
   @Mock private IndexAction indexAction;
@@ -49,8 +48,7 @@
     TransactionSynchronizationManager.bindResource(
         TransactionConstants.TRANSACTION_ID_RESOURCE_NAME, "1");
     indexActionRegisterServiceImpl =
-        new IndexActionRegisterServiceImpl(
-            dataService, indexActionFactory, new IndexingStrategy());
+        new IndexActionRegisterServiceImpl(dataService, indexActionFactory, new IndexingStrategy());
   }
 
   @AfterEach
@@ -134,4 +132,4 @@
     EntityKey entityKey = EntityKey.create(entityTypeId, otherId);
     assertFalse(indexActionRegisterServiceImpl.isEntityDirty(entityKey));
   }
- }
+}
