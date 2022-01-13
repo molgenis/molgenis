@@ -92,7 +92,7 @@ public class IndexActionSchedulerImpl implements IndexActionScheduler {
                   other,
                   indexAction);
               }
-              other.setStatus(IndexActionMetadata.IndexStatus.CANCELED);
+              other.setStatus(IndexActionMetadata.IndexStatus.SKIPPED);
             });
 
     addTask(task);
@@ -112,7 +112,7 @@ public class IndexActionSchedulerImpl implements IndexActionScheduler {
                     indexAction,
                     other);
               }
-              task.setStatus(IndexStatus.CANCELED);
+              task.setStatus(IndexStatus.SKIPPED);
               exists.set(true);
             });
     return exists.get();

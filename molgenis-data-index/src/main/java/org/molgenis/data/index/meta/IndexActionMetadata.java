@@ -83,6 +83,8 @@ public class IndexActionMetadata extends SystemEntityType {
     FINISHED,
     /** index action is canceled */
     CANCELED,
+    /** index action is skipped (because it is not necessary) */
+    SKIPPED,
     /** index action failed */
     FAILED,
     /** index action is started */
