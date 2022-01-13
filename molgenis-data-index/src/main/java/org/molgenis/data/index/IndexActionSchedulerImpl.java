@@ -86,10 +86,12 @@ public class IndexActionSchedulerImpl implements IndexActionScheduler {
         .filter(other -> other.getStatus() == PENDING)
         .forEach(
             other -> {
-              LOG.info(
+              if (LOG.isDebugEnabled()){
+                LOG.debug(
                   "Canceled pending index action {} contained by the work of index action {}!",
                   other,
                   indexAction);
+              }
               other.setStatus(IndexActionMetadata.IndexStatus.CANCELED);
             });
 
@@ -104,10 +106,12 @@ public class IndexActionSchedulerImpl implements IndexActionScheduler {
         .findAny()
         .ifPresent(
             other -> {
-              LOG.info(
-                  "Skipping index action {} because the work is already contained in action {}",
-                  indexAction,
-                  other);
+              if (LOG.isDebugEnabled()){
+                LOG.debug(
+                    "Skipping index action {} because the work is already contained in action {}",
+                    indexAction,
+                    other);
+              }
               task.setStatus(IndexStatus.CANCELED);
               exists.set(true);
             });
