@@ -243,6 +243,7 @@
                 <version>1.0-rc6</version>
               </path>
             </annotationProcessorPaths>
+          	<fork>true</fork>
           </configuration>
         </plugin>
         <plugin>
