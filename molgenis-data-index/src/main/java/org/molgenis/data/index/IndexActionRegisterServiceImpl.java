@@ -169,7 +169,9 @@ public class IndexActionRegisterServiceImpl
 
   @Override
   public boolean forgetIndexActions(String transactionId) {
-    LOG.debug("Forget index actions for transaction {}", transactionId);
+    if (LOG.isTraceEnabled()) {
+      LOG.trace("Forget index actions for transaction {}", transactionId);
+    }
     return !changesPerTransaction.removeAll(transactionId).stream()
         .map(Impact::getEntityTypeId)
         .allMatch(excludedEntities::contains);
