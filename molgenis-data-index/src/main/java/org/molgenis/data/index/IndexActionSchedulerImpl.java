@@ -88,7 +88,7 @@ public class IndexActionSchedulerImpl implements IndexActionScheduler {
             other -> {
               if (LOG.isDebugEnabled()) {
                 LOG.debug(
-                    "Canceled pending index action {} contained by the work of index action {}!",
+                    "Skipping pending index action {} contained by the work of index action {}!",
                     other,
                     indexAction);
               }
