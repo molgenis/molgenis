@@ -27,7 +27,7 @@ public class RunnableIndexAction implements Runnable {
 
   @Override
   public void run() {
-    if (getStatus() == CANCELED) {
+    if (getStatus() != PENDING) {
       return;
     }
     setStatus(STARTED);
@@ -63,8 +63,8 @@ public class RunnableIndexAction implements Runnable {
   }
 
   /**
-   * Checks if the work done by this action is larger than but contains the work by the other
-   * action.
+   * Checks if the work done by this action is equal or larger than and contains the work of the
+   * other action.
    *
    * @param other the other action
    * @return true if the work contains the other action, false otherwise
