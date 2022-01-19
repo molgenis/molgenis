@@ -394,7 +394,7 @@ class PlatformIT extends AbstractMockitoSpringContextTests {
   @Test
   void testIndexCreateMetaData() {
     populateUserPermissions();
-
+    waitForWorkToBeFinished(indexService, LOG);
     IndexMetadataCUDOperationsPlatformIT.testIndexCreateMetaData(
         searchService, entityTypeStatic, entityTypeDynamic, metaDataService);
   }
