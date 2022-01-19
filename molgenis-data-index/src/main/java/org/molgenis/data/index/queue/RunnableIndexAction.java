@@ -1,7 +1,6 @@
 package org.molgenis.data.index.queue;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus.CANCELED;
 import static org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus.FAILED;
 import static org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus.FINISHED;
 import static org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus.PENDING;

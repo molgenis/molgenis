@@ -78,7 +78,7 @@ class RunnableIndexActionTest extends AbstractMockitoTest {
   }
 
   @Test
-  void testContainsSameEntityType(){
+  void testContainsSameEntityType() {
     var runnableAction1 = createRunnableIndexAction("entityType1");
     var runnableAction2 = createRunnableIndexAction("entityType1");
 
@@ -89,7 +89,7 @@ class RunnableIndexActionTest extends AbstractMockitoTest {
   }
 
   @Test
-  void testContainsDifferentEntityType(){
+  void testContainsDifferentEntityType() {
     var runnableAction1 = createRunnableIndexAction("entityType1");
     var runnableAction2 = createRunnableIndexAction("entityType2");
 
@@ -100,7 +100,7 @@ class RunnableIndexActionTest extends AbstractMockitoTest {
   }
 
   @Test
-  void testContainsEntity(){
+  void testContainsEntity() {
     var runnableAction1 = createRunnableIndexAction("entityType1", "entity1");
     var runnableAction2 = createRunnableIndexAction("entityType1");
 
@@ -111,7 +111,7 @@ class RunnableIndexActionTest extends AbstractMockitoTest {
   }
 
   @Test
-  void testContainsDifferentEntity(){
+  void testContainsDifferentEntity() {
     var runnableAction1 = createRunnableIndexAction("entityType1", "entity1");
     var runnableAction2 = createRunnableIndexAction("entityType1", "entity2");
 
@@ -122,7 +122,7 @@ class RunnableIndexActionTest extends AbstractMockitoTest {
   }
 
   @Test
-  void testContainsSameEntity(){
+  void testContainsSameEntity() {
     var runnableAction1 = createRunnableIndexAction("entityType1", "entity1");
     var runnableAction2 = createRunnableIndexAction("entityType1", "entity1");
 
@@ -133,7 +133,7 @@ class RunnableIndexActionTest extends AbstractMockitoTest {
   }
 
   @Test
-  void testConcerns(){
+  void testConcerns() {
     var runnableAction = createRunnableIndexAction("entityType1");
 
     assertTrue(runnableAction.concerns("entityType1"));
@@ -144,10 +144,10 @@ class RunnableIndexActionTest extends AbstractMockitoTest {
     return createRunnableIndexAction(entityType, null);
   }
 
-  private RunnableIndexAction createRunnableIndexAction(String entityType, String entityId){
+  private RunnableIndexAction createRunnableIndexAction(String entityType, String entityId) {
     var action = mock(IndexAction.class);
     when(action.getEntityTypeId()).thenReturn(entityType);
-    if (entityId != null){
+    if (entityId != null) {
       when(action.getEntityId()).thenReturn(entityId);
     }
     return new RunnableIndexAction(action, indexActionService);
