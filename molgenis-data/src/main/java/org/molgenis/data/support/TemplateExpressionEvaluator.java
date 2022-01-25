@@ -30,8 +30,7 @@ import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.util.UnexpectedEnumException;
 
 public class TemplateExpressionEvaluator implements ExpressionEvaluator {
-  private static final Handlebars HANDLEBARS =
-      new Handlebars().with(new ConcurrentMapTemplateCache()).with(EscapingStrategy.NOOP);
+  private static final Handlebars HANDLEBARS = setupHandlebars();
 
   private final Attribute attribute;
   private final EntityType entityType;
@@ -46,7 +45,6 @@ public class TemplateExpressionEvaluator implements ExpressionEvaluator {
   @Override
   public Object evaluate(Entity entity) {
     initTemplate();
-
     Map<String, Object> tagValues = getTemplateTagValue(entity);
 
     try {
@@ -184,6 +182,10 @@ public class TemplateExpressionEvaluator implements ExpressionEvaluator {
     for (Iterator<String> it = composedTagName.iterator(); it.hasNext(); ) {
       String tagPartName = it.next();
 
+      if (tagPartName.equals("math") || tagPartName.equals("+")) {
+        break;
+      }
+
       if (variableEntityType == null) {
         throw new TemplateExpressionInvalidTagException(attribute.getExpression(), tagPartName);
       }
@@ -215,5 +217,12 @@ public class TemplateExpressionEvaluator implements ExpressionEvaluator {
     public void setTemplate(String template) {
       this.template = template;
     }
+  }
+
+  private static Handlebars setupHandlebars() {
+    return new Handlebars()
+        .with(new ConcurrentMapTemplateCache())
+        .with(EscapingStrategy.NOOP)
+        .registerHelper("math", new HandlebarsMathHelper());
   }
 }
