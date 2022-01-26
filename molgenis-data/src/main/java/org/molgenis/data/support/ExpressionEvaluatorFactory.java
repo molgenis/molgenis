@@ -15,34 +15,13 @@ class ExpressionEvaluatorFactory {
     if (expressionJson instanceof String) {
       expressionEvaluator = new StringExpressionEvaluator(attribute, entityType);
     } else {
-      switch (attribute.getDataType()) {
-        case BOOL:
-        case CATEGORICAL:
-        case CATEGORICAL_MREF:
-        case COMPOUND:
-        case DATE:
-        case DATE_TIME:
-        case DECIMAL:
-        case FILE:
-        case INT:
-        case LONG:
-        case MREF:
-        case ONE_TO_MANY:
-        case XREF:
-          expressionEvaluator = new MapOfStringsExpressionEvaluator(attribute, entityType);
-          break;
-        case EMAIL:
-        case ENUM:
-        case HTML:
-        case HYPERLINK:
-        case SCRIPT:
-        case STRING:
-        case TEXT:
-          expressionEvaluator = new TemplateExpressionEvaluator(attribute, entityType);
-          break;
-        default:
-          throw new UnexpectedEnumException(attribute.getDataType());
-      }
+      expressionEvaluator = switch (attribute.getDataType()) {
+        case BOOL, CATEGORICAL, CATEGORICAL_MREF, COMPOUND, DATE,
+            DATE_TIME, DECIMAL, FILE, INT, LONG, MREF, ONE_TO_MANY, XREF ->
+            new MapOfStringsExpressionEvaluator(attribute, entityType);
+        case EMAIL, ENUM, HTML, HYPERLINK, SCRIPT, STRING, TEXT ->
+            new TemplateExpressionEvaluator(attribute, entityType);
+      };
     }
 
     return expressionEvaluator;

@@ -21,30 +21,6 @@ import java.math.RoundingMode;
  * decimal results using the extra parameter <code>scale</code>, which corresponds to calling
  * <code>BigDecimal.setScale(int scale, RoundingMode.HALF_UP)</code>.
  * </p>
- *
- * <p>addition</p>
- *
- * <pre>{{math arg0 "+" arg1}} // arg0 + arg1</pre>
- *
- * <p>subtraction</p>
- *
- * <pre>{{math arg0 "-" arg1}} // arg0 - arg1</pre>
- *
- * <p>multiplication</p>
- *
- * <pre>{{math arg0 "*" arg1}} // arg0 * arg1</pre>
- *
- * <p>division</p>
- *
- * <pre>{{math arg0 "/" arg1}} // arg0 / arg1</pre>
- *
- * <p>modulus</p>
- *
- * <pre>{{math arg0 "%" arg1}} // arg0 % arg1</pre>
- *
- * @author mrhanlon
- * @see java.math.BigDecimal
- * @see java.math.MathContext
  */
 public class HandlebarsMathHelper implements Helper<Object> {
 
