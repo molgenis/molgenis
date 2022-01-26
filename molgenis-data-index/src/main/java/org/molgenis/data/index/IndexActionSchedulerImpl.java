@@ -184,7 +184,7 @@ public class IndexActionSchedulerImpl implements IndexActionScheduler {
    * Cleans up IndexActions that finished longer than five minutes ago. Delay for a minute to allow
    * the transaction manager to become available
    */
-  @Scheduled(initialDelay = 60 * 1000, fixedRate = 5 * 60 * 1000)
+  @Scheduled(initialDelay = 60 * 1000, fixedRate = 15 * 60 * 1000)
   @Override
   public void cleanupIndexActions() {
     runAsSystem(

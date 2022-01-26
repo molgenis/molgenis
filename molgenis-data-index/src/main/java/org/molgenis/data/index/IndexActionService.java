@@ -67,14 +67,13 @@ public class IndexActionService {
           LOG.info("Dropping entityType with id: {}", entityType.getId());
           indexService.deleteIndex(entityType);
         } else {
-          // Index Job is finished, here we concluded that we don't have enough info to continue the
-          // index job
+          // Index action is finished, here we concluded that we don't have enough info to continue
           LOG.info("Skip index entity {}.{}", entityType.getId(), indexAction.getEntityId());
         }
       }
       return true;
     } catch (Exception ex) {
-      LOG.error("Index job failed", ex);
+      LOG.error("Index action failed", ex);
       return false;
     }
   }

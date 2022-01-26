@@ -64,13 +64,13 @@ public class IndexConfig {
   }
 
   @Bean
-  public IndexActionScheduler indexJobScheduler(IndexActionService indexActionService) {
+  public IndexActionScheduler indexActionScheduler(IndexActionService indexActionService) {
     var executors = Executors.newFixedThreadPool(5);
     return new IndexActionSchedulerImpl(indexActionService, executors, dataService);
   }
 
   @Bean
-  public IndexActionService indexJobService() {
+  public IndexActionService indexActionService() {
     return new IndexActionService(dataService, indexService, entityTypeFactory);
   }
 }
