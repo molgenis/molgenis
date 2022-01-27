@@ -20,7 +20,7 @@ public interface SortaService {
   /**
    * Get a specified ontologyterm in generic type based on the given ontologyIri and ontologyTermIri
    *
-   * @return specified ontologyterm entity in a generic type
+   * @return specifieid ontologyterm entity in a generic type
    */
   Entity getOntologyTermEntity(String ontologyTermIri, String ontologyIri);
 

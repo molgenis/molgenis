@@ -30,7 +30,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -169,6 +168,15 @@ public class SortaController extends PluginController {
   public String init(Model model) {
     model.addAttribute("existingTasks", getJobsForCurrentUser());
     return MATCH_VIEW_NAME;
+  }
+
+  private SortaJobExecution findSortaJobExecution(String sortaJobExecutionId) {
+    Fetch fetch = new Fetch();
+    sortaJobExecutionMetaData.getAtomicAttributes().forEach(attr -> fetch.field(attr.getName()));
+    return runAsSystem(
+        () ->
+            dataService.findOneById(
+                SORTA_JOB_EXECUTION, sortaJobExecutionId, fetch, SortaJobExecution.class));
   }
 
   @GetMapping("/jobs")
@@ -360,8 +368,7 @@ public class SortaController extends PluginController {
       return init(model);
     }
     validateJobName(jobName);
-    try (ByteArrayInputStream inputStream =
-        new ByteArrayInputStream(inputTerms.getBytes(StandardCharsets.UTF_8))) {
+    try (ByteArrayInputStream inputStream = new ByteArrayInputStream(inputTerms.getBytes("UTF8"))) {
       return startMatchJob(jobName, ontologyIri, model, httpServletRequest, inputStream);
     }
   }
@@ -411,6 +418,47 @@ public class SortaController extends PluginController {
     }
     return new SortaServiceResponse(
         "Please check that sortaJobExecutionId and identifier keys exist in input and have nonempty value!");
+  }
+
+  private Entity toDownloadRow(
+      SortaJobExecution sortaJobExecution, Entity resultEntity, EntityType downloadEntityType) {
+    NumberFormat format = NumberFormat.getNumberInstance();
+    format.setMaximumFractionDigits(2);
+    Entity inputEntity = resultEntity.getEntity(MatchingTaskContentMetaData.INPUT_TERM);
+    Entity ontologyTermEntity =
+        sortaService.getOntologyTermEntity(
+            resultEntity.getString(MatchingTaskContentMetaData.MATCHED_TERM),
+            sortaJobExecution.getOntologyIri());
+
+    Entity row = new DynamicEntity(downloadEntityType);
+    inputEntity
+        .getAttributeNames()
+        .forEach(
+            attributeName -> {
+              if (!attributeName.equalsIgnoreCase(SortaCsvRepository.ALLOWED_IDENTIFIER)) {
+                row.set(attributeName, inputEntity.get(attributeName));
+              }
+            });
+    if (ontologyTermEntity != null) {
+      row.set(
+          OntologyTermMetadata.ONTOLOGY_TERM_NAME,
+          ontologyTermEntity.getString(OntologyTermMetadata.ONTOLOGY_TERM_NAME));
+      row.set(
+          OntologyTermMetadata.ONTOLOGY_TERM_IRI,
+          ontologyTermEntity.getString(OntologyTermMetadata.ONTOLOGY_TERM_IRI));
+    }
+    row.set(
+        MatchingTaskContentMetaData.VALIDATED,
+        resultEntity.getBoolean(MatchingTaskContentMetaData.VALIDATED));
+    row.set(
+        MatchingTaskContentMetaData.REVIEW,
+        resultEntity.getBoolean(MatchingTaskContentMetaData.REVIEW));
+
+    Double score = resultEntity.getDouble(MatchingTaskContentMetaData.SCORE);
+    if (score != null) {
+      row.set(MatchingTaskContentMetaData.SCORE, format.format(score));
+    }
+    return row;
   }
 
   @GetMapping("/match/download/{sortaJobExecutionId}")
@@ -464,56 +512,6 @@ public class SortaController extends PluginController {
               resultEntity ->
                   csvWriter.add(toDownloadRow(sortaJobExecution, resultEntity, targetMetadata)));
     }
-  }
-
-  private SortaJobExecution findSortaJobExecution(String sortaJobExecutionId) {
-    Fetch fetch = new Fetch();
-    sortaJobExecutionMetaData.getAtomicAttributes().forEach(attr -> fetch.field(attr.getName()));
-    return runAsSystem(
-        () ->
-            dataService.findOneById(
-                SORTA_JOB_EXECUTION, sortaJobExecutionId, fetch, SortaJobExecution.class));
-  }
-
-  private Entity toDownloadRow(
-      SortaJobExecution sortaJobExecution, Entity resultEntity, EntityType downloadEntityType) {
-    NumberFormat format = NumberFormat.getNumberInstance();
-    format.setMaximumFractionDigits(2);
-    Entity inputEntity = resultEntity.getEntity(MatchingTaskContentMetaData.INPUT_TERM);
-    Entity ontologyTermEntity =
-        sortaService.getOntologyTermEntity(
-            resultEntity.getString(MatchingTaskContentMetaData.MATCHED_TERM),
-            sortaJobExecution.getOntologyIri());
-
-    Entity row = new DynamicEntity(downloadEntityType);
-    inputEntity
-        .getAttributeNames()
-        .forEach(
-            attributeName -> {
-              if (!attributeName.equalsIgnoreCase(SortaCsvRepository.ALLOWED_IDENTIFIER)) {
-                row.set(attributeName, inputEntity.get(attributeName));
-              }
-            });
-    if (ontologyTermEntity != null) {
-      row.set(
-          OntologyTermMetadata.ONTOLOGY_TERM_NAME,
-          ontologyTermEntity.getString(OntologyTermMetadata.ONTOLOGY_TERM_NAME));
-      row.set(
-          OntologyTermMetadata.ONTOLOGY_TERM_IRI,
-          ontologyTermEntity.getString(OntologyTermMetadata.ONTOLOGY_TERM_IRI));
-    }
-    row.set(
-        MatchingTaskContentMetaData.VALIDATED,
-        resultEntity.getBoolean(MatchingTaskContentMetaData.VALIDATED));
-    row.set(
-        MatchingTaskContentMetaData.REVIEW,
-        resultEntity.getBoolean(MatchingTaskContentMetaData.REVIEW));
-
-    Double score = resultEntity.getDouble(MatchingTaskContentMetaData.SCORE);
-    if (score != null) {
-      row.set(MatchingTaskContentMetaData.SCORE, format.format(score));
-    }
-    return row;
   }
 
   private String startMatchJob(
