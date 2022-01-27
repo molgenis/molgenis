@@ -30,7 +30,7 @@ import org.molgenis.util.UnexpectedEnumException;
 
 public class TemplateExpressionEvaluator implements ExpressionEvaluator {
 
-  public static final String MATH = "math";
+  public static final String MATH = "molgenis-math";
   private static final Handlebars HANDLEBARS = setupHandlebars();
   private final Attribute attribute;
   private final EntityType entityType;

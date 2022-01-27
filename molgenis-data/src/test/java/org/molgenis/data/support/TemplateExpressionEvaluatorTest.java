@@ -288,7 +288,7 @@ class TemplateExpressionEvaluatorTest extends AbstractMockitoTest {
   @Test
   void testEvaluateMathAttributes() {
     when(expressionAttribute.getExpression())
-        .thenReturn("{'template':'{{math attr1 \"+\" attr2}}'}");
+        .thenReturn("{'template':'{{molgenis-math attr1 \"+\" attr2}}'}");
     Attribute attribute1Mock = mock(Attribute.class);
     Attribute attribute2Mock = mock(Attribute.class);
     when(attribute1Mock.getDataType()).thenReturn(INT);
@@ -311,7 +311,7 @@ class TemplateExpressionEvaluatorTest extends AbstractMockitoTest {
   @Test
   void testEvaluateMathAndVariableAttributes() {
     when(expressionAttribute.getExpression())
-        .thenReturn("{'template':'{{math attr1 \"+\" attr2}} yo {{attr3}}'}");
+        .thenReturn("{'template':'{{molgenis-math attr1 \"+\" attr2}} yo {{attr3}}'}");
     Attribute attribute1Mock = mock(Attribute.class);
     Attribute attribute2Mock = mock(Attribute.class);
     Attribute attribute3Mock = mock(Attribute.class);
