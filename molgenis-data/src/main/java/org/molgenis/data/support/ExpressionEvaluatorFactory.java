@@ -3,14 +3,11 @@ package org.molgenis.data.support;
 import com.google.gson.Gson;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.util.UnexpectedEnumException;
 
 class ExpressionEvaluatorFactory {
   private ExpressionEvaluatorFactory() {}
 
   static ExpressionEvaluator createExpressionEvaluator(Attribute attribute, EntityType entityType) {
-    ExpressionEvaluator expressionEvaluator;
-
     Object expressionJson = new Gson().fromJson(attribute.getExpression(), Object.class);
     if (expressionJson instanceof String) {
       return new StringExpressionEvaluator(attribute, entityType);

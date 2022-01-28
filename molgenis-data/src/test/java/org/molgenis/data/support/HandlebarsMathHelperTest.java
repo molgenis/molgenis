@@ -124,6 +124,22 @@ class HandlebarsMathHelperTest extends AbstractMockitoTest {
         thrown.getMessage());
   }
 
+  @Test
+  void valueIsNotNumeric() throws IOException {
+    Handlebars handlebars = new Handlebars();
+    handlebars.registerHelper("math", new HandlebarsMathHelper());
+    Template template = handlebars.compileInline("{{math this \"+\" foo}}");
+    HandlebarsException thrown =
+        assertThrows(HandlebarsException.class, () -> template.apply("NotANumber!"));
+
+    // Handlebars adds hash of the thrown IOException to the error
+    assertEquals(
+        "inline@92546b5:1:2: "
+            + "java.lang.IllegalArgumentException: Cannot perform operations on null values\n"
+            + "    inline@92546b5:1:2",
+        thrown.getMessage());
+  }
+
   private void shouldCompileTo(String templateString, String varValue, String expected)
       throws IOException {
     Handlebars handlebars = new Handlebars();

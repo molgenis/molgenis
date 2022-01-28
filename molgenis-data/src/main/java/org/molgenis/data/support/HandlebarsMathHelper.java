@@ -12,6 +12,11 @@ import java.math.RoundingMode;
  *
  * based on: https://github.com/mrhanlon/handlebars-math-helper/
  *
+ * changes:
+ *  - Some refactoring
+ *  - Remove deprecated functions
+ *  - Added some extra unit tests
+ *
  */
 
 public class HandlebarsMathHelper implements Helper<Object> {
