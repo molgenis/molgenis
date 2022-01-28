@@ -176,15 +176,15 @@ public class TemplateExpressionEvaluator implements ExpressionEvaluator {
 
     Attribute tagAttribute = entity.getEntityType().getAttribute(attributeName);
     switch (tagAttribute.getDataType()) {
-      case BOOL -> { return entity.getBoolean(attributeName); }
-      case CATEGORICAL, FILE, XREF -> { return getXrefVarValue(entity, tagParts, index, attributeName); }
-      case CATEGORICAL_MREF, MREF, ONE_TO_MANY -> { return getMrefVarValue(entity, tagParts, index, attributeName); }
-      case DATE -> { return entity.getLocalDate(attributeName); }
-      case DATE_TIME -> { return entity.getInstant(attributeName); }
-      case DECIMAL -> { return entity.getDouble(attributeName); }
-      case EMAIL, ENUM, HTML, HYPERLINK, SCRIPT, STRING, TEXT -> { return entity.getString(attributeName); }
-      case INT -> { return entity.getInt(attributeName); }
-      case LONG ->{ return entity.getLong(attributeName); }
+      case BOOL -> { return entity.getBoolean(attributeName); };
+      case CATEGORICAL, FILE, XREF -> { return getXrefVarValue(entity, tagParts, index, attributeName); };
+      case CATEGORICAL_MREF, MREF, ONE_TO_MANY -> { return getMrefVarValue(entity, tagParts, index, attributeName); };
+      case DATE -> { return entity.getLocalDate(attributeName); };
+      case DATE_TIME -> { return entity.getInstant(attributeName); };
+      case DECIMAL -> { return entity.getDouble(attributeName); };
+      case EMAIL, ENUM, HTML, HYPERLINK, SCRIPT, STRING, TEXT -> { return entity.getString(attributeName); };
+      case INT -> { return entity.getInt(attributeName); };
+      case LONG -> { return entity.getLong(attributeName); };
       case COMPOUND -> throw new IllegalAttributeTypeException(tagAttribute.getDataType());
       default -> throw new UnexpectedEnumException(tagAttribute.getDataType());
     }
