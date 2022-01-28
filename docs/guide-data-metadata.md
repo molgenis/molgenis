@@ -146,8 +146,12 @@ For String type attributes, uses a string
 template, e.g.: `{"template": "Hello {{world.label}}"}` which fills in the value of the `label`
 attribute of the `world` reference.
 
+And a template, e.g.: `{"template": "{{molgenis-math MyInt '+' MyDecimal}}"}` adds 2 the attributes in the template.
+
 For single reference type attributes, creates an instance of the refEntity type, copying
 attribute values. E.g.: `{Chromosome: foo, Position: bar}`
+
+[Read More about expressions](guide-emx.md#expression)
 
 __Visible expression__
 : Expression that determines whether the column should be shown or not.
