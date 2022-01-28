@@ -170,7 +170,6 @@ public class TemplateExpressionEvaluator implements ExpressionEvaluator {
         && existingValue instanceof Map;
   }
 
-  @SuppressWarnings("all")
   private Object getTemplateTagValueRecursive(Entity entity, List<String> tagParts, int index) {
     String attributeName = tagParts.get(index);
 

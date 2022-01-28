@@ -13,9 +13,9 @@ class ExpressionEvaluatorFactory {
 
     Object expressionJson = new Gson().fromJson(attribute.getExpression(), Object.class);
     if (expressionJson instanceof String) {
-      expressionEvaluator = new StringExpressionEvaluator(attribute, entityType);
+      return new StringExpressionEvaluator(attribute, entityType);
     } else {
-      expressionEvaluator = switch (attribute.getDataType()) {
+      return switch (attribute.getDataType()) {
         case BOOL, CATEGORICAL, CATEGORICAL_MREF, COMPOUND, DATE,
             DATE_TIME, DECIMAL, FILE, INT, LONG, MREF, ONE_TO_MANY, XREF ->
             new MapOfStringsExpressionEvaluator(attribute, entityType);
@@ -23,7 +23,5 @@ class ExpressionEvaluatorFactory {
             new TemplateExpressionEvaluator(attribute, entityType);
       };
     }
-
-    return expressionEvaluator;
   }
 }

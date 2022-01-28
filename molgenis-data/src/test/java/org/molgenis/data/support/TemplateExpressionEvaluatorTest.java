@@ -35,8 +35,8 @@ class TemplateExpressionEvaluatorTest extends AbstractMockitoTest {
 
   @BeforeEach
   void setUpBeforeMethod() {
-    templateExpressionEvaluator = new TemplateExpressionEvaluator(expressionAttribute,
-        entityTypeMock);
+    templateExpressionEvaluator =
+        new TemplateExpressionEvaluator(expressionAttribute, entityTypeMock);
   }
 
   @Test
