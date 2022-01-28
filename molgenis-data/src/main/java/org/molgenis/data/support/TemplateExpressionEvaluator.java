@@ -26,7 +26,6 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.IllegalAttributeTypeException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.util.UnexpectedEnumException;
 
 public class TemplateExpressionEvaluator implements ExpressionEvaluator {
 
@@ -171,23 +170,23 @@ public class TemplateExpressionEvaluator implements ExpressionEvaluator {
         && existingValue instanceof Map;
   }
 
+  @SuppressWarnings("all")
   private Object getTemplateTagValueRecursive(Entity entity, List<String> tagParts, int index) {
     String attributeName = tagParts.get(index);
 
     Attribute tagAttribute = entity.getEntityType().getAttribute(attributeName);
-    switch (tagAttribute.getDataType()) {
-      case BOOL:  return entity.getBoolean(attributeName);
-      case CATEGORICAL, FILE, XREF: return getXrefVarValue(entity, tagParts, index, attributeName);
-      case CATEGORICAL_MREF, MREF, ONE_TO_MANY: return getMrefVarValue(entity, tagParts, index, attributeName);
-      case DATE:  return entity.getLocalDate(attributeName);
-      case DATE_TIME: return entity.getInstant(attributeName);
-      case DECIMAL:  return entity.getDouble(attributeName);
-      case EMAIL, ENUM, HTML, HYPERLINK, SCRIPT, STRING, TEXT: return entity.getString(attributeName);
-      case INT:  return entity.getInt(attributeName);
-      case LONG: return entity.getLong(attributeName);
-      case COMPOUND: throw new IllegalAttributeTypeException(tagAttribute.getDataType());
-      default: throw new UnexpectedEnumException(tagAttribute.getDataType());
-    }
+    return switch (tagAttribute.getDataType()) {
+      case BOOL -> entity.getBoolean(attributeName);
+      case CATEGORICAL, FILE, XREF -> getXrefVarValue(entity, tagParts, index, attributeName);
+      case CATEGORICAL_MREF, MREF, ONE_TO_MANY -> getMrefVarValue(entity, tagParts, index, attributeName);
+      case DATE ->  entity.getLocalDate(attributeName);
+      case DATE_TIME ->  entity.getInstant(attributeName);
+      case DECIMAL ->  entity.getDouble(attributeName);
+      case EMAIL, ENUM, HTML, HYPERLINK, SCRIPT, STRING, TEXT ->  entity.getString(attributeName);
+      case INT ->  entity.getInt(attributeName);
+      case LONG -> entity.getLong(attributeName);
+      case COMPOUND -> throw new IllegalAttributeTypeException(tagAttribute.getDataType());
+    };
   }
 
   private Map<String, Object> getXrefVarValue(Entity entity, List<String> tagParts, int index,
