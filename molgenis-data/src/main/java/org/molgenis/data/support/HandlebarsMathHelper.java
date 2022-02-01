@@ -16,6 +16,7 @@ import java.math.RoundingMode;
  *  - Some refactoring
  *  - Remove deprecated functions
  *  - Added some extra unit tests
+ *  - Use molgenis exceptions
  *
  */
 
@@ -25,18 +26,18 @@ public class HandlebarsMathHelper implements Helper<Object> {
     if (options.params.length >= 2) {
       return calculateResult(value, options);
     } else {
-      throw new IOException("MathHelper requires three parameters");
+      throw new HandleBarsMathHelperException("molgenis-math requires three parameters");
     }
   }
 
   private String calculateResult(Object value, Options options) {
     Operator operator = Operator.fromSymbol(options.param(0).toString());
     if (operator == null) {
-      throw new IllegalArgumentException("Unknown operation '" + options.param(0) + "'");
+      throw new HandleBarsMathHelperException("unknown operation '" + options.param(0) + "' for molgenis-math");
     }
 
     if (value == null || options.param(1) == null) {
-      throw new IllegalArgumentException("Cannot perform operations on null values");
+      throw new HandleBarsMathHelperException("molgenis-math cannot perform operations on null values");
     }
 
     BigDecimal firstValue = new BigDecimal(value.toString());
