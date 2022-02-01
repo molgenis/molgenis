@@ -26,6 +26,11 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.IllegalAttributeTypeException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.support.exceptions.TemplateExpressionException;
+import org.molgenis.data.support.exceptions.TemplateExpressionInvalidTagException;
+import org.molgenis.data.support.exceptions.TemplateExpressionMissingTagException;
+import org.molgenis.data.support.exceptions.TemplateExpressionSyntaxException;
+import org.molgenis.data.support.exceptions.TemplateExpressionUnknownAttributeException;
 
 public class TemplateExpressionEvaluator implements ExpressionEvaluator {
 

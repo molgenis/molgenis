@@ -1,11 +1,13 @@
-package org.molgenis.data.support;
+package org.molgenis.data.support.exceptions;
+
+import static org.mockito.Mockito.mock;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.util.exception.ExceptionMessageTest;
 
-class TemplateExpressionMissingTagExceptionTest extends ExceptionMessageTest {
+public class TemplateExpressionSyntaxExceptionTest extends ExceptionMessageTest {
   @BeforeEach
   void setUp() {
     messageSource.addMolgenisNamespaces("data");
@@ -15,19 +17,15 @@ class TemplateExpressionMissingTagExceptionTest extends ExceptionMessageTest {
   @MethodSource("languageMessageProvider")
   @Override
   protected void testGetLocalizedMessage(String lang, String message) {
-    String expression = "hello {{xref}}";
-    String tag = "xref";
+    String expression = "{\"platetem\":\"value\"}";
+    Exception exception = mock(Exception.class);
     assertExceptionMessageEquals(
-        new TemplateExpressionMissingTagException(expression, tag), lang, message);
+        new TemplateExpressionSyntaxException(expression, exception), lang, message);
   }
 
   static Object[][] languageMessageProvider() {
-    Object[] enParams = {
-      "en", "Expression 'hello {{xref}}' with tag 'xref' is missing a reference tag."
-    };
-    Object[] nlParams = {
-      "nl", "Expressie 'hello {{xref}}' met tag 'xref' mist een referentie tag."
-    };
+    Object[] enParams = {"en", "Expression '{\"platetem\":\"value\"}' syntax invalid."};
+    Object[] nlParams = {"nl", "Expressie '{\"platetem\":\"value\"}' syntax ongeldig."};
     return new Object[][] {enParams, nlParams};
   }
 }

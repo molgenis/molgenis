@@ -65,16 +65,7 @@ class HandlebarsMathHelperTest extends AbstractMockitoTest {
     handlebars.registerHelper("math", new HandlebarsMathHelper());
     Template template = handlebars.compileInline("{{math this \"+\" }}");
     String varValue = "37";
-    HandlebarsException thrown =
-        assertThrows(HandlebarsException.class, () -> template.apply(varValue));
-
-    // Handlebars adds hash of the thrown IOException to the error
-    assertEquals(
-        "inline@783389cf:1:2: "
-            + "org.molgenis.data.support.TemplateExpressionMathNotEnoughParametersException: "
-            + "FAILED TO FORMAT LOCALIZED MESSAGE FOR ERROR CODE D12f.%nFallback message: \n"
-            + "    inline@783389cf:1:2",
-        thrown.getMessage());
+    assertThrows(HandlebarsException.class, () -> template.apply(varValue));
   }
 
   @Test
@@ -82,16 +73,7 @@ class HandlebarsMathHelperTest extends AbstractMockitoTest {
     Handlebars handlebars = new Handlebars();
     handlebars.registerHelper("math", new HandlebarsMathHelper());
     Template template = handlebars.compileInline("{{math this \"$\" 42}}");
-    HandlebarsException thrown =
         assertThrows(HandlebarsException.class, () -> template.apply("37"));
-
-    // Handlebars adds hash of the thrown IOException to the error
-    assertEquals(
-        "inline@5419d628:1:2: "
-            + "org.molgenis.data.support.TemplateExpressionMathUnknownOperatorException: "
-            + "FAILED TO FORMAT LOCALIZED MESSAGE FOR ERROR CODE D12f.%nFallback message: Unknown operator 'Unknown operator '$' for molgenis-math' for molgenis-math\n"
-            + "    inline@5419d628:1:2",
-        thrown.getMessage());
   }
 
   @Test
@@ -99,16 +81,7 @@ class HandlebarsMathHelperTest extends AbstractMockitoTest {
     Handlebars handlebars = new Handlebars();
     handlebars.registerHelper("math", new HandlebarsMathHelper());
     Template template = handlebars.compileInline("{{math this \"+\" 42}}");
-    HandlebarsException thrown =
         assertThrows(HandlebarsException.class, () -> template.apply(null));
-
-    // Handlebars adds hash of the thrown IOException to the error
-    assertEquals(
-        "inline@399a8b11:1:2: "
-            + "org.molgenis.data.support.TemplateExpressionMathInvalidParameterException: "
-            + "FAILED TO FORMAT LOCALIZED MESSAGE FOR ERROR CODE D12h.%nFallback message: \n"
-            + "    inline@399a8b11:1:2",
-        thrown.getMessage());
   }
 
   @Test
@@ -116,16 +89,7 @@ class HandlebarsMathHelperTest extends AbstractMockitoTest {
     Handlebars handlebars = new Handlebars();
     handlebars.registerHelper("math", new HandlebarsMathHelper());
     Template template = handlebars.compileInline("{{math this \"+\" foo}}");
-    HandlebarsException thrown =
         assertThrows(HandlebarsException.class, () -> template.apply("37"));
-
-    // Handlebars adds hash of the thrown IOException to the error
-    assertEquals(
-        "inline@92546b5:1:2: "
-            + "org.molgenis.data.support.TemplateExpressionMathInvalidParameterException: "
-            + "FAILED TO FORMAT LOCALIZED MESSAGE FOR ERROR CODE D12h.%nFallback message: \n"
-            + "    inline@92546b5:1:2",
-        thrown.getMessage());
   }
 
   @Test
@@ -133,16 +97,7 @@ class HandlebarsMathHelperTest extends AbstractMockitoTest {
     Handlebars handlebars = new Handlebars();
     handlebars.registerHelper("math", new HandlebarsMathHelper());
     Template template = handlebars.compileInline("{{math this \"+\" foo}}");
-    HandlebarsException thrown =
         assertThrows(HandlebarsException.class, () -> template.apply("NotANumber!"));
-
-    // Handlebars adds hash of the thrown IOException to the error
-    assertEquals(
-        "inline@92546b5:1:2: "
-            + "org.molgenis.data.support.TemplateExpressionMathInvalidParameterException: "
-            + "FAILED TO FORMAT LOCALIZED MESSAGE FOR ERROR CODE D12h.%nFallback message: \n"
-            + "    inline@92546b5:1:2",
-        thrown.getMessage());
   }
 
   private void shouldCompileTo(String templateString, String varValue, String expected)

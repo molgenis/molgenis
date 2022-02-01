@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import org.molgenis.data.support.exceptions.TemplateExpressionMathInvalidParameterException;
+import org.molgenis.data.support.exceptions.TemplateExpressionMathNotEnoughParametersException;
+import org.molgenis.data.support.exceptions.TemplateExpressionMathUnknownOperatorException;
 
 /**
  * Handlebars Math Helper

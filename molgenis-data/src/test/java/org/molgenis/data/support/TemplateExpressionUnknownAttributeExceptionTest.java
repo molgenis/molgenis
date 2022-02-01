@@ -3,6 +3,7 @@ package org.molgenis.data.support;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.molgenis.data.support.exceptions.TemplateExpressionUnknownAttributeException;
 import org.molgenis.util.exception.ExceptionMessageTest;
 
 public class TemplateExpressionUnknownAttributeExceptionTest extends ExceptionMessageTest {

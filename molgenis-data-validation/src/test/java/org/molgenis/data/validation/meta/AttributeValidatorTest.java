@@ -43,7 +43,7 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.support.TemplateExpressionSyntaxException;
+import org.molgenis.data.support.exceptions.TemplateExpressionSyntaxException;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.data.validation.SimpleExpressionEvaluator;
 import org.molgenis.data.validation.meta.AttributeValidator.ValidationMode;

@@ -1,4 +1,4 @@
-package org.molgenis.data.support;
+package org.molgenis.data.support.exceptions;
 
 import org.molgenis.util.exception.CodedRuntimeException;
 
@@ -7,7 +7,7 @@ public class TemplateExpressionMathUnknownOperatorException extends CodedRuntime
 
   private final String operator;
 
-  TemplateExpressionMathUnknownOperatorException(String operator) {
+  public TemplateExpressionMathUnknownOperatorException(String operator) {
     super(ERROR_CODE);
     this.operator = operator;
   }

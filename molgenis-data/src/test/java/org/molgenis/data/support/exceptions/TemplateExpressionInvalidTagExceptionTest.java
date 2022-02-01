@@ -1,14 +1,14 @@
-package org.molgenis.data.support;
+package org.molgenis.data.support.exceptions;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.util.exception.ExceptionMessageTest;
 
-class TemplateExpressionMathUnknownOperatorExceptionTest extends ExceptionMessageTest {
+class TemplateExpressionInvalidTagExceptionTest extends ExceptionMessageTest {
   static Object[][] languageMessageProvider() {
-    Object[] enParams = {"en", "Unknown operator '@' for molgenis-math."};
-    Object[] nlParams = {"nl", "Onbekende operator '@' voor molgenis-math."};
+    Object[] enParams = {"en", "Expression 'hello {{text.id}}' with tag 'id' is invalid."};
+    Object[] nlParams = {"nl", "Expressie 'hello {{text.id}}' met tag 'id' is ongeldig."};
     return new Object[][] {enParams, nlParams};
   }
 
@@ -21,8 +21,9 @@ class TemplateExpressionMathUnknownOperatorExceptionTest extends ExceptionMessag
   @MethodSource("languageMessageProvider")
   @Override
   protected void testGetLocalizedMessage(String lang, String message) {
-    String operator = "@";
+    String expression = "hello {{text.id}}";
+    String tag = "id";
     assertExceptionMessageEquals(
-        new TemplateExpressionMathUnknownOperatorException(operator), lang, message);
+        new TemplateExpressionInvalidTagException(expression, tag), lang, message);
   }
 }

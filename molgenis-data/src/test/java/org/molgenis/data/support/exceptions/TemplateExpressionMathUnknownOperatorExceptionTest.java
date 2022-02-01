@@ -1,18 +1,14 @@
-package org.molgenis.data.support;
+package org.molgenis.data.support.exceptions;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.util.exception.ExceptionMessageTest;
 
-class TemplateExpressionMathInvalidParameterExceptionTest extends ExceptionMessageTest {
+class TemplateExpressionMathUnknownOperatorExceptionTest extends ExceptionMessageTest {
   static Object[][] languageMessageProvider() {
-    Object[] enParams = {
-      "en", "molgenis-math Cannot perform operations on null or non-numerical values."
-    };
-    Object[] nlParams = {
-      "nl", "molgenis-math kan geen operaties doen op null of non-numerieke waarden."
-    };
+    Object[] enParams = {"en", "Unknown operator '@' for molgenis-math."};
+    Object[] nlParams = {"nl", "Onbekende operator '@' voor molgenis-math."};
     return new Object[][] {enParams, nlParams};
   }
 
@@ -25,7 +21,8 @@ class TemplateExpressionMathInvalidParameterExceptionTest extends ExceptionMessa
   @MethodSource("languageMessageProvider")
   @Override
   protected void testGetLocalizedMessage(String lang, String message) {
+    String operator = "@";
     assertExceptionMessageEquals(
-        new TemplateExpressionMathInvalidParameterException(), lang, message);
+        new TemplateExpressionMathUnknownOperatorException(operator), lang, message);
   }
 }
