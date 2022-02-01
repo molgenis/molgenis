@@ -71,7 +71,8 @@ class HandlebarsMathHelperTest extends AbstractMockitoTest {
     // Handlebars adds hash of the thrown IOException to the error
     assertEquals(
         "inline@783389cf:1:2: "
-            + "java.io.IOException: MathHelper requires three parameters\n"
+            + "org.molgenis.data.support.TemplateExpressionMathNotEnoughParametersException: "
+            + "FAILED TO FORMAT LOCALIZED MESSAGE FOR ERROR CODE D12f.%nFallback message: \n"
             + "    inline@783389cf:1:2",
         thrown.getMessage());
   }
@@ -87,7 +88,8 @@ class HandlebarsMathHelperTest extends AbstractMockitoTest {
     // Handlebars adds hash of the thrown IOException to the error
     assertEquals(
         "inline@5419d628:1:2: "
-            + "java.lang.IllegalArgumentException: Unknown operation '$'\n"
+            + "org.molgenis.data.support.TemplateExpressionMathUnknownOperatorException: "
+            + "FAILED TO FORMAT LOCALIZED MESSAGE FOR ERROR CODE D12f.%nFallback message: Unknown operator 'Unknown operator '$' for molgenis-math' for molgenis-math\n"
             + "    inline@5419d628:1:2",
         thrown.getMessage());
   }
@@ -103,7 +105,8 @@ class HandlebarsMathHelperTest extends AbstractMockitoTest {
     // Handlebars adds hash of the thrown IOException to the error
     assertEquals(
         "inline@399a8b11:1:2: "
-            + "java.lang.IllegalArgumentException: Cannot perform operations on null values\n"
+            + "org.molgenis.data.support.TemplateExpressionMathInvalidParameterException: "
+            + "FAILED TO FORMAT LOCALIZED MESSAGE FOR ERROR CODE D12h.%nFallback message: \n"
             + "    inline@399a8b11:1:2",
         thrown.getMessage());
   }
@@ -119,7 +122,8 @@ class HandlebarsMathHelperTest extends AbstractMockitoTest {
     // Handlebars adds hash of the thrown IOException to the error
     assertEquals(
         "inline@92546b5:1:2: "
-            + "java.lang.IllegalArgumentException: Cannot perform operations on null values\n"
+            + "org.molgenis.data.support.TemplateExpressionMathInvalidParameterException: "
+            + "FAILED TO FORMAT LOCALIZED MESSAGE FOR ERROR CODE D12h.%nFallback message: \n"
             + "    inline@92546b5:1:2",
         thrown.getMessage());
   }
@@ -135,7 +139,8 @@ class HandlebarsMathHelperTest extends AbstractMockitoTest {
     // Handlebars adds hash of the thrown IOException to the error
     assertEquals(
         "inline@92546b5:1:2: "
-            + "java.lang.IllegalArgumentException: Cannot perform operations on null values\n"
+            + "org.molgenis.data.support.TemplateExpressionMathInvalidParameterException: "
+            + "FAILED TO FORMAT LOCALIZED MESSAGE FOR ERROR CODE D12h.%nFallback message: \n"
             + "    inline@92546b5:1:2",
         thrown.getMessage());
   }

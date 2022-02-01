@@ -5,10 +5,16 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.util.exception.ExceptionMessageTest;
 
-class TemplateExpressionInvalidTagExceptionTest extends ExceptionMessageTest {
+class TemplateExpressionMathNotEnoughParametersExceptionTest extends ExceptionMessageTest {
   static Object[][] languageMessageProvider() {
-    Object[] enParams = {"en", "Expression 'hello {{text.id}}' with tag 'id' is invalid."};
-    Object[] nlParams = {"nl", "Expressie 'hello {{text.id}}' met tag 'id' is ongeldig."};
+    Object[] enParams = {
+      "en",
+      "molgenis-math Requires three parameters."
+    };
+    Object[] nlParams = {
+      "nl",
+      "molgenis-math Heeft drie parameters nodig."
+    };
     return new Object[][] {enParams, nlParams};
   }
 
@@ -21,9 +27,7 @@ class TemplateExpressionInvalidTagExceptionTest extends ExceptionMessageTest {
   @MethodSource("languageMessageProvider")
   @Override
   protected void testGetLocalizedMessage(String lang, String message) {
-    String expression = "hello {{text.id}}";
-    String tag = "id";
     assertExceptionMessageEquals(
-        new TemplateExpressionInvalidTagException(expression, tag), lang, message);
+        new TemplateExpressionMathNotEnoughParametersException(), lang, message);
   }
 }

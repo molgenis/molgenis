@@ -5,15 +5,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.util.exception.ExceptionMessageTest;
 
-class TemplateExpressionMathExceptionTest extends ExceptionMessageTest {
+class TemplateExpressionMathInvalidParameterExceptionTest extends ExceptionMessageTest {
   static Object[][] languageMessageProvider() {
     Object[] enParams = {
-      "en",
-      "molgenis-math requires three parameters"
+      "en", "molgenis-math Cannot perform operations on null or non-numerical values."
     };
     Object[] nlParams = {
-      "nl",
-      "molgenis-math heeft drie parameters nodig"
+      "nl", "molgenis-math kan geen operaties doen op null of non-numerieke waarden."
     };
     return new Object[][] {enParams, nlParams};
   }
@@ -27,8 +25,7 @@ class TemplateExpressionMathExceptionTest extends ExceptionMessageTest {
   @MethodSource("languageMessageProvider")
   @Override
   protected void testGetLocalizedMessage(String lang, String message) {
-    String errorMessage = "error: "+ message;
     assertExceptionMessageEquals(
-        new TemplateExpressionMathException(message), lang, errorMessage);
+        new TemplateExpressionMathInvalidParameterException(), lang, message);
   }
 }
