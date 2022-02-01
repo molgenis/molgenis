@@ -26,18 +26,18 @@ public class HandlebarsMathHelper implements Helper<Object> {
     if (options.params.length >= 2) {
       return calculateResult(value, options);
     } else {
-      throw new HandleBarsMathHelperException("molgenis-math requires three parameters");
+      throw new TemplateExpressionMathException("molgenis-math requires three parameters");
     }
   }
 
   private String calculateResult(Object value, Options options) {
     Operator operator = Operator.fromSymbol(options.param(0).toString());
     if (operator == null) {
-      throw new HandleBarsMathHelperException("unknown operation '" + options.param(0) + "' for molgenis-math");
+      throw new TemplateExpressionMathException("unknown operation '" + options.param(0) + "' for molgenis-math");
     }
 
     if (value == null || options.param(1) == null) {
-      throw new HandleBarsMathHelperException("molgenis-math cannot perform operations on null values");
+      throw new TemplateExpressionMathException("molgenis-math cannot perform operations on null values");
     }
 
     BigDecimal firstValue = new BigDecimal(value.toString());

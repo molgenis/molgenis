@@ -5,7 +5,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.util.exception.ExceptionMessageTest;
 
-class HandleBarsMathHelperExceptionTest extends ExceptionMessageTest {
+class TemplateExpressionMathExceptionTest extends ExceptionMessageTest {
   static Object[][] languageMessageProvider() {
     Object[] enParams = {
       "en",
@@ -29,6 +29,6 @@ class HandleBarsMathHelperExceptionTest extends ExceptionMessageTest {
   protected void testGetLocalizedMessage(String lang, String message) {
     String errorMessage = "error: "+ message;
     assertExceptionMessageEquals(
-        new HandleBarsMathHelperException(message), lang, errorMessage);
+        new TemplateExpressionMathException(message), lang, errorMessage);
   }
 }
