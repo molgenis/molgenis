@@ -28,6 +28,9 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.exceptions.TemplateExpressionException;
 import org.molgenis.data.support.exceptions.TemplateExpressionInvalidTagException;
+import org.molgenis.data.support.exceptions.TemplateExpressionMathInvalidParameterException;
+import org.molgenis.data.support.exceptions.TemplateExpressionMathNotEnoughParametersException;
+import org.molgenis.data.support.exceptions.TemplateExpressionMathUnknownOperatorException;
 import org.molgenis.data.support.exceptions.TemplateExpressionMissingTagException;
 import org.molgenis.data.support.exceptions.TemplateExpressionSyntaxException;
 import org.molgenis.data.support.exceptions.TemplateExpressionUnknownAttributeException;
@@ -90,9 +93,30 @@ public class TemplateExpressionEvaluator implements ExpressionEvaluator {
 
     try {
       return template.apply(Context.newContext(tagValues));
-    } catch (IOException e) {
-      throw new TemplateExpressionException(attribute, e);
+    } catch (IOException exception) {
+      throw new TemplateExpressionException(attribute, exception);
+    } catch (HandlebarsException exception){
+      handleHandleBarsException(exception);
     }
+    return null;
+  }
+
+  private void handleHandleBarsException(HandlebarsException exception) {
+    Throwable cause = exception.getCause();
+    String[] split = cause.toString().split(":");
+    if(split[0].contains("TemplateExpressionMathNotEnoughParametersException")){
+      throw new TemplateExpressionMathNotEnoughParametersException();
+    } else if (split[0].contains("TemplateExpressionMathInvalidParameterException")){
+      throw new TemplateExpressionMathInvalidParameterException();
+    } else if (split[0].contains("TemplateExpressionMathUnknownOperatorException")){
+      throw new TemplateExpressionMathUnknownOperatorException(getOperator(split[1]));
+    } else {
+      throw new TemplateExpressionMathInvalidParameterException();
+    }
+  }
+
+  private String getOperator(String exceptionMessage) {
+    return exceptionMessage.split("'")[1];
   }
 
   private synchronized void initTemplate() {

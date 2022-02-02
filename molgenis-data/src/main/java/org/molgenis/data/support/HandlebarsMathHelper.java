@@ -49,20 +49,20 @@ public class HandlebarsMathHelper implements Helper<Object> {
 
     BigDecimal result = switch (operator) {
       case ADD -> firstValue.add(secondValue, mathContext);
-      case subtract -> firstValue.subtract(secondValue, mathContext);
-      case multiply -> firstValue.multiply(secondValue, mathContext);
-      case divide -> firstValue.divide(secondValue, mathContext);
-      case mod -> firstValue.remainder(secondValue, mathContext);
+      case SUBTRACT -> firstValue.subtract(secondValue, mathContext);
+      case MULTIPLY -> firstValue.multiply(secondValue, mathContext);
+      case DIVIDE -> firstValue.divide(secondValue, mathContext);
+      case MOD -> firstValue.remainder(secondValue, mathContext);
     };
     return result.toString();
   }
 
   public enum Operator {
     ADD("+"),
-    subtract("-"),
-    multiply("*"),
-    divide("/"),
-    mod("%");
+    SUBTRACT("-"),
+    MULTIPLY("*"),
+    DIVIDE("/"),
+    MOD("%");
 
     @SuppressWarnings("unused")
     Operator(String symbol) {}
@@ -70,10 +70,10 @@ public class HandlebarsMathHelper implements Helper<Object> {
     public static Operator fromSymbol(String symbol) {
       return switch (symbol) {
         case "+" -> ADD;
-        case "-" -> subtract;
-        case "*" -> multiply;
-        case "/" -> divide;
-        case "%" -> mod;
+        case "-" -> SUBTRACT;
+        case "*" -> MULTIPLY;
+        case "/" -> DIVIDE;
+        case "%" -> MOD;
         default -> null;
       };
     }
