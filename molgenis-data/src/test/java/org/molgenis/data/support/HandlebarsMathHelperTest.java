@@ -65,7 +65,9 @@ class HandlebarsMathHelperTest extends AbstractMockitoTest {
     handlebars.registerHelper("math", new HandlebarsMathHelper());
     Template template = handlebars.compileInline("{{math this \"+\" }}");
     String varValue = "37";
-    assertThrows(HandlebarsException.class, () -> template.apply(varValue));
+    HandlebarsException thrown =
+        assertThrows(HandlebarsException.class, () -> template.apply(null));
+    assert(thrown.getCause().toString().contains("TemplateExpressionMathNotEnoughParametersException"));
   }
 
   @Test
@@ -73,7 +75,9 @@ class HandlebarsMathHelperTest extends AbstractMockitoTest {
     Handlebars handlebars = new Handlebars();
     handlebars.registerHelper("math", new HandlebarsMathHelper());
     Template template = handlebars.compileInline("{{math this \"$\" 42}}");
+    HandlebarsException thrown =
         assertThrows(HandlebarsException.class, () -> template.apply("37"));
+    assert(thrown.getCause().toString().contains("TemplateExpressionMathUnknownOperatorException"));
   }
 
   @Test
@@ -81,7 +85,9 @@ class HandlebarsMathHelperTest extends AbstractMockitoTest {
     Handlebars handlebars = new Handlebars();
     handlebars.registerHelper("math", new HandlebarsMathHelper());
     Template template = handlebars.compileInline("{{math this \"+\" 42}}");
+    HandlebarsException thrown =
         assertThrows(HandlebarsException.class, () -> template.apply(null));
+    assert(thrown.getCause().toString().contains("TemplateExpressionMathInvalidParameterException"));
   }
 
   @Test
@@ -89,7 +95,9 @@ class HandlebarsMathHelperTest extends AbstractMockitoTest {
     Handlebars handlebars = new Handlebars();
     handlebars.registerHelper("math", new HandlebarsMathHelper());
     Template template = handlebars.compileInline("{{math this \"+\" foo}}");
-        assertThrows(HandlebarsException.class, () -> template.apply("37"));
+    HandlebarsException thrown =
+        assertThrows(HandlebarsException.class, () -> template.apply(null));
+    assert(thrown.getCause().toString().contains("TemplateExpressionMathInvalidParameterException"));
   }
 
   @Test
@@ -97,7 +105,9 @@ class HandlebarsMathHelperTest extends AbstractMockitoTest {
     Handlebars handlebars = new Handlebars();
     handlebars.registerHelper("math", new HandlebarsMathHelper());
     Template template = handlebars.compileInline("{{math this \"+\" foo}}");
-        assertThrows(HandlebarsException.class, () -> template.apply("NotANumber!"));
+    HandlebarsException thrown =
+        assertThrows(HandlebarsException.class, () -> template.apply(null));
+    assert(thrown.getCause().toString().contains("TemplateExpressionMathInvalidParameterException"));
   }
 
   private void shouldCompileTo(String templateString, String varValue, String expected)

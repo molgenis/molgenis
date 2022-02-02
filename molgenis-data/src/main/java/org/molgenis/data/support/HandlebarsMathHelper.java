@@ -36,7 +36,7 @@ public class HandlebarsMathHelper implements Helper<Object> {
   private String calculateResult(Object value, Options options) {
     Operator operator = Operator.fromSymbol(options.param(0).toString());
     if (operator == null) {
-      throw new TemplateExpressionMathUnknownOperatorException("Unknown operator '" + options.param(0) + "' for molgenis-math");
+      throw new TemplateExpressionMathUnknownOperatorException(options.param(0));
     }
 
     if (value == null || options.param(1) == null) {
@@ -48,7 +48,7 @@ public class HandlebarsMathHelper implements Helper<Object> {
     MathContext mathContext = new MathContext(16, RoundingMode.HALF_UP);
 
     BigDecimal result = switch (operator) {
-      case add -> firstValue.add(secondValue, mathContext);
+      case ADD -> firstValue.add(secondValue, mathContext);
       case subtract -> firstValue.subtract(secondValue, mathContext);
       case multiply -> firstValue.multiply(secondValue, mathContext);
       case divide -> firstValue.divide(secondValue, mathContext);
@@ -58,18 +58,18 @@ public class HandlebarsMathHelper implements Helper<Object> {
   }
 
   public enum Operator {
-    add("+"),
+    ADD("+"),
     subtract("-"),
     multiply("*"),
     divide("/"),
     mod("%");
 
-    Operator(String symbol) {
-    }
+    @SuppressWarnings("unused")
+    Operator(String symbol) {}
 
     public static Operator fromSymbol(String symbol) {
       return switch (symbol) {
-        case "+" -> add;
+        case "+" -> ADD;
         case "-" -> subtract;
         case "*" -> multiply;
         case "/" -> divide;
