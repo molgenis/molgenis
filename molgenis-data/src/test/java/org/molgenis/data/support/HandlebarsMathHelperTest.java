@@ -11,13 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.molgenis.test.AbstractMockitoTest;
 
 class HandlebarsMathHelperTest extends AbstractMockitoTest {
-
-  protected Handlebars newHandlebars() {
-    Handlebars handlebars = new Handlebars();
-    handlebars.registerHelper("math", new HandlebarsMathHelper());
-    return handlebars;
-  }
-
   @Test
   void addTest() throws IOException {
     shouldCompileTo("{{math this \"+\" 0}}", "2", "2");
@@ -60,69 +53,41 @@ class HandlebarsMathHelperTest extends AbstractMockitoTest {
   }
 
   @Test
-  void notEnoughParameters() throws IOException {
-    Handlebars handlebars = new Handlebars();
-    handlebars.registerHelper("math", new HandlebarsMathHelper());
-    Template template = handlebars.compileInline("{{math this \"+\" }}");
-    String varValue = "37";
-    HandlebarsException thrown =
-        assertThrows(HandlebarsException.class, () -> template.apply(null));
-    assert (thrown
-        .getCause()
-        .toString()
-        .contains("TemplateExpressionMathNotEnoughParametersException"));
+  void notEnoughParametersTest() throws IOException {
+    testHandlebarsException(
+        "{{math this \"+\" }}", "TemplateExpressionMathNotEnoughParametersException");
   }
 
   @Test
-  void operatorIsNull() throws IOException {
-    Handlebars handlebars = new Handlebars();
-    handlebars.registerHelper("math", new HandlebarsMathHelper());
-    Template template = handlebars.compileInline("{{math this \"$\" 42}}");
-    HandlebarsException thrown =
-        assertThrows(HandlebarsException.class, () -> template.apply("37"));
-    assert (thrown
-        .getCause()
-        .toString()
-        .contains("TemplateExpressionMathUnknownOperatorException"));
+  void operatorIsNullTest() throws IOException {
+    testHandlebarsException(
+        "{{math 37 \"$\" 42}}", "TemplateExpressionMathUnknownOperatorException");
   }
 
   @Test
-  void firstValueIsNull() throws IOException {
-    Handlebars handlebars = new Handlebars();
-    handlebars.registerHelper("math", new HandlebarsMathHelper());
-    Template template = handlebars.compileInline("{{math this \"+\" 42}}");
-    HandlebarsException thrown =
-        assertThrows(HandlebarsException.class, () -> template.apply(null));
-    assert (thrown
-        .getCause()
-        .toString()
-        .contains("TemplateExpressionMathInvalidParameterException"));
+  void firstValueIsNullTest() throws IOException {
+    testHandlebarsException(
+        "{{math nullVar \"+\" 42}}", "TemplateExpressionMathInvalidParameterException");
   }
 
   @Test
-  void secondValueIsNull() throws IOException {
-    Handlebars handlebars = new Handlebars();
-    handlebars.registerHelper("math", new HandlebarsMathHelper());
-    Template template = handlebars.compileInline("{{math this \"+\" foo}}");
-    HandlebarsException thrown =
-        assertThrows(HandlebarsException.class, () -> template.apply(null));
-    assert (thrown
-        .getCause()
-        .toString()
-        .contains("TemplateExpressionMathInvalidParameterException"));
+  void secondValueIsNullTest() throws IOException {
+    testHandlebarsException(
+        "{{math 42 \"+\" nullVar}}", "TemplateExpressionMathInvalidParameterException");
   }
 
   @Test
-  void valueIsNotNumeric() throws IOException {
+  void valueIsNotNumericTest() throws IOException {
+    testHandlebarsException("{{math \"this\" \"+\" \"foo\"}}", "NumberFormatException");
+  }
+
+  private void testHandlebarsException(String templateString, String exception) throws IOException {
     Handlebars handlebars = new Handlebars();
     handlebars.registerHelper("math", new HandlebarsMathHelper());
-    Template template = handlebars.compileInline("{{math this \"+\" foo}}");
+    Template template = handlebars.compileInline(templateString);
     HandlebarsException thrown =
         assertThrows(HandlebarsException.class, () -> template.apply(null));
-    assert (thrown
-        .getCause()
-        .toString()
-        .contains("TemplateExpressionMathInvalidParameterException"));
+    assert (thrown.getCause().toString().contains(exception));
   }
 
   private void shouldCompileTo(String templateString, String varValue, String expected)
