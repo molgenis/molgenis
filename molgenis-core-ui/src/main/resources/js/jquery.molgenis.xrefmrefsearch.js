@@ -19,7 +19,7 @@
     var restApi = new molgenis.RestClient();
 
     function getInexactQueryOperator(fieldType) {
-        var operator = 'SEARCH';
+        var operator = 'LIKE';
         switch (fieldType) {
             case 'INT':
             case 'LONG':
