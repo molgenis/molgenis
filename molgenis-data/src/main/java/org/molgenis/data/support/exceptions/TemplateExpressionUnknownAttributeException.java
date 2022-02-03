@@ -1,16 +1,16 @@
-package org.molgenis.data.support;
+package org.molgenis.data.support.exceptions;
 
 import static java.util.Objects.requireNonNull;
 
 import org.molgenis.util.exception.CodedRuntimeException;
 
-class TemplateExpressionMissingTagException extends CodedRuntimeException {
-  private static final String ERROR_CODE = "D12d";
+public class TemplateExpressionUnknownAttributeException extends CodedRuntimeException {
+  private static final String ERROR_CODE = "D12b";
 
   private final String expression;
   private final String tag;
 
-  TemplateExpressionMissingTagException(String expression, String tag) {
+  public TemplateExpressionUnknownAttributeException(String expression, String tag) {
     super(ERROR_CODE);
     this.expression = requireNonNull(expression);
     this.tag = requireNonNull(tag);

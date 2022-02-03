@@ -278,6 +278,17 @@ specified as well (e.g. {% raw %}{{myXrefAttribute.id}}{% endraw %}).
 | id	           | MyReference  |	string	 |						 |                                                          |
 | label	         | MyReference  |	string	 |						 |                                                          | 
 
+*Math helper*
+
+Use a math helper to do some simple arithmetics.
+`{"template":"{{molgenis-math myIntValue '+' mySecondIntValue}}"}`
+Will add the 2 attributes.
+
+It's possible to nest multiple math helpers like this:
+`{"template":"{{molgenis-math myIntValue '+' (molgenis-math mySecondIntValue '-' myThirdDecimalValue)}}"}`
+
+Valid operators are: `'+'`, `'-'`, `'*'`, `'/'` and the modulo operator `'%'`
+
 ## Entities options
 ### Required columns
 

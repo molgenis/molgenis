@@ -5,7 +5,6 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonMap;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 
 import com.github.jknack.handlebars.Context;
 import com.github.jknack.handlebars.EscapingStrategy;
@@ -27,142 +26,30 @@ import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.IllegalAttributeTypeException;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.util.UnexpectedEnumException;
+import org.molgenis.data.support.exceptions.TemplateExpressionException;
+import org.molgenis.data.support.exceptions.TemplateExpressionInvalidTagException;
+import org.molgenis.data.support.exceptions.TemplateExpressionMissingTagException;
+import org.molgenis.data.support.exceptions.TemplateExpressionSyntaxException;
+import org.molgenis.data.support.exceptions.TemplateExpressionUnknownAttributeException;
+import org.molgenis.util.exception.CodedRuntimeException;
 
 public class TemplateExpressionEvaluator implements ExpressionEvaluator {
-  private static final Handlebars HANDLEBARS =
-      new Handlebars().with(new ConcurrentMapTemplateCache()).with(EscapingStrategy.NOOP);
 
+  public static final String MATH = "molgenis-math";
+  private static final Handlebars HANDLEBARS = setupHandlebars();
   private final Attribute attribute;
   private final EntityType entityType;
   private Template template;
-  private List<List<String>> templateTags;
+  private List<List<String>> variables;
 
   TemplateExpressionEvaluator(Attribute attribute, EntityType entityType) {
     this.attribute = requireNonNull(attribute);
     this.entityType = requireNonNull(entityType);
   }
 
-  @Override
-  public Object evaluate(Entity entity) {
-    initTemplate();
-
-    Map<String, Object> tagValues = getTemplateTagValue(entity);
-
-    try {
-      return template.apply(Context.newContext(tagValues));
-    } catch (IOException e) {
-      throw new TemplateExpressionException(attribute, e);
-    }
-  }
-
-  @SuppressWarnings("unchecked")
-  private Map<String, Object> getTemplateTagValue(Entity entity) {
-    Map<String, Object> tagValues = new HashMap<>();
-    templateTags.forEach(
-        tagParts -> {
-          Object value = getTemplateTagValueRec(entity, tagParts, 0);
-
-          String tagPart = tagParts.get(0);
-          if (tagValues.containsKey(tagPart)) {
-            Object existingValue = tagValues.get(tagPart);
-            if (existingValue != null
-                && !Objects.equals(value, existingValue)
-                && value instanceof Map
-                && existingValue instanceof Map) {
-              Map<String, Object> mergedValue = new HashMap<>();
-              mergedValue.putAll((Map) existingValue);
-              mergedValue.putAll((Map) value);
-              value = mergedValue;
-            }
-          }
-          tagValues.put(tagParts.get(0), value);
-        });
-    return tagValues;
-  }
-
-  private Object getTemplateTagValueRec(Entity entity, List<String> tagParts, int index) {
-    String attributeName = tagParts.get(index);
-
-    Object value;
-    Attribute tagAttribute = entity.getEntityType().getAttribute(attributeName);
-    switch (tagAttribute.getDataType()) {
-      case BOOL:
-        value = entity.getBoolean(attributeName);
-        break;
-      case CATEGORICAL:
-      case FILE:
-      case XREF:
-        Entity refEntity = entity.getEntity(attributeName);
-        Object refValue =
-            refEntity != null ? getTemplateTagValueRec(refEntity, tagParts, index + 1) : null;
-
-        String refTag = tagParts.get(index + 1);
-        value = singletonMap(refTag, refValue);
-        break;
-      case CATEGORICAL_MREF:
-      case MREF:
-      case ONE_TO_MANY:
-        Object mrefValue =
-            stream(entity.getEntities(attributeName))
-                .map(mrefEntity -> getTemplateTagValueRec(mrefEntity, tagParts, index + 1))
-                .map(Object::toString)
-                .collect(joining(","));
-
-        String mrefTag = tagParts.get(index + 1);
-        value = singletonMap(mrefTag, mrefValue);
-        break;
-      case COMPOUND:
-        throw new IllegalAttributeTypeException(tagAttribute.getDataType());
-      case DATE:
-        value = entity.getLocalDate(attributeName);
-        break;
-      case DATE_TIME:
-        value = entity.getInstant(attributeName);
-        break;
-      case DECIMAL:
-        value = entity.getDouble(attributeName);
-        break;
-      case EMAIL:
-      case ENUM:
-      case HTML:
-      case HYPERLINK:
-      case SCRIPT:
-      case STRING:
-      case TEXT:
-        value = entity.getString(attributeName);
-        break;
-      case INT:
-        value = entity.getInt(attributeName);
-        break;
-      case LONG:
-        value = entity.getLong(attributeName);
-        break;
-      default:
-        throw new UnexpectedEnumException(tagAttribute.getDataType());
-    }
-    return value;
-  }
-
-  private synchronized void initTemplate() {
-    if (template == null) {
-      template = getTemplate(attribute);
-      templateTags = getTemplateVariables(template);
-    }
-  }
-
   public static Template getTemplate(Attribute attribute) {
-    String expression = attribute.getExpression();
-    if (expression == null) {
-      throw new TemplateExpressionException(attribute);
-    }
-
-    JsonTemplate jsonTemplate;
-    try {
-      jsonTemplate = new Gson().fromJson(expression, JsonTemplate.class);
-    } catch (JsonSyntaxException e) {
-      throw new TemplateExpressionSyntaxException(expression, e);
-    }
+    String expression = getString(attribute);
+    JsonTemplate jsonTemplate = getJsonTemplate(expression);
 
     try {
       return HANDLEBARS.compileInline(jsonTemplate.getTemplate());
@@ -171,18 +58,74 @@ public class TemplateExpressionEvaluator implements ExpressionEvaluator {
     }
   }
 
-  private List<List<String>> getTemplateVariables(Template template) {
-    List<String> tagNames = template.collect(TagType.VAR);
-    List<List<String>> composedTagNames =
-        tagNames.stream().map(tagName -> asList(tagName.split("\\."))).collect(toList());
-    composedTagNames.forEach(this::validateTemplateVariable);
-    return composedTagNames;
+  private static String getString(Attribute attribute) {
+    String expression = attribute.getExpression();
+    if (expression == null) {
+      throw new TemplateExpressionException(attribute);
+    } else {
+      return expression;
+    }
   }
 
-  private void validateTemplateVariable(List<String> composedTagName) {
+  private static JsonTemplate getJsonTemplate(String expression) {
+    JsonTemplate jsonTemplate;
+    try {
+      jsonTemplate = new Gson().fromJson(expression, JsonTemplate.class);
+    } catch (JsonSyntaxException e) {
+      throw new TemplateExpressionSyntaxException(expression, e);
+    }
+    return jsonTemplate;
+  }
+
+  private static Handlebars setupHandlebars() {
+    return new Handlebars()
+        .with(new ConcurrentMapTemplateCache())
+        .with(EscapingStrategy.NOOP)
+        .registerHelper(MATH, new HandlebarsMathHelper());
+  }
+
+  @Override
+  public Object evaluate(Entity entity) {
+    initTemplate();
+    Map<String, Object> tagValues = getVarValues(entity);
+
+    try {
+      return template.apply(Context.newContext(tagValues));
+    } catch (IOException exception) {
+      throw new TemplateExpressionException(attribute, exception);
+    } catch (HandlebarsException exception) {
+      throw (CodedRuntimeException) exception.getCause();
+    }
+  }
+
+  private synchronized void initTemplate() {
+    if (template == null) {
+      template = getTemplate(attribute);
+      variables = getTemplateVariables(template);
+    }
+  }
+
+  private List<List<String>> getTemplateVariables(Template template) {
+    List<List<String>> varNames = getVarNames(template);
+    validateVars(varNames);
+    return varNames;
+  }
+
+  private List<List<String>> getVarNames(Template template) {
+    List<String> varNames = template.collectReferenceParameters();
+    List<String> simpleVarNames = template.collect(TagType.VAR);
+    varNames.addAll(simpleVarNames);
+    return varNames.stream().filter(s -> !s.equals(MATH)).map(tagName -> asList(tagName.split("\\."))).toList();
+  }
+
+  private void validateVars(List<List<String>> varNames) {
+    varNames.forEach(this::validateVariable);
+  }
+
+  private void validateVariable(List<String> composedVarName) {
     EntityType variableEntityType = entityType;
-    for (Iterator<String> it = composedTagName.iterator(); it.hasNext(); ) {
-      String tagPartName = it.next();
+    for (Iterator<String> iterator = composedVarName.iterator(); iterator.hasNext(); ) {
+      String tagPartName = iterator.next();
 
       if (variableEntityType == null) {
         throw new TemplateExpressionInvalidTagException(attribute.getExpression(), tagPartName);
@@ -193,16 +136,86 @@ public class TemplateExpressionEvaluator implements ExpressionEvaluator {
         throw new TemplateExpressionUnknownAttributeException(
             attribute.getExpression(), tagPartName);
       }
+
       if (tagAttribute.getDataType() == AttributeType.COMPOUND) {
         throw new TemplateExpressionAttributeTypeException(
             attribute.getExpression(), tagPartName, tagAttribute);
       }
 
       variableEntityType = tagAttribute.hasRefEntity() ? tagAttribute.getRefEntity() : null;
-      if (variableEntityType != null && !it.hasNext()) {
+      if (variableEntityType != null && !iterator.hasNext()) {
         throw new TemplateExpressionMissingTagException(attribute.getExpression(), tagPartName);
       }
     }
+  }
+
+  private Map<String, Object> getVarValues(Entity entity) {
+    Map<String, Object> varValues = new HashMap<>();
+    variables.forEach(varParts -> getVarValue(entity, varValues, varParts));
+    return varValues;
+  }
+
+  private void getVarValue(Entity entity, Map<String, Object> varValues, List<String> varParts) {
+    Object value = getTemplateTagValueRecursive(entity, varParts, 0);
+
+    String variableName = varParts.get(0);
+    if (varValues.containsKey(variableName)) {
+      Object existingValue = varValues.get(variableName);
+      if (doesValueNeedsMerging(value, existingValue)) {
+        Map<String, Object> mergedValue = new HashMap<>();
+        mergedValue.putAll((Map) existingValue);
+        mergedValue.putAll((Map) value);
+        value = mergedValue;
+      }
+    }
+    varValues.put(variableName, value);
+  }
+
+  private boolean doesValueNeedsMerging(Object newValue, Object existingValue) {
+    return existingValue != null
+        && !Objects.equals(newValue, existingValue)
+        && newValue instanceof Map
+        && existingValue instanceof Map;
+  }
+
+  private Object getTemplateTagValueRecursive(Entity entity, List<String> tagParts, int index) {
+    String attributeName = tagParts.get(index);
+
+    Attribute tagAttribute = entity.getEntityType().getAttribute(attributeName);
+    return switch (tagAttribute.getDataType()) {
+      case BOOL -> entity.getBoolean(attributeName);
+      case CATEGORICAL, FILE, XREF -> getXrefVarValue(entity, tagParts, index, attributeName);
+      case CATEGORICAL_MREF, MREF, ONE_TO_MANY -> getMrefVarValue(entity, tagParts, index, attributeName);
+      case DATE ->  entity.getLocalDate(attributeName);
+      case DATE_TIME ->  entity.getInstant(attributeName);
+      case DECIMAL ->  entity.getDouble(attributeName);
+      case EMAIL, ENUM, HTML, HYPERLINK, SCRIPT, STRING, TEXT ->  entity.getString(attributeName);
+      case INT ->  entity.getInt(attributeName);
+      case LONG -> entity.getLong(attributeName);
+      case COMPOUND -> throw new IllegalAttributeTypeException(tagAttribute.getDataType());
+    };
+  }
+
+  private Map<String, Object> getXrefVarValue(Entity entity, List<String> tagParts, int index,
+      String attributeName) {
+    Entity refEntity = entity.getEntity(attributeName);
+    Object refValue = refEntity != null ?
+      getTemplateTagValueRecursive(refEntity, tagParts, index + 1) : null;
+    String refTag = tagParts.get(index + 1);
+    return singletonMap(refTag, refValue);
+  }
+
+  private Map<String, Object> getMrefVarValue(Entity entity, List<String> tagParts, int index, String attributeName) {
+    Object mrefValue = getMrefValue(entity, tagParts, index, attributeName);
+    String mrefTag = tagParts.get(index + 1);
+    return singletonMap(mrefTag, mrefValue);
+  }
+
+  private Object getMrefValue(Entity entity, List<String> tagParts, int index, String attributeName) {
+    return stream(entity.getEntities(attributeName))
+      .map(mrefEntity -> getTemplateTagValueRecursive(mrefEntity, tagParts, index + 1))
+      .map(Object::toString)
+      .collect(joining(","));
   }
 
   private static class JsonTemplate {
