@@ -1,5 +1,6 @@
 package org.molgenis.data.support;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -8,9 +9,41 @@ import com.github.jknack.handlebars.HandlebarsException;
 import com.github.jknack.handlebars.Template;
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.test.AbstractMockitoTest;
 
 class HandlebarsMathHelperTest extends AbstractMockitoTest {
+  private static String[][] exceptionInputProvider() {
+    String[] notEnoughParameters = {
+      "{{math this \"+\" }}", "TemplateExpressionMathNotEnoughParametersException"
+    };
+    String[] operatorIsNull = {
+      "{{math 37 \"$\" 42}}", "TemplateExpressionMathUnknownOperatorException"
+    };
+    String[] firstValueIsNull = {
+      "{{math nullVar \"+\" 42}}", "TemplateExpressionMathInvalidParameterException"
+    };
+    String[] secondValueIsNull = {
+      "{{math 42 \"+\" nullVar}}", "TemplateExpressionMathInvalidParameterException"
+    };
+    String[] valueIsNotNumeric = {"{{math \"this\" \"+\" \"foo\"}}", "NumberFormatException"};
+    return new String[][] {
+      notEnoughParameters, operatorIsNull, firstValueIsNull, secondValueIsNull, valueIsNotNumeric
+    };
+  }
+
+  @ParameterizedTest
+  @MethodSource("exceptionInputProvider")
+  void testExceptions(String templateString, String exception) throws IOException {
+    Handlebars handlebars = new Handlebars();
+    handlebars.registerHelper("math", new HandlebarsMathHelper());
+    Template template = handlebars.compileInline(templateString);
+    HandlebarsException thrown =
+        assertThrows(HandlebarsException.class, () -> template.apply(null));
+    assertThat(thrown.getCause().toString()).contains(exception);
+  }
+
   @Test
   void addTest() throws IOException {
     shouldCompileTo("{{math this \"+\" 0}}", "2", "2");
@@ -50,44 +83,6 @@ class HandlebarsMathHelperTest extends AbstractMockitoTest {
   void modulusTest() throws IOException {
     shouldCompileTo("{{math this \"%\" 2}}", "3", "1");
     shouldCompileTo("{{math this \"%\" 2}}", "10.5", "0.5");
-  }
-
-  @Test
-  void notEnoughParametersTest() throws IOException {
-    testHandlebarsException(
-        "{{math this \"+\" }}", "TemplateExpressionMathNotEnoughParametersException");
-  }
-
-  @Test
-  void operatorIsNullTest() throws IOException {
-    testHandlebarsException(
-        "{{math 37 \"$\" 42}}", "TemplateExpressionMathUnknownOperatorException");
-  }
-
-  @Test
-  void firstValueIsNullTest() throws IOException {
-    testHandlebarsException(
-        "{{math nullVar \"+\" 42}}", "TemplateExpressionMathInvalidParameterException");
-  }
-
-  @Test
-  void secondValueIsNullTest() throws IOException {
-    testHandlebarsException(
-        "{{math 42 \"+\" nullVar}}", "TemplateExpressionMathInvalidParameterException");
-  }
-
-  @Test
-  void valueIsNotNumericTest() throws IOException {
-    testHandlebarsException("{{math \"this\" \"+\" \"foo\"}}", "NumberFormatException");
-  }
-
-  private void testHandlebarsException(String templateString, String exception) throws IOException {
-    Handlebars handlebars = new Handlebars();
-    handlebars.registerHelper("math", new HandlebarsMathHelper());
-    Template template = handlebars.compileInline(templateString);
-    HandlebarsException thrown =
-        assertThrows(HandlebarsException.class, () -> template.apply(null));
-    assert (thrown.getCause().toString().contains(exception));
   }
 
   private void shouldCompileTo(String templateString, String varValue, String expected)
