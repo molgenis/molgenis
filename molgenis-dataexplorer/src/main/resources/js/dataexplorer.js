@@ -354,7 +354,7 @@ $.when($,
                     // If the state is empty or undefined, or is set to
                     // 'none', return null. All attributes will be shown
                     if (state.attrs === undefined || state.attrs === null) {
-                        if (attribute.fieldType !== 'COMPOUND') selectedAttributes.push(attribute);
+                        selectedAttributes.push(attribute);
                     } else if (state.attrs === 'none') {
                         selectedAttributes = [];
                     } else {

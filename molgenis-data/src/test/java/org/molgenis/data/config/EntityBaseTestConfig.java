@@ -2,6 +2,7 @@ package org.molgenis.data.config;
 
 import static java.util.Objects.requireNonNull;
 
+import org.mockito.Mockito;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityFactoryRegistry;
 import org.molgenis.data.EntityReferenceCreator;
@@ -10,6 +11,7 @@ import org.molgenis.data.populate.AutoValuePopulator;
 import org.molgenis.data.populate.DefaultValuePopulator;
 import org.molgenis.data.populate.EntityPopulator;
 import org.molgenis.data.populate.IdGeneratorImpl;
+import org.molgenis.data.populate.Sequences;
 import org.molgenis.data.system.model.RootSystemPackage;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,5 +40,10 @@ public class EntityBaseTestConfig {
   @Bean
   public EntityReferenceCreator entityReferenceCreator() {
     return new EntityReferenceCreatorImpl(dataService, entityFactoryRegistry);
+  }
+
+  @Bean
+  public Sequences sequences() {
+    return Mockito.mock(Sequences.class);
   }
 }

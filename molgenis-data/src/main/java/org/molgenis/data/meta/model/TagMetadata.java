@@ -20,6 +20,7 @@ public class TagMetadata extends SystemEntityType {
   public static final String LABEL = "label";
   public static final String RELATION_IRI = "relationIRI";
   public static final String RELATION_LABEL = "relationLabel";
+  public static final String VALUE = "value";
   public static final String CODE_SYSTEM = "codeSystem";
 
   TagMetadata() {
@@ -37,6 +38,7 @@ public class TagMetadata extends SystemEntityType {
     addAttribute(LABEL, ROLE_LABEL, ROLE_LOOKUP).setNillable(false).setLabel("Label");
     addAttribute(RELATION_IRI).setNillable(false).setLabel("Relation IRI");
     addAttribute(RELATION_LABEL).setNillable(false).setLabel("Relation label");
+    addAttribute(VALUE).setNillable(true).setLabel("Value");
     addAttribute(CODE_SYSTEM).setLabel("Code system");
   }
 }

@@ -1,22 +1,35 @@
 package org.molgenis.data.populate;
 
 import static java.util.Arrays.asList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.quality.Strictness.LENIENT;
 import static org.molgenis.data.meta.AttributeType.DATE;
 import static org.molgenis.data.meta.AttributeType.DATE_TIME;
 import static org.molgenis.data.meta.AttributeType.STRING;
+import static org.molgenis.data.semantic.Relation.hasIDDigitCount;
+import static org.molgenis.data.semantic.Relation.hasIDPrefix;
+import static org.molgenis.data.semantic.Relation.type;
+import static org.molgenis.data.semantic.Vocabulary.SCRAMBLED;
 
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.support.DynamicEntity;
 
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = LENIENT)
 class AutoValuePopulatorTest {
   private static final String ATTR_ID = "id";
   private static final String ATTR_DATE_AUTO_DEFAULT = "date_auto-default";
@@ -27,12 +40,18 @@ class AutoValuePopulatorTest {
   private static final String ATTR_DATETIME_AUTO_TRUE = "datetime_auto-true";
 
   private EntityType entityType;
+  private Attribute attrId;
   private AutoValuePopulator autoValuePopulator;
+  @Mock private Sequences sequences;
+  @Mock private IdGenerator idGenerator;
+  @Mock private Tag idDigitCountTag;
+  @Mock private Tag idPrefixTag;
+  @Mock private Tag scrambledTag;
 
   @BeforeEach
   void setUpBeforeMethod() {
     entityType = when(mock(EntityType.class).getId()).thenReturn("entity").getMock();
-    Attribute attrId = when(mock(Attribute.class).getName()).thenReturn(ATTR_ID).getMock();
+    attrId = when(mock(Attribute.class).getName()).thenReturn(ATTR_ID).getMock();
     when(attrId.getDataType()).thenReturn(STRING);
     when(attrId.isAuto()).thenReturn(true);
     Attribute attrDateAutoDefault =
@@ -85,9 +104,8 @@ class AutoValuePopulatorTest {
     when(entityType.getAttribute(ATTR_DATETIME_AUTO_DEFAULT)).thenReturn(attrDateTimeAutoDefault);
     when(entityType.getAttribute(ATTR_DATETIME_AUTO_FALSE)).thenReturn(attrDateTimeAutoFalse);
     when(entityType.getAttribute(ATTR_DATETIME_AUTO_TRUE)).thenReturn(attrDateTimeAutoTrue);
-    IdGenerator idGenerator = mock(IdGenerator.class);
-    Mockito.when(idGenerator.generateId()).thenReturn("ID1").thenReturn("ID2");
-    autoValuePopulator = new AutoValuePopulator(idGenerator);
+    when(idGenerator.generateId()).thenReturn("ID1").thenReturn("ID2");
+    autoValuePopulator = new AutoValuePopulator(idGenerator, sequences);
   }
 
   @Test
@@ -102,5 +120,37 @@ class AutoValuePopulatorTest {
     assertNull(entity.getInstant(ATTR_DATETIME_AUTO_DEFAULT));
     assertNull(entity.getInstant(ATTR_DATETIME_AUTO_FALSE));
     assertNotNull(entity.getInstant(ATTR_DATETIME_AUTO_TRUE));
+  }
+
+  @Test
+  void populateStringFromSequence() {
+    when(attrId.getTags()).thenReturn(List.of(idDigitCountTag, idPrefixTag));
+    when(idDigitCountTag.getRelationIri()).thenReturn(hasIDDigitCount.getIRI());
+    when(idDigitCountTag.getValue()).thenReturn("7");
+    when(idPrefixTag.getRelationIri()).thenReturn(hasIDPrefix.getIRI());
+    when(idPrefixTag.getValue()).thenReturn("GEN-");
+    when(sequences.generateId(attrId)).thenReturn(123L);
+
+    Entity entity = new DynamicEntity(entityType);
+    autoValuePopulator.populate(entity);
+
+    assertEquals("GEN-0000123", entity.getString(attrId));
+  }
+
+  @Test
+  void populateStringFromSequenceScrambled() {
+    when(attrId.getTags()).thenReturn(List.of(idDigitCountTag, idPrefixTag, scrambledTag));
+    when(idDigitCountTag.getRelationIri()).thenReturn(hasIDDigitCount.getIRI());
+    when(idDigitCountTag.getValue()).thenReturn("7");
+    when(idPrefixTag.getRelationIri()).thenReturn(hasIDPrefix.getIRI());
+    when(idPrefixTag.getValue()).thenReturn("GEN-");
+    when(scrambledTag.getObjectIri()).thenReturn(SCRAMBLED.toString());
+    when(scrambledTag.getRelationIri()).thenReturn(type.getIRI());
+    when(sequences.generateId(attrId)).thenReturn(1L);
+
+    Entity entity = new DynamicEntity(entityType);
+    autoValuePopulator.populate(entity);
+
+    assertEquals("GEN-5184445", entity.getString(attrId));
   }
 }

@@ -1,4 +1,4 @@
-package org.molgenis.data.support;
+package org.molgenis.data.support.exceptions;
 
 import static java.util.Objects.requireNonNull;
 
@@ -9,7 +9,7 @@ public class TemplateExpressionSyntaxException extends CodedRuntimeException {
 
   private final String expression;
 
-  TemplateExpressionSyntaxException(String expression, Exception e) {
+  public TemplateExpressionSyntaxException(String expression, Exception e) {
     super(ERROR_CODE, e);
     this.expression = requireNonNull(expression);
   }

@@ -3,11 +3,11 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.molgenis</groupId>
   <artifactId>molgenis</artifactId>
-  <version>10.0.0-SNAPSHOT</version>
+  <version>10.1.0-SNAPSHOT</version>
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.5.4</version>
+    <version>2.5.8</version>
   </parent>
   <packaging>pom</packaging>
 
@@ -146,14 +146,14 @@
     <elasticsearch.cluster.name>molgenis</elasticsearch.cluster.name>
     <zt-zip.version>1.13</zt-zip.version>
     <fmt-maven-plugin.version>2.9</fmt-maven-plugin.version>
-    <maven-checkstyle-plugin.version>3.1.0</maven-checkstyle-plugin.version>
-    <checkstyle.version>8.29</checkstyle.version>
+    <maven-checkstyle-plugin.version>3.1.2</maven-checkstyle-plugin.version>
+    <checkstyle.version>8.40</checkstyle.version>
     <sonar-maven-plugin.version>3.6.0.1398</sonar-maven-plugin.version>
     <sentry.version>1.7.5</sentry.version>
     <sentry-logback.version>1.7.14</sentry-logback.version>
     <molgenis-expressions.version>0.21.1</molgenis-expressions.version>
     <maven-project-info-reports-plugin.version>3.1.2</maven-project-info-reports-plugin.version>
-    <maven-site-plugin.version>3.8.2</maven-site-plugin.version>
+    <maven-site-plugin.version>3.10.0</maven-site-plugin.version>
   </properties>
 
   <distributionManagement>
