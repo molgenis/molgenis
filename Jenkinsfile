@@ -98,7 +98,7 @@ pipeline {
         }
         stage('Steps [ x.x ]') {
             when {
-                expression { BRANCH_NAME ==~ /[0-9]+\.[0-9]+/ }
+                expression { BRANCH_NAME ==~ /[0-9]{1,3}\.[0-9]{1,3}/ }
                 beforeAgent true
             }
             agent {
