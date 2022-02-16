@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.http.HttpHost;
+import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -65,7 +66,7 @@ class ClientFactory {
                 "Failed to connect to Elasticsearch cluster on %s. Is Elasticsearch running?",
                 hostnames));
       }
-    } catch (IOException e) {
+    } catch (ElasticsearchException | IOException e) {
       LOG.error(
           "Failed to connect to Elasticsearch cluster on {}. Retry count = {}",
           hostnames,
