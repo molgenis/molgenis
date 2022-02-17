@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.molgenis</groupId>
   <artifactId>molgenis</artifactId>
-  <version>10.0.1-SNAPSHOT</version>
+  <version>10.0.1</version>
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
@@ -28,7 +28,7 @@
     <connection>scm:git:https://github.com/molgenis/molgenis.git</connection>
     <developerConnection>scm:git:https://github.com/molgenis/molgenis.git</developerConnection>
     <url>https://github.com/molgenis/molgenis</url>
-    <tag>HEAD</tag>
+    <tag>molgenis-10.0.1</tag>
   </scm>
 
   <developers>
