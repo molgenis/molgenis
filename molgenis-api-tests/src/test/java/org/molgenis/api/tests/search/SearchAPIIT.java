@@ -12,7 +12,6 @@ import static org.molgenis.api.tests.utils.RestTestUtils.X_MOLGENIS_TOKEN;
 import static org.molgenis.api.tests.utils.RestTestUtils.removePackages;
 import static org.molgenis.api.tests.utils.RestTestUtils.uploadEmxFile;
 import static org.molgenis.api.tests.utils.RestTestUtils.waitForIndexJobs;
-import static org.slf4j.LoggerFactory.getLogger;
 
 import io.restassured.response.ValidatableResponse;
 import java.io.File;
@@ -32,11 +31,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.molgenis.api.tests.AbstractApiTests;
-import org.slf4j.Logger;
 
 @TestMethodOrder(OrderAnnotation.class)
 class SearchAPIIT extends AbstractApiTests {
-  private static final Logger LOG = getLogger(SearchAPIIT.class);
   private static String adminToken;
 
   private static File createEMX() {
