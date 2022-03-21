@@ -32,6 +32,7 @@ import org.springframework.stereotype.Component;
 /** Generates Elasticsearch queries from MOLGENIS queries. */
 @Component
 public class QueryGenerator {
+
   static final String ATTRIBUTE_SEPARATOR = ".";
 
   private final EnumMap<Operator, QueryClauseGenerator> queryClauseGeneratorMap;
@@ -83,8 +84,9 @@ public class QueryGenerator {
         } else if (i + 1 < nrQueryRules) {
           QueryRule occurQueryRule = queryRules.get(i + 1);
           QueryRule.Operator occurOperator = occurQueryRule.getOperator();
-          if (occurOperator == null)
+          if (occurOperator == null) {
             throw new MolgenisQueryException("Missing expected occur operator");
+          }
 
           //noinspection EnumSwitchStatementWhichMissesCases
           switch (occurOperator) {
@@ -103,7 +105,9 @@ public class QueryGenerator {
         }
 
         QueryBuilder queryPartBuilder = createQueryClause(queryRule, entityType);
-        if (queryPartBuilder == null) continue; // skip SHOULD and DIS_MAX query rules
+        if (queryPartBuilder == null) {
+          continue; // skip SHOULD and DIS_MAX query rules
+        }
 
         //noinspection ConstantConditions
         if (occur == null) {
@@ -142,8 +146,7 @@ public class QueryGenerator {
       case AND:
       case OR:
       case NOT:
-        throw new MolgenisQueryException(
-            format("Unexpected query operator [%s]", queryOperator.toString()));
+        throw new MolgenisQueryException(format("Unexpected query operator [%s]", queryOperator));
       default:
         QueryClauseGenerator queryClauseGenerator = queryClauseGeneratorMap.get(queryOperator);
         if (queryClauseGenerator == null) {
