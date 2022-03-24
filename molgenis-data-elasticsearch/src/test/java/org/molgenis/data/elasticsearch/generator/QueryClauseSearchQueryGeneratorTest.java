@@ -22,6 +22,7 @@ import org.molgenis.data.meta.model.EntityType;
 
 @ExtendWith(MockitoExtension.class)
 class QueryClauseSearchQueryGeneratorTest {
+
   @Mock DocumentIdGenerator documentIdGenerator;
   @Mock QueryRule queryRule;
   @Mock EntityType entityType;
@@ -40,7 +41,8 @@ class QueryClauseSearchQueryGeneratorTest {
   void mapQueryRuleAllAttributeSearch() {
     when(queryRule.getValue()).thenReturn("val");
     QueryBuilder queryBuilder = searchQueryGenerator.mapQueryRule(queryRule, entityType);
-    QueryBuilder expectedQueryBuilder = simpleQueryStringQuery("val").defaultOperator(AND);
+    QueryBuilder expectedQueryBuilder =
+        simpleQueryStringQuery("val").defaultOperator(AND).field("_all");
     assertQueryBuilderEquals(expectedQueryBuilder, queryBuilder);
   }
 
