@@ -3,7 +3,6 @@ package org.molgenis.data.elasticsearch.client;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -40,7 +39,7 @@ class MappingContentBuilderTest {
 
   @ParameterizedTest
   @MethodSource("createMappingProvider")
-  void testCreateMapping(MappingType mappingType, String expectedJson) throws IOException {
+  void testCreateMapping(MappingType mappingType, String expectedJson) {
     Mapping mapping =
         createMapping(FieldMapping.builder().setName("field").setType(mappingType).build());
     XContentBuilder xContentBuilder = mappingContentBuilder.createMapping(mapping);
@@ -48,7 +47,7 @@ class MappingContentBuilderTest {
   }
 
   @Test
-  void testCreateMappingKeywordCaseSensitive() throws IOException {
+  void testCreateMappingKeywordCaseSensitive() {
     Mapping mapping =
         createMapping(
             FieldMapping.builder()
@@ -62,7 +61,7 @@ class MappingContentBuilderTest {
   }
 
   @Test
-  void testCreateMappingNested() throws IOException {
+  void testCreateMappingNested() {
     FieldMapping nestedFieldMapping =
         FieldMapping.builder().setName("nestedField").setType(MappingType.BOOLEAN).build();
     Mapping mapping =
@@ -81,23 +80,23 @@ class MappingContentBuilderTest {
   }
 
   private static final String JSON_BOOLEAN =
-      "{\"_source\":{\"enabled\":false},\"properties\":{\"field\":{\"type\":\"boolean\"}}}";
+      "{\"_source\":{\"enabled\":false},\"properties\":{\"field\":{\"type\":\"boolean\",\"copy_to\":\"_all\"},\"_all\":{\"type\":\"text\"}}}";
   private static final String JSON_DATE =
-      "{\"_source\":{\"enabled\":false},\"properties\":{\"field\":{\"type\":\"date\",\"format\":\"date\",\"fields\":{\"raw\":{\"type\":\"keyword\",\"index\":true}}}}}";
+      "{\"_source\":{\"enabled\":false},\"properties\":{\"field\":{\"type\":\"date\",\"format\":\"date\",\"fields\":{\"raw\":{\"type\":\"keyword\",\"index\":true}},\"copy_to\":\"_all\"},\"_all\":{\"type\":\"text\"}}}";
   private static final String JSON_DATE_TIME =
-      "{\"_source\":{\"enabled\":false},\"properties\":{\"field\":{\"type\":\"date\",\"format\":\"date_time_no_millis\",\"fields\":{\"raw\":{\"type\":\"keyword\",\"index\":true}}}}}";
+      "{\"_source\":{\"enabled\":false},\"properties\":{\"field\":{\"type\":\"date\",\"format\":\"date_time_no_millis\",\"fields\":{\"raw\":{\"type\":\"keyword\",\"index\":true}},\"copy_to\":\"_all\"},\"_all\":{\"type\":\"text\"}}}";
   private static final String JSON_DOUBLE =
-      "{\"_source\":{\"enabled\":false},\"properties\":{\"field\":{\"type\":\"double\"}}}";
+      "{\"_source\":{\"enabled\":false},\"properties\":{\"field\":{\"type\":\"double\",\"copy_to\":\"_all\"},\"_all\":{\"type\":\"text\"}}}";
   private static final String JSON_INTEGER =
-      "{\"_source\":{\"enabled\":false},\"properties\":{\"field\":{\"type\":\"integer\",\"doc_values\":true}}}";
+      "{\"_source\":{\"enabled\":false},\"properties\":{\"field\":{\"type\":\"integer\",\"doc_values\":true,\"copy_to\":\"_all\"},\"_all\":{\"type\":\"text\"}}}";
   private static final String JSON_LONG =
-      "{\"_source\":{\"enabled\":false},\"properties\":{\"field\":{\"type\":\"long\"}}}";
+      "{\"_source\":{\"enabled\":false},\"properties\":{\"field\":{\"type\":\"long\",\"copy_to\":\"_all\"},\"_all\":{\"type\":\"text\"}}}";
   private static final String JSON_TEXT =
-      "{\"_source\":{\"enabled\":false},\"properties\":{\"field\":{\"type\":\"text\",\"norms\":true,\"fields\":{\"raw\":{\"type\":\"keyword\",\"index\":true,\"ignore_above\":8191}}}}}";
+      "{\"_source\":{\"enabled\":false},\"properties\":{\"field\":{\"type\":\"text\",\"norms\":true,\"fields\":{\"raw\":{\"type\":\"keyword\",\"index\":true,\"ignore_above\":8191}},\"copy_to\":\"_all\"},\"_all\":{\"type\":\"text\"}}}";
   private static final String JSON_KEYWORD =
-      "{\"_source\":{\"enabled\":false},\"properties\":{\"field\":{\"type\":\"keyword\",\"normalizer\":\"lowercase_asciifold\",\"fields\":{\"raw\":{\"type\":\"keyword\",\"index\":true}}}}}";
+      "{\"_source\":{\"enabled\":false},\"properties\":{\"field\":{\"type\":\"keyword\",\"normalizer\":\"lowercase_asciifold\",\"fields\":{\"raw\":{\"type\":\"keyword\",\"index\":true}},\"copy_to\":\"_all\"},\"_all\":{\"type\":\"text\"}}}";
   private static final String JSON_KEYWORD_CASE_SENSITIVE =
-      "{\"_source\":{\"enabled\":false},\"properties\":{\"field\":{\"type\":\"keyword\",\"fields\":{\"raw\":{\"type\":\"keyword\",\"index\":true}}}}}";
+      "{\"_source\":{\"enabled\":false},\"properties\":{\"field\":{\"type\":\"keyword\",\"fields\":{\"raw\":{\"type\":\"keyword\",\"index\":true}},\"copy_to\":\"_all\"},\"_all\":{\"type\":\"text\"}}}";
   private static final String JSON_NESTED =
-      "{\"_source\":{\"enabled\":false},\"properties\":{\"field\":{\"type\":\"nested\",\"properties\":{\"nestedField\":{\"type\":\"boolean\"}}}}}";
+      "{\"_source\":{\"enabled\":false},\"properties\":{\"field\":{\"type\":\"nested\",\"properties\":{\"nestedField\":{\"type\":\"boolean\",\"copy_to\":\"_all\"}}},\"_all\":{\"type\":\"text\"}}}";
 }
