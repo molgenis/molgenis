@@ -149,8 +149,6 @@
     <maven-checkstyle-plugin.version>3.1.2</maven-checkstyle-plugin.version>
     <checkstyle.version>8.40</checkstyle.version>
     <sonar-maven-plugin.version>3.6.0.1398</sonar-maven-plugin.version>
-    <sentry.version>1.7.5</sentry.version>
-    <sentry-logback.version>1.7.14</sentry-logback.version>
     <molgenis-expressions.version>0.21.1</molgenis-expressions.version>
     <maven-project-info-reports-plugin.version>3.1.2</maven-project-info-reports-plugin.version>
     <maven-site-plugin.version>3.10.0</maven-site-plugin.version>
@@ -812,16 +810,6 @@
         <groupId>com.github.jknack</groupId>
         <artifactId>handlebars</artifactId>
         <version>${handlebars.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.sentry</groupId>
-        <artifactId>sentry</artifactId>
-        <version>${sentry.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.sentry</groupId>
-        <artifactId>sentry-logback</artifactId>
-        <version>${sentry-logback.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.poi</groupId>
