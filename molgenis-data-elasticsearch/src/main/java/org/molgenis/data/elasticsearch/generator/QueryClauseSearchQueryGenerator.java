@@ -33,7 +33,8 @@ class QueryClauseSearchQueryGenerator extends BaseQueryClauseGenerator {
 
   private QueryBuilder createQueryClauseSearchAll(QueryRule queryRule) {
     return QueryBuilders.simpleQueryStringQuery(queryRule.getValue().toString())
-        .defaultOperator(org.elasticsearch.index.query.Operator.AND);
+        .defaultOperator(org.elasticsearch.index.query.Operator.AND)
+        .field("_all");
   }
 
   private QueryBuilder createQueryClauseSearchAttribute(

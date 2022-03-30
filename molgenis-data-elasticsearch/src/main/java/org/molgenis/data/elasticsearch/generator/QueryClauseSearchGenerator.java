@@ -1,13 +1,9 @@
 package org.molgenis.data.elasticsearch.generator;
 
 import static java.lang.String.format;
-import static org.elasticsearch.index.query.QueryBuilders.multiMatchQuery;
-import static org.elasticsearch.index.query.QueryBuilders.nestedQuery;
 import static org.molgenis.data.QueryUtils.getAttributePathExpanded;
-import static org.molgenis.data.util.EntityTypeUtils.isReferenceType;
 
 import java.util.List;
-import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.molgenis.data.MolgenisQueryException;
@@ -29,22 +25,14 @@ class QueryClauseSearchGenerator extends BaseQueryClauseGenerator {
     }
 
     if (queryRule.getField() == null) {
-      return createQueryClauseSearchAll(queryRule, entityType);
+      return createQueryClauseSearchAll(queryRule);
     } else {
       return createQueryClauseSearchAttribute(queryRule, entityType);
     }
   }
 
-  private QueryBuilder createQueryClauseSearchAll(QueryRule queryRule, EntityType entityType) {
-    var builder = QueryBuilders.boolQuery().should(multiMatchQuery(queryRule.getValue()));
-    var clauses = builder.should();
-    for (Attribute child : entityType.getAtomicAttributes()) {
-      if (isReferenceType(child.getDataType())) {
-        var fieldName = getQueryFieldName(child);
-        clauses.add(nestedQuery(fieldName, multiMatchQuery(queryRule.getValue()), ScoreMode.Max));
-      }
-    }
-    return builder;
+  private QueryBuilder createQueryClauseSearchAll(QueryRule queryRule) {
+    return QueryBuilders.matchPhraseQuery("_all", queryRule.getValue()).slop(10);
   }
 
   private QueryBuilder createQueryClauseSearchAttribute(

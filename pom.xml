@@ -104,7 +104,6 @@
     <freemarker-java8.version>1.1.2</freemarker-java8.version>
     <mapdb.version>1.0.6</mapdb.version>
     <simplecaptcha.version>1.2.2</simplecaptcha.version>
-    <zip4j.version>1.3.2</zip4j.version>
     <handlebars.version>4.1.0</handlebars.version>
     <poi-ooxml-schemas.version>4.0.1</poi-ooxml-schemas.version>
     <gson-extras.version>0.2.1</gson-extras.version>
@@ -149,8 +148,6 @@
     <maven-checkstyle-plugin.version>3.1.2</maven-checkstyle-plugin.version>
     <checkstyle.version>8.40</checkstyle.version>
     <sonar-maven-plugin.version>3.6.0.1398</sonar-maven-plugin.version>
-    <sentry.version>1.7.5</sentry.version>
-    <sentry-logback.version>1.7.14</sentry-logback.version>
     <molgenis-expressions.version>0.21.1</molgenis-expressions.version>
     <maven-project-info-reports-plugin.version>3.1.2</maven-project-info-reports-plugin.version>
     <maven-site-plugin.version>3.10.0</maven-site-plugin.version>
@@ -799,11 +796,6 @@
         <version>${simplecaptcha.version}</version>
       </dependency>
       <dependency>
-        <groupId>net.lingala.zip4j</groupId>
-        <artifactId>zip4j</artifactId>
-        <version>${zip4j.version}</version>
-      </dependency>
-      <dependency>
         <groupId>org.zeroturnaround</groupId>
         <artifactId>zt-zip</artifactId>
         <version>${zt-zip.version}</version>
@@ -812,16 +804,6 @@
         <groupId>com.github.jknack</groupId>
         <artifactId>handlebars</artifactId>
         <version>${handlebars.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.sentry</groupId>
-        <artifactId>sentry</artifactId>
-        <version>${sentry.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.sentry</groupId>
-        <artifactId>sentry-logback</artifactId>
-        <version>${sentry-logback.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.poi</groupId>

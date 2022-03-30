@@ -49,7 +49,8 @@
   * [R-api client](guide-client-r.md)   
   * [Beacon api](guide-beacon.md)
   * [FAIR api](guide-fair.md)
-  * [RSQL operators](guide-rsql.md)  
+  * [RSQL operators](guide-rsql.md)
+  * [Biobank Directory](guide-biobank-directory.md)
 * For developers
   * [Developing MOLGENIS](guide-development.md)
   * [Developing frontend in MOLGENIS](guide-development-frontend.md)

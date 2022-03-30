@@ -5,8 +5,8 @@ import static org.elasticsearch.index.query.QueryBuilders.boolQuery;
 import static org.elasticsearch.index.query.QueryBuilders.constantScoreQuery;
 import static org.elasticsearch.index.query.QueryBuilders.existsQuery;
 import static org.elasticsearch.index.query.QueryBuilders.matchPhrasePrefixQuery;
+import static org.elasticsearch.index.query.QueryBuilders.matchPhraseQuery;
 import static org.elasticsearch.index.query.QueryBuilders.matchQuery;
-import static org.elasticsearch.index.query.QueryBuilders.multiMatchQuery;
 import static org.elasticsearch.index.query.QueryBuilders.nestedQuery;
 import static org.elasticsearch.index.query.QueryBuilders.rangeQuery;
 import static org.elasticsearch.index.query.QueryBuilders.termQuery;
@@ -1566,12 +1566,7 @@ class QueryGeneratorIntegrationTest extends AbstractMolgenisSpringTest {
     String value = "my text";
     Query<Entity> q = new QueryImpl<>().search(value);
     QueryBuilder query = queryGenerator.createQueryBuilder(q, entityType);
-    QueryBuilder expectedQuery =
-        boolQuery()
-            .should(multiMatchQuery("my text"))
-            .should(nestedQuery("xcategorical", multiMatchQuery("my text"), ScoreMode.Max))
-            .should(nestedQuery("xmref", multiMatchQuery("my text"), ScoreMode.Max))
-            .should(nestedQuery("xxref", multiMatchQuery("my text"), ScoreMode.Max));
+    QueryBuilder expectedQuery = matchPhraseQuery("_all", value).slop(10);
     assertQueryBuilderEquals(expectedQuery, query);
   }
 

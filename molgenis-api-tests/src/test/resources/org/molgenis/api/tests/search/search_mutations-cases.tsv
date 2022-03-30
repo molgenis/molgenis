@@ -9,7 +9,7 @@
 "MUT008"	"*"	"SEARCH"	"c.6187C>G"	"1"	"M18"	"Finds only the exact mutation"
 "MUT009"	"*"	"SEARCH"	"c.6081_6082dup"	"1"	"M104"	"Finds only the exact mutation"
 "MUT010"	"*"	"SEARCH"	"c.6082G>T"	"1"	"M657"	"Finds only the exact mutation"
-"MUT011"	"*"	"SEARCH"	"C>T"	"0"	""	"Search all is consistent with field search"
+"MUT011"	"*"	"SEARCH"	"C>T"	"143"	"M922"	"C>T also finds the c. in c.5318G>T"
 "MUT012"	"*"	"SEARCH"	"c.6082"	"0"		"Does not find substrings [SHOULD FIND MATHCES]"
 "MUT013"	"cdna_notation"	"LIKE"	"c.6082"	"2"	"M67,M657"	"LIKE finds substrings at the start"
 "MUT014"	"cdna_notation"	"LIKE"	"6082"	"3"	"M67,M657,M104"	"LIKE finds substrings in the middle"
