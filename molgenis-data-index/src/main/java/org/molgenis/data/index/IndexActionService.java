@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.index.meta.IndexActionMetadata.INDEX_ACTION;
 import static org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus.FAILED;
 import static org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus.FINISHED;
+import static org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus.STARTED;
 import static org.molgenis.data.util.EntityUtils.getTypedValue;
 
 import io.micrometer.core.annotation.Timed;
@@ -23,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 /** Executes {@link IndexAction}s. */
 public class IndexActionService {
+
   private static final Logger LOG = LoggerFactory.getLogger(IndexActionService.class);
 
   private final DataService dataService;
@@ -88,8 +90,9 @@ public class IndexActionService {
   @RunAsSystem
   public void updateIndexActionStatus(
       IndexAction indexAction, IndexActionMetadata.IndexStatus status) {
-    if (status == FAILED || status == FINISHED) {
-      indexAction.setEndDateTime(Instant.now());
+    switch (status) {
+      case FINISHED, FAILED -> indexAction.setEndDateTime(Instant.now());
+      case STARTED -> indexAction.setStartDateTime(Instant.now());
     }
     indexAction.setIndexStatus(status);
     dataService.update(INDEX_ACTION, indexAction);

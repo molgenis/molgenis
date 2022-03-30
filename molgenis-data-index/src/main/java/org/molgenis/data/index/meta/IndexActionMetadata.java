@@ -30,6 +30,9 @@ public class IndexActionMetadata extends SystemEntityType {
   /** The time at which this index action was finished (for whichever reason) */
   public static final String END_DATE_TIME = "endDateTime";
 
+  /** The time at which this index action started */
+  public static final String START_DATE_TIME = "startDateTime";
+
   /** The transaction that caused this index action. */
   public static final String TRANSACTION_ID = "transactionId";
 
@@ -60,6 +63,7 @@ public class IndexActionMetadata extends SystemEntityType {
 
     addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false);
     addAttribute(CREATION_DATE_TIME, ROLE_LABEL).setDataType(AttributeType.DATE_TIME).setAuto(true);
+    addAttribute(START_DATE_TIME).setDataType(AttributeType.DATE_TIME).setNillable(true);
     addAttribute(END_DATE_TIME).setDataType(AttributeType.DATE_TIME).setNillable(true);
     addAttribute(TRANSACTION_ID)
         .setDescription("The id of the transaction that caused this index action");

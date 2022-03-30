@@ -7,6 +7,7 @@ import static org.molgenis.data.index.meta.IndexActionMetadata.ENTITY_TYPE_ID;
 import static org.molgenis.data.index.meta.IndexActionMetadata.ID;
 import static org.molgenis.data.index.meta.IndexActionMetadata.INDEX_STATUS;
 import static org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus;
+import static org.molgenis.data.index.meta.IndexActionMetadata.START_DATE_TIME;
 import static org.molgenis.data.index.meta.IndexActionMetadata.TRANSACTION_ID;
 
 import java.time.Instant;
@@ -49,6 +50,14 @@ public class IndexAction extends StaticEntity {
 
   public void setCreationDateTime(Instant value) {
     set(CREATION_DATE_TIME, value);
+  }
+
+  public Instant getStartDateTime() {
+    return getInstant(START_DATE_TIME);
+  }
+
+  public void setStartDateTime(Instant value) {
+    set(START_DATE_TIME, value);
   }
 
   public Instant getEndDateTime() {
