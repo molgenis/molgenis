@@ -96,7 +96,14 @@ public class IndexActionSchedulerImpl implements IndexActionScheduler {
             });
 
     addTask(task);
-    CompletableFuture.runAsync(task, executorService).whenComplete((a, b) -> removeTask(task));
+
+    // TODO remove log
+    CompletableFuture.runAsync(task, executorService)
+        .whenComplete(
+            (a, b) -> {
+              LOG.info("Task completed: " + task);
+              removeTask(task);
+            });
   }
 
   private boolean workExists(IndexAction indexAction, RunnableIndexAction task) {

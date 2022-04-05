@@ -395,8 +395,21 @@ class PlatformIT extends AbstractMockitoSpringContextTests {
   void testIndexCreateMetaData() {
     populateUserPermissions();
     waitForWorkToBeFinished(indexService, LOG);
+    printIndexActions(metaDataService);
     IndexMetadataCUDOperationsPlatformIT.testIndexCreateMetaData(
         searchService, entityTypeStatic, entityTypeDynamic, metaDataService);
+  }
+
+  private static void printIndexActions(MetaDataService metaDataService) {
+    metaDataService
+        .getDataService()
+        .findAll("sys_idx_IndexAction", IndexAction.class)
+        .forEach(
+            action ->
+                System.out.println(
+                    String.format(
+                        "IndexAction - status: %s | entityType: %s | entity: %s",
+                        action.getIndexStatus(), action.getEntityTypeId(), action.getEntityId())));
   }
 
   @WithMockUser(username = USERNAME)
@@ -503,6 +516,7 @@ class PlatformIT extends AbstractMockitoSpringContextTests {
     entityTypePermissionMap.put(new EntityTypeIdentity("sys_md_Attribute"), PermissionSet.WRITE);
     entityTypePermissionMap.put(new EntityTypeIdentity("sys_Language"), PermissionSet.WRITE);
     entityTypePermissionMap.put(new EntityTypeIdentity("sys_L10nString"), PermissionSet.WRITE);
+    entityTypePermissionMap.put(new EntityTypeIdentity("sys_idx_IndexAction"), PermissionSet.READ);
     entityTypePermissionMap.put(
         new EntityTypeIdentity("sys_dec_DecoratorConfiguration"), PermissionSet.READ);
     entityTypePermissionMap.put(new EntityTypeIdentity(refEntityTypeStatic), PermissionSet.WRITE);
