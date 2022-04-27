@@ -106,7 +106,7 @@ public class RestControllerV2 {
 
   private static final Logger LOG = LoggerFactory.getLogger(RestControllerV2.class);
 
-  static final int MAX_ENTITIES = 1000;
+  static final int MAX_ENTITIES = 5000;
 
   static final String API_VERSION = "v2";
   static final String BASE_URI = ApiNamespace.API_PATH + '/' + API_VERSION;

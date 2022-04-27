@@ -959,7 +959,7 @@ class RestControllerV2Test extends AbstractMolgenisSpringTest {
                 .contentType(APPLICATION_JSON))
         .andExpect(status().isBadRequest())
         .andExpect(
-            jsonPath(FIRST_ERROR_MESSAGE, is("Number of entities cannot be more than 1000.")));
+            jsonPath(FIRST_ERROR_MESSAGE, is("Number of entities cannot be more than 5000.")));
   }
 
   @Test
@@ -1075,7 +1075,7 @@ class RestControllerV2Test extends AbstractMolgenisSpringTest {
                 .contentType(APPLICATION_JSON))
         .andExpect(status().isBadRequest())
         .andExpect(
-            jsonPath(FIRST_ERROR_MESSAGE, is("Number of entities cannot be more than 1000.")));
+            jsonPath(FIRST_ERROR_MESSAGE, is("Number of entities cannot be more than 5000.")));
   }
 
   @Test
@@ -1159,7 +1159,7 @@ class RestControllerV2Test extends AbstractMolgenisSpringTest {
                 .contentType(APPLICATION_JSON))
         .andExpect(status().isBadRequest())
         .andExpect(
-            jsonPath(FIRST_ERROR_MESSAGE, is("Number of entities cannot be more than 1000.")));
+            jsonPath(FIRST_ERROR_MESSAGE, is("Number of entities cannot be more than 5000.")));
   }
 
   @Test
