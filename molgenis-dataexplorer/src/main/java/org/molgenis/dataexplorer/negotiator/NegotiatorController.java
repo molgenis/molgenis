@@ -38,10 +38,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -80,6 +77,15 @@ public class NegotiatorController extends PluginController {
     Optional<NegotiatorEntityConfig> settings = getNegotiatorEntityConfig(entityTypeId);
     return settings.isPresent()
         && permissions.hasPermission(new PluginIdentity(ID), PluginPermission.VIEW_PLUGIN);
+  }
+
+  @PostMapping("/negotiator-status")
+  public Integer checkNegotiatorStatus(@RequestBody NegotiatorRequest request) {
+      // grab the url from molgenis using an ID for the config
+      // provide an endpoint
+      // request at endpoint
+      // return the status
+      return 404;
   }
 
   /**
