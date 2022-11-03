@@ -14,6 +14,7 @@ public class PluginAttributes {
   public static final String KEY_RESOURCE_FINGERPRINT_REGISTRY = "resource_fingerprint_registry";
   public static final String KEY_APP_SETTINGS = "app_settings";
   public static final String KEY_AUTHENTICATION_OIDC_CLIENTS = "authentication_oidc_clients";
+  public static final String KEY_PRIVACY_POLICY_TEXT = "privacy_policy_text";
   public static final String KEY_AUTHENTICATION_SIGN_UP_FORM = "authentication_sign_up_form";
   public static final String KEY_PLUGIN_SETTINGS = "plugin_settings";
   /** Whether or not the current user can edit settings for the requested plugin */

@@ -11,7 +11,7 @@
                 <button type="button" class="close" onclick="location.href='/'"><span
                         aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
             <#else>
-                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+                <button type="button" class="close" data-dismiss="modal" ><span aria-hidden="true">&times;</span><span
                         class="sr-only">Close</span></button>
             </#if>
                 <h4 class="modal-title" id="login-modal-label">Sign in</h4>
@@ -19,11 +19,24 @@
             <div class="modal-body">
                 <div class="container-fluid modal-container-padding">
                     <div id="alert-container"></div>
+                    <div class="well well-sm">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-sm w-0">
+                                    <input class="form-check-input" type="checkbox" value="" id="privacy-policy-check">
+                                </div>
+                                <div class="col-sm">
+                                    ${privacy_policy_text}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 <#if authentication_oidc_clients?has_content>
                     <div class="row">
                       <div class="col-md-12">
                     <#list authentication_oidc_clients as client>
-                        <a href="${client.requestUri}" class="btn btn-primary btn-block" role="button" id="login-with-${client.registrationId}">
+                        <a href="${client.requestUri}" class="btn btn-primary btn-block disabled" role="button" id="login-with-${client.registrationId}">
                             <!-- configure this label by adding a Localization value for security.oidc.client.${client.registrationId}.buttonText -->
                             <@spring.messageText "security.oidc.client.${client.registrationId}.buttonText" "With ${client.name}" />
                         </a>
@@ -51,7 +64,7 @@
                         </div>
                         <div class="row">
                             <div class="col-md-4">
-                                <button id="signin-button" type="submit" class="btn btn-success">Sign in</button>
+                                <button id="signin-button" type="submit" class="btn btn-success" disabled>Sign in</button>
                             </div>
                             <div class="col-md-8">
                                 <p class="pull-right"><a class="modal-href" href="/account/password/reset"
@@ -87,8 +100,9 @@
 <script type="text/javascript">
     $(function () {
         var modal = $('#login-modal')
-        var submitBtn = $('#login-btn')
+        var submitBtn = $('#signin-button')
         var form = $('#login-form')
+        var privacyPolicyCheckbox = $('#privacy-policy-check')
         form.validate()
 
     <#-- modal events -->
@@ -107,17 +121,21 @@
             }
         })
 
-        submitBtn.click(function (e) {
-            e.preventDefault()
-            e.stopPropagation()
-            form.submit()
-        })
-
         $('input', form).add(submitBtn).keydown(function (e) { <#-- use keydown, because keypress doesn't work cross-browser -->
             if (e.which == 13) {
                 e.preventDefault()
                 e.stopPropagation()
                 form.submit()
+            }
+        })
+
+        privacyPolicyCheckbox.change(function() {
+            if (this.checked){
+                submitBtn.prop("disabled", false)
+                $('[id^="login-with-"]').removeClass("disabled")
+            }else{
+                submitBtn.prop("disabled", true)
+                $('[id^="login-with-"]').addClass("disabled")
             }
         })
 
