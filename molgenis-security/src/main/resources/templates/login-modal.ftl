@@ -20,16 +20,8 @@
                 <div class="container-fluid modal-container-padding">
                     <div id="alert-container"></div>
                     <div class="well well-sm">
-                        <div class="container">
-                            <div class="row">
-                                <div class="col-sm w-0">
-                                    <input class="form-check-input" type="checkbox" value="" id="privacy-policy-check">
-                                </div>
-                                <div class="col-sm">
-                                    ${privacy_policy_text}
-                                </div>
-                            </div>
-                        </div>
+                            <label class="checkbox-inline">
+                                <input id="privacy-policy-check" type="checkbox" value="" autocomplete="off">${privacy_policy_text}</label>
                     </div>
 
                 <#if authentication_oidc_clients?has_content>
@@ -129,7 +121,7 @@
             }
         })
 
-        privacyPolicyCheckbox.change(function() {
+        privacyPolicyCheckbox.change(function onChangePrivacyPolicy(){
             if (this.checked){
                 submitBtn.prop("disabled", false)
                 $('[id^="login-with-"]').removeClass("disabled")
@@ -138,6 +130,8 @@
                 $('[id^="login-with-"]').addClass("disabled")
             }
         })
+
+        privacyPolicyCheckbox.blur()
 
     <#-- submodal events -->
         $(document).on('molgenis-registered', function (e, msg) {
