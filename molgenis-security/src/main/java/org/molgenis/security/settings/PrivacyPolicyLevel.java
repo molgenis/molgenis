@@ -3,7 +3,7 @@ package org.molgenis.security.settings;
 public enum PrivacyPolicyLevel {
   LEVEL_1(
       "Level 1",
-      "I have read and agree to the privacy policy described at <a>https://www.molgenis.org/MOLGENIS_Privacy_Policy.pdf</a>"),
+      "I have read and agree to the privacy policy described at <a href=\"https://www.molgenis.org/MOLGENIS_Privacy_Policy.pdf\">https://www.molgenis.org/MOLGENIS_Privacy_Policy.pdf</a>"),
   LEVEL_2("Level 2", "I have read and agree to the privacy policy described at <a><TODO></a>"),
   LEVEL_3("Level 3", "I have read and agree to the privacy policy described at <a><TODO></a>"),
   LEVEL_4("Level 4", "I have read and agree to the privacy policy described at <a><TODO></a>"),

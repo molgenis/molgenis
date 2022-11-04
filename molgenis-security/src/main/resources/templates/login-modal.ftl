@@ -97,6 +97,7 @@
         var privacyPolicyCheckbox = $('#privacy-policy-check')
         form.validate()
 
+
     <#-- modal events -->
         modal.on('hide.bs.modal', function (e) {
             e.stopPropagation()
@@ -142,6 +143,12 @@
             $('#alert-container', modal).empty()
             $('#alert-container', modal).html($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> ' + msg + '</div>'))
         })
+        $(document).on("tap click", 'label a', function( event, data ){
+            event.stopPropagation();
+            event.preventDefault();
+            window.open($(this).attr('href'), $(this).attr('target'));
+            return false;
+        });
 
     })
 </script>
