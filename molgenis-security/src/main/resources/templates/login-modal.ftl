@@ -28,7 +28,7 @@
                     <div class="row">
                       <div class="col-md-12">
                     <#list authentication_oidc_clients as client>
-                        <a href="${client.requestUri}" class="btn btn-primary btn-block disabled" role="button" id="login-with-${client.registrationId}">
+                        <a href="${client.requestUri}" class="btn btn-primary btn-block" role="button" id="login-with-${client.registrationId}">
                             <!-- configure this label by adding a Localization value for security.oidc.client.${client.registrationId}.buttonText -->
                             <@spring.messageText "security.oidc.client.${client.registrationId}.buttonText" "With ${client.name}" />
                         </a>
@@ -56,7 +56,7 @@
                         </div>
                         <div class="row">
                             <div class="col-md-4">
-                                <button id="signin-button" type="submit" class="btn btn-success" disabled>Sign in</button>
+                                <button id="signin-button" type="submit" class="btn btn-success">Sign in</button>
                             </div>
                             <div class="col-md-8">
                                 <p class="pull-right"><a class="modal-href" href="/account/password/reset"
@@ -108,7 +108,21 @@
 
     <#-- form events -->
         form.submit(function (e) {
+            if(!privacyPolicyCheckbox.prop("checked")){
+                $(document).trigger('molgenis-privacy-policy-not-agreed');
+                e.preventDefault()
+                e.stopPropagation()
+            }
+
             if (!form.valid()) {
+                e.preventDefault()
+                e.stopPropagation()
+            }
+        })
+
+        $('[id^="login-with-"]').click(function (e) {
+            if(!privacyPolicyCheckbox.prop("checked")){
+                $(document).trigger('molgenis-privacy-policy-not-agreed');
                 e.preventDefault()
                 e.stopPropagation()
             }
@@ -142,6 +156,10 @@
         $(document).on('molgenis-passwordresetted', function (e, msg) {
             $('#alert-container', modal).empty()
             $('#alert-container', modal).html($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> ' + msg + '</div>'))
+        })
+        $(document).on('molgenis-privacy-policy-not-agreed', function (e) {
+            $('#alert-container', modal).empty()
+            $('#alert-container', modal).html($('<div class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">&times;</button>You need to agree to the privacy policy before you can sign in.</div>'))
         })
         $(document).on("tap click", 'label a', function( event, data ){
             event.stopPropagation();
