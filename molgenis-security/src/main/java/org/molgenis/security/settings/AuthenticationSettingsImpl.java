@@ -120,7 +120,8 @@ public class AuthenticationSettingsImpl extends DefaultSettingsEntity
           .setDataType(TEXT)
           .setParent(privacyPolicy)
           .setLabel("Privacy Policy Custom Text")
-          .setDescription("This text is shown when the \"Custom\" privacy policy level is chosen.");
+          .setDescription("This text is shown when the \"Custom\" privacy policy level is chosen.")
+          .setVisibleExpression(format("{%s} = '%s'", PRIVACY_POLICY_LEVEL, PrivacyPolicyLevel.CUSTOM.getLabel()));
     }
   }
 
