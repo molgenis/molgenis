@@ -7,17 +7,11 @@ import org.molgenis.gson.AutoGson;
 @AutoGson(autoValueClass = AutoValue_NegotiatorStatusRequest.class)
 public abstract class NegotiatorStatusRequest {
 
-    /** Entity type ID for the negotiator config */
-    public abstract String getNegotiatorConfigId();
-
     /** The endpoint to query for status */
-    public abstract String getStatusEndpoint();
+    public abstract String getTestEndpointUrl();
 
-    public static NegotiatorStatusRequest create(
-            String negotiatorEntityId,
-            String statusEndpointUrl) {
-        return new AutoValue_NegotiatorStatusRequest(
-                negotiatorEntityId, statusEndpointUrl);
+    public static NegotiatorStatusRequest create(String testEndpointUrl) {
+        return new AutoValue_NegotiatorStatusRequest(testEndpointUrl);
     }
 }
 
