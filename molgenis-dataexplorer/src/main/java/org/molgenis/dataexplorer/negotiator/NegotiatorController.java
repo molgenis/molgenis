@@ -91,7 +91,7 @@ public class NegotiatorController extends PluginController {
     try {
       restTemplate.postForEntity(request.getTestEndpointUrl(), null, String.class);
     } catch (HttpClientErrorException response) {
-      LOG.info("Endpoint returned a status code of " + response.getStatusCode());
+      LOG.info(String.format("Endpoint returned a status code of %s", response.getStatusCode()));
       return response.getRawStatusCode() == 403;
     }
     return false;
