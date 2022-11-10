@@ -42,6 +42,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -80,6 +81,20 @@ public class NegotiatorController extends PluginController {
     Optional<NegotiatorEntityConfig> settings = getNegotiatorEntityConfig(entityTypeId);
     return settings.isPresent()
         && permissions.hasPermission(new PluginIdentity(ID), PluginPermission.VIEW_PLUGIN);
+  }
+
+  @PostMapping("/negotiator-status")
+  @ResponseBody
+  public boolean checkNegotiatorStatus(@RequestBody NegotiatorStatusRequest request) {
+    LOG.info("Preparing Negotiator connection test");
+
+    try {
+      restTemplate.postForEntity(request.getTestEndpointUrl(), null, String.class);
+    } catch (HttpClientErrorException response) {
+      LOG.info(String.format("Endpoint returned a status code of %s", response.getStatusCode()));
+      return response.getRawStatusCode() == 403;
+    }
+    return false;
   }
 
   /**
