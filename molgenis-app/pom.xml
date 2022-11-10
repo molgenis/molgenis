@@ -23,7 +23,7 @@
     <jib.repository>docker.io/molgenis/molgenis-app</jib.repository>
     <jib.to.image>${jib.repository}:${jib.tag}</jib.to.image>
 
-    <dependency-check-maven.version>3.1.2</dependency-check-maven.version>
+    <dependency-check-maven.version>7.3.0</dependency-check-maven.version>
   </properties>
 
   <build>
