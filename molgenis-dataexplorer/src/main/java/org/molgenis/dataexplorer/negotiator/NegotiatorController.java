@@ -11,8 +11,6 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -39,9 +37,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -90,8 +90,7 @@ public class NegotiatorController extends PluginController {
 
     try {
       restTemplate.postForEntity(request.getTestEndpointUrl(), null, String.class);
-    }
-    catch(HttpClientErrorException response) {
+    } catch (HttpClientErrorException response) {
       LOG.info("Endpoint returned a status code of " + response.getStatusCode());
       return response.getRawStatusCode() == 403;
     }
