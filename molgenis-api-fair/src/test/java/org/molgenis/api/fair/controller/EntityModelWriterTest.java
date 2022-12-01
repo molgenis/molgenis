@@ -11,7 +11,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.api.fair.controller.EntityModelWriter.DCAT_RESOURCE;
-import static org.molgenis.api.fair.controller.EntityModelWriter.R3D_REPOSITORY;
 import static org.molgenis.data.meta.AttributeType.BOOL;
 import static org.molgenis.data.meta.AttributeType.DATE;
 import static org.molgenis.data.meta.AttributeType.DATE_TIME;
@@ -56,6 +55,7 @@ import org.molgenis.test.AbstractMockitoTest;
 import org.springframework.web.util.UriComponentsBuilder;
 
 class EntityModelWriterTest extends AbstractMockitoTest {
+
   @Mock private TagService<LabeledResource, LabeledResource> tagService;
   @Mock private Entity objectEntity;
   @Mock private Entity refEntity;
@@ -68,94 +68,6 @@ class EntityModelWriterTest extends AbstractMockitoTest {
   @Mock private LabeledResource labeledResource2;
   private EntityModelWriter writer;
   private SimpleValueFactory valueFactory = SimpleValueFactory.getInstance();
-
-  @SuppressWarnings("unchecked")
-  @BeforeEach
-  void beforeMethod() {
-    writer =
-        new EntityModelWriter(tagService, valueFactory) {
-          @Override
-          UriComponentsBuilder getServletUriComponentsBuilder() {
-            return UriComponentsBuilder.fromUriString("http://example.org/api/fdp");
-          }
-        };
-  }
-
-  @Test
-  void testCreateRfdModelForEntity() {
-    List<Attribute> attributeList = singletonList(attribute);
-
-    when(objectEntity.getEntityType()).thenReturn(entityType);
-    when(entityType.getId()).thenReturn("fdp_Catalog");
-    when(objectEntity.getIdValue()).thenReturn("catalogId");
-    when(objectEntity.get("attributeName1")).thenReturn("value1");
-    when(objectEntity.getString("attributeName1")).thenReturn("value1");
-
-    when(entityType.getAtomicAttributes()).thenReturn(attributeList);
-
-    when(attribute.getName()).thenReturn("attributeName1");
-    when(attribute.getDataType()).thenReturn(STRING);
-
-    when(tagService.getTagsForEntity(entityType)).thenReturn(List.of(entityTag, entityTag2));
-    when(entityTag.getRelation()).thenReturn(isAssociatedWith);
-    when(entityTag.getObject()).thenReturn(labeledResource);
-    when(labeledResource.getIri()).thenReturn(DCAT_RESOURCE);
-
-    when(entityTag2.getRelation()).thenReturn(isAssociatedWith);
-    when(entityTag2.getObject()).thenReturn(labeledResource2);
-    when(labeledResource2.getIri()).thenReturn(R3D_REPOSITORY);
-
-    LabeledResource tag1 = new LabeledResource("http://IRI1.nl", "tag1Label");
-    Multimap<Relation, LabeledResource> tags = ImmutableMultimap.of(isAssociatedWith, tag1);
-    when(tagService.getTagsForAttribute(entityType, attribute)).thenReturn(tags);
-
-    Model result = writer.createRdfModel(objectEntity);
-
-    assertEquals(9, result.size());
-    StringWriter writer = new StringWriter();
-    Rio.write(result, writer, TURTLE, new WriterConfig().set(INLINE_BLANK_NODES, true));
-    assertThat(writer.toString())
-        .contains("<http://IRI1.nl> \"value1\";")
-        .contains(
-            "fdp:metadataIdentifier [ a datacite:Identifier;\n"
-                + "      dct:identifier <http://example.org/api/fdp/fdp_Catalog/catalogId>\n"
-                + "    ]")
-        .contains(
-            "r3d:repositoryIdentifier [ a datacite:Identifier;\n"
-                + "      dct:identifier <http://example.org/api/fdp/fdp_Catalog/catalogId>\n"
-                + "    ]");
-  }
-
-  @Test
-  void testCreateRfdModelWithCustomIRI() {
-
-    List<Attribute> attributeList = singletonList(attribute);
-
-    when(objectEntity.getEntityType()).thenReturn(entityType);
-    when(entityType.getId()).thenReturn("fdp_Catalog");
-    when(objectEntity.getString("IRI")).thenReturn("http://purl.org/example/catalog_id");
-    when(entityType.getAttributeNames()).thenReturn(singletonList("IRI"));
-    when(entityType.getAtomicAttributes()).thenReturn(attributeList);
-
-    when(attribute.getName()).thenReturn("IRI");
-
-    when(tagService.getTagsForEntity(entityType)).thenReturn(List.of(entityTag, entityTag2));
-    when(entityTag.getRelation()).thenReturn(isAssociatedWith);
-    when(entityTag.getObject()).thenReturn(labeledResource);
-    when(labeledResource.getIri()).thenReturn(DCAT_RESOURCE);
-
-    Model result = writer.createRdfModel(objectEntity);
-
-    assertEquals(4, result.size());
-    StringWriter writer = new StringWriter();
-    Rio.write(result, writer, TURTLE, new WriterConfig().set(INLINE_BLANK_NODES, true));
-    assertThat(writer.toString())
-        .contains("<http://purl.org/example/catalog_id> a dcat:Resource")
-        .contains(
-            "fdp:metadataIdentifier [ a datacite:Identifier;\n"
-                + "      dct:identifier <http://purl.org/example/catalog_id>\n"
-                + "    ]");
-  }
 
   static Object[][] createStatementForAttributeProvider() {
     return new Object[][] {
@@ -220,6 +132,86 @@ class EntityModelWriterTest extends AbstractMockitoTest {
         "<http://example.org/iri> <http://example.org>"
       }
     };
+  }
+
+  @SuppressWarnings("unchecked")
+  @BeforeEach
+  void beforeMethod() {
+    writer =
+        new EntityModelWriter(tagService, valueFactory) {
+          @Override
+          UriComponentsBuilder getServletUriComponentsBuilder() {
+            return UriComponentsBuilder.fromUriString("http://example.org/api/fdp");
+          }
+        };
+  }
+
+  @Test
+  void testCreateRfdModelForEntity() {
+    List<Attribute> attributeList = singletonList(attribute);
+
+    when(objectEntity.getEntityType()).thenReturn(entityType);
+    when(entityType.getId()).thenReturn("fdp_Catalog");
+    when(objectEntity.getIdValue()).thenReturn("catalogId");
+    when(objectEntity.get("attributeName1")).thenReturn("value1");
+    when(objectEntity.getString("attributeName1")).thenReturn("value1");
+
+    when(entityType.getAtomicAttributes()).thenReturn(attributeList);
+
+    when(attribute.getName()).thenReturn("attributeName1");
+    when(attribute.getDataType()).thenReturn(STRING);
+
+    when(tagService.getTagsForEntity(entityType)).thenReturn(List.of(entityTag, entityTag2));
+    when(entityTag.getRelation()).thenReturn(isAssociatedWith);
+    when(entityTag.getObject()).thenReturn(labeledResource);
+    when(labeledResource.getIri()).thenReturn(DCAT_RESOURCE);
+
+    LabeledResource tag1 = new LabeledResource("http://IRI1.nl", "tag1Label");
+    Multimap<Relation, LabeledResource> tags = ImmutableMultimap.of(isAssociatedWith, tag1);
+    when(tagService.getTagsForAttribute(entityType, attribute)).thenReturn(tags);
+
+    Model result = writer.createRdfModel(objectEntity);
+
+    assertEquals(5, result.size());
+    StringWriter writer = new StringWriter();
+    Rio.write(result, writer, TURTLE, new WriterConfig().set(INLINE_BLANK_NODES, true));
+    assertThat(writer.toString())
+        .contains("<http://IRI1.nl> \"value1\";")
+        .contains(
+            "fdp-o:metadataIdentifier [ a datacite:Identifier;\n"
+                + "      dct:identifier <http://example.org/api/fdp/fdp_Catalog/catalogId>\n"
+                + "    ]");
+  }
+
+  @Test
+  void testCreateRfdModelWithCustomIRI() {
+
+    List<Attribute> attributeList = singletonList(attribute);
+
+    when(objectEntity.getEntityType()).thenReturn(entityType);
+    //    when(entityType.getId()).thenReturn("fdp_Catalog");
+    when(objectEntity.getString("IRI")).thenReturn("http://purl.org/example/catalog_id");
+    when(entityType.getAttributeNames()).thenReturn(singletonList("IRI"));
+    when(entityType.getAtomicAttributes()).thenReturn(attributeList);
+
+    when(attribute.getName()).thenReturn("IRI");
+
+    when(tagService.getTagsForEntity(entityType)).thenReturn(List.of(entityTag, entityTag2));
+    when(entityTag.getRelation()).thenReturn(isAssociatedWith);
+    when(entityTag.getObject()).thenReturn(labeledResource);
+    when(labeledResource.getIri()).thenReturn(DCAT_RESOURCE);
+
+    Model result = writer.createRdfModel(objectEntity);
+
+    assertEquals(4, result.size());
+    StringWriter writer = new StringWriter();
+    Rio.write(result, writer, TURTLE, new WriterConfig().set(INLINE_BLANK_NODES, true));
+    assertThat(writer.toString())
+        .contains("<http://purl.org/example/catalog_id> a dcat:Resource")
+        .contains(
+            "fdp-o:metadataIdentifier [ a datacite:Identifier;\n"
+                + "      dct:identifier <http://purl.org/example/catalog_id>\n"
+                + "    ]");
   }
 
   @ParameterizedTest
