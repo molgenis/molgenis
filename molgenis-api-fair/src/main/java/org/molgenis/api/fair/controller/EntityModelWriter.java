@@ -251,12 +251,14 @@ public class EntityModelWriter {
    */
   private Resource createResource(Entity entity) {
     var entityType = entity.getEntityType();
-    if ("fdp_Metadata".equals(entityType.getId())) {
-      return valueFactory.createIRI(getServletUriComponentsBuilder().build().toUriString());
-    }
     if (contains(entity.getEntityType().getAttributeNames(), "IRI")) {
       return valueFactory.createIRI(entity.getString("IRI"));
     }
+
+    if ("fdp_Metadata".equals(entityType.getId())) {
+      return valueFactory.createIRI(getServletUriComponentsBuilder().build().toUriString());
+    }
+
     if (isADcatResource(entityType)) {
       var iri =
           getServletUriComponentsBuilder()
