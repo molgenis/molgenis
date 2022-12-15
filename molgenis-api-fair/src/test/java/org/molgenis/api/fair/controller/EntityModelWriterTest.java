@@ -7,7 +7,6 @@ import static org.eclipse.rdf4j.model.vocabulary.RDF.TYPE;
 import static org.eclipse.rdf4j.rio.RDFFormat.TURTLE;
 import static org.eclipse.rdf4j.rio.helpers.BasicWriterSettings.INLINE_BLANK_NODES;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.api.fair.controller.EntityModelWriter.DCAT_RESOURCE;
@@ -155,6 +154,48 @@ class EntityModelWriterTest extends AbstractMockitoTest {
     when(objectEntity.getIdValue()).thenReturn("catalogId");
     when(objectEntity.get("attributeName1")).thenReturn("value1");
     when(objectEntity.getString("attributeName1")).thenReturn("value1");
+    when(objectEntity.getString("directContainerTitle")).thenReturn("Children");
+    when(objectEntity.getString("hasMemberRelation"))
+        .thenReturn("http://purl.org/fdp/fdp-o#relation");
+
+    when(entityType.getAtomicAttributes()).thenReturn(attributeList);
+
+    when(attribute.getName()).thenReturn("attributeName1");
+    when(attribute.getDataType()).thenReturn(STRING);
+
+    when(tagService.getTagsForEntity(entityType)).thenReturn(List.of(entityTag, entityTag2));
+    when(entityTag.getRelation()).thenReturn(isAssociatedWith);
+    when(entityTag.getObject()).thenReturn(labeledResource);
+    when(labeledResource.getIri()).thenReturn(DCAT_RESOURCE);
+
+    LabeledResource tag1 = new LabeledResource("http://IRI1.nl", "tag1Label");
+    Multimap<Relation, LabeledResource> tags = ImmutableMultimap.of(isAssociatedWith, tag1);
+    when(tagService.getTagsForAttribute(entityType, attribute)).thenReturn(tags);
+
+    Model result = writer.createRdfModel(objectEntity);
+
+    assertEquals(9, result.size());
+    StringWriter writer = new StringWriter();
+    Rio.write(result, writer, TURTLE, new WriterConfig().set(INLINE_BLANK_NODES, true));
+    assertThat(writer.toString())
+        .contains("<http://IRI1.nl> \"value1\";")
+        .contains(
+            "fdp-o:metadataIdentifier [ a datacite:Identifier;\n"
+                + "      dct:identifier <http://example.org/api/fdp/fdp_Catalog/catalogId>\n"
+                + "    ]")
+        .contains("<http://example.org/api/fdp/fdp_Catalog/catalogId/dc> a ldp:DirectContainer");
+  }
+
+  @Test
+  void testCreateRfdModelForEntityWithoutNagivationInfo() {
+    List<Attribute> attributeList = singletonList(attribute);
+
+    when(objectEntity.getEntityType()).thenReturn(entityType);
+    when(entityType.getId()).thenReturn("fdp_Catalog");
+    when(objectEntity.getIdValue()).thenReturn("catalogId");
+    when(objectEntity.get("attributeName1")).thenReturn("value1");
+    when(objectEntity.getString("attributeName1")).thenReturn("value1");
+    when(objectEntity.getString("hasMemberRelation")).thenReturn(null);
 
     when(entityType.getAtomicAttributes()).thenReturn(attributeList);
 
@@ -180,7 +221,9 @@ class EntityModelWriterTest extends AbstractMockitoTest {
         .contains(
             "fdp-o:metadataIdentifier [ a datacite:Identifier;\n"
                 + "      dct:identifier <http://example.org/api/fdp/fdp_Catalog/catalogId>\n"
-                + "    ]");
+                + "    ]")
+        .doesNotContain(
+            "<http://example.org/api/fdp/fdp_Catalog/catalogId/dc> a ldp:DirectContainer");
   }
 
   @Test
@@ -191,6 +234,10 @@ class EntityModelWriterTest extends AbstractMockitoTest {
     when(objectEntity.getEntityType()).thenReturn(entityType);
     //    when(entityType.getId()).thenReturn("fdp_Catalog");
     when(objectEntity.getString("IRI")).thenReturn("http://purl.org/example/catalog_id");
+    when(objectEntity.getString("directContainerTitle")).thenReturn("Children");
+    when(objectEntity.getString("hasMemberRelation"))
+        .thenReturn("http://purl.org/fdp/fdp-o#relation");
+
     when(entityType.getAttributeNames()).thenReturn(singletonList("IRI"));
     when(entityType.getAtomicAttributes()).thenReturn(attributeList);
 
@@ -203,7 +250,7 @@ class EntityModelWriterTest extends AbstractMockitoTest {
 
     Model result = writer.createRdfModel(objectEntity);
 
-    assertEquals(4, result.size());
+    assertEquals(8, result.size());
     StringWriter writer = new StringWriter();
     Rio.write(result, writer, TURTLE, new WriterConfig().set(INLINE_BLANK_NODES, true));
     assertThat(writer.toString())
@@ -211,7 +258,8 @@ class EntityModelWriterTest extends AbstractMockitoTest {
         .contains(
             "fdp-o:metadataIdentifier [ a datacite:Identifier;\n"
                 + "      dct:identifier <http://purl.org/example/catalog_id>\n"
-                + "    ]");
+                + "    ]")
+        .contains("<http://purl.org/example/catalog_id/dc> a ldp:DirectContainer");
   }
 
   @ParameterizedTest
@@ -222,6 +270,10 @@ class EntityModelWriterTest extends AbstractMockitoTest {
     when(entityType.getId()).thenReturn("fdp_Catalog");
     when(objectEntity.getIdValue()).thenReturn("attributeName");
     when(objectEntity.get("attributeName")).thenReturn(value);
+    when(objectEntity.getString("directContainerTitle")).thenReturn("Children");
+    when(objectEntity.getString("hasMemberRelation"))
+        .thenReturn("http://purl.org/fdp/fdp-o#relation");
+
     consumer.accept(objectEntity);
 
     when(entityType.getAtomicAttributes()).thenReturn(List.of(attribute));
@@ -248,6 +300,9 @@ class EntityModelWriterTest extends AbstractMockitoTest {
     when(objectEntity.getIdValue()).thenReturn("attributeName");
     when(objectEntity.get("attributeName")).thenReturn(refEntity);
     when(objectEntity.getEntity("attributeName")).thenReturn(refEntity);
+    when(objectEntity.getString("directContainerTitle")).thenReturn("Children");
+    when(objectEntity.getString("hasMemberRelation"))
+        .thenReturn("http://purl.org/fdp/fdp-o#relation");
 
     when(refEntity.getEntityType()).thenReturn(refEntityType);
     when(refEntityType.getAttributeNames()).thenReturn(List.of("IRI"));
@@ -264,7 +319,7 @@ class EntityModelWriterTest extends AbstractMockitoTest {
 
     Model result = writer.createRdfModel(objectEntity);
 
-    assertEquals(1, result.size());
+    assertEquals(5, result.size());
     StringWriter writer = new StringWriter();
     Rio.write(result, writer, TURTLE, new WriterConfig().set(INLINE_BLANK_NODES, true));
     assertThat(writer.toString())
@@ -278,6 +333,9 @@ class EntityModelWriterTest extends AbstractMockitoTest {
     when(objectEntity.getIdValue()).thenReturn("attributeName");
     when(objectEntity.get("attributeName")).thenReturn(refEntity);
     when(objectEntity.getEntity("attributeName")).thenReturn(refEntity);
+    when(objectEntity.getString("directContainerTitle")).thenReturn("Children");
+    when(objectEntity.getString("hasMemberRelation"))
+        .thenReturn("http://purl.org/fdp/fdp-o#relation");
 
     when(refEntity.getEntityType()).thenReturn(refEntityType);
     when(refEntity.getIdValue()).thenReturn("refEntityId");
@@ -298,7 +356,7 @@ class EntityModelWriterTest extends AbstractMockitoTest {
 
     Model result = writer.createRdfModel(objectEntity);
 
-    assertEquals(2, result.size());
+    assertEquals(6, result.size());
     StringWriter writer = new StringWriter();
     Rio.write(result, writer, TURTLE, new WriterConfig().set(INLINE_BLANK_NODES, true));
     assertThat(writer.toString())
@@ -317,6 +375,9 @@ class EntityModelWriterTest extends AbstractMockitoTest {
     when(refEntity.getEntityType()).thenReturn(refEntityType);
     when(refEntityType.getAttributeNames()).thenReturn(List.of("IRI"));
     when(refEntity.getString("IRI")).thenReturn("http://example.org/refEntity");
+    when(objectEntity.getString("directContainerTitle")).thenReturn("Children");
+    when(objectEntity.getString("hasMemberRelation"))
+        .thenReturn("http://purl.org/fdp/fdp-o#relation");
 
     when(entityType.getAtomicAttributes()).thenReturn(List.of(attribute));
     when(attribute.getName()).thenReturn("attributeName");
@@ -329,7 +390,7 @@ class EntityModelWriterTest extends AbstractMockitoTest {
 
     Model result = writer.createRdfModel(objectEntity);
 
-    assertEquals(1, result.size());
+    assertEquals(5, result.size());
     StringWriter writer = new StringWriter();
     Rio.write(result, writer, TURTLE, new WriterConfig().set(INLINE_BLANK_NODES, true));
     assertThat(writer.toString())
@@ -349,6 +410,9 @@ class EntityModelWriterTest extends AbstractMockitoTest {
     when(objectEntity.getIdValue()).thenReturn("attributeName");
     when(objectEntity.get("attributeName")).thenReturn(value);
     when(objectEntity.getString("attributeName")).thenReturn(value);
+    when(objectEntity.getString("directContainerTitle")).thenReturn("Children");
+    when(objectEntity.getString("hasMemberRelation"))
+        .thenReturn("http://purl.org/fdp/fdp-o#relation");
 
     when(entityType.getAtomicAttributes()).thenReturn(attributeList);
     when(attribute.getName()).thenReturn("attributeName");
@@ -361,7 +425,7 @@ class EntityModelWriterTest extends AbstractMockitoTest {
 
     Model result = writer.createRdfModel(objectEntity);
 
-    assertEquals(3, result.size());
+    assertEquals(7, result.size());
     StringWriter writer = new StringWriter();
     Rio.write(result, writer, TURTLE, new WriterConfig().set(INLINE_BLANK_NODES, true));
 
@@ -375,10 +439,14 @@ class EntityModelWriterTest extends AbstractMockitoTest {
     when(objectEntity.getIdValue()).thenReturn("attributeName1");
     when(objectEntity.get("attributeName1")).thenReturn(null);
     when(attribute.getName()).thenReturn("attributeName1");
+    when(objectEntity.getString("directContainerTitle")).thenReturn("Children");
+    when(objectEntity.getString("hasMemberRelation"))
+        .thenReturn("http://purl.org/fdp/fdp-o#relation");
 
     Model result = writer.createRdfModel(objectEntity);
 
-    assertTrue(result.isEmpty());
+    //    assertTrue(result.isEmpty());
+    assertEquals(4, result.size());
   }
 
   @Test
