@@ -104,24 +104,19 @@ public class AuthenticationSettingsImpl extends DefaultSettingsEntity
           .setDataType(ENUM)
           .setParent(privacyPolicy)
           .setNillable(false)
-          .setDefaultValue(PrivacyPolicyLevel.LEVEL_4.getLabel())
+          .setDefaultValue(PrivacyPolicyLevel.CUSTOM.getLabel())
           .setEnumOptions(
               stream(PrivacyPolicyLevel.values()).map(PrivacyPolicyLevel::getLabel).toList())
-          .setLabel("Privacy Policy Level")
-          .setDescription(
-              format(
-                  "Pick one of the four privacy levels with pre-determined texts, or "
-                      + "choose \"Custom\" if you want to use your own.{br}1. %s {br}2. %s {br}3. %s {br}4. %s ",
-                  PrivacyPolicyLevel.LEVEL_1.getPolicy(),
-                  PrivacyPolicyLevel.LEVEL_2.getPolicy(),
-                  PrivacyPolicyLevel.LEVEL_3.getPolicy(),
-                  PrivacyPolicyLevel.LEVEL_4.getPolicy()));
+          .setLabel("Privacy Policy Level");
       addAttribute(PRIVACY_POLICY_CUSTOM_TEXT)
           .setDataType(TEXT)
           .setParent(privacyPolicy)
           .setLabel("Privacy Policy Custom Text")
+          .setDefaultValue(
+              "I have read and agree to the privacy policy described at <a href=\\\"https://www.molgenis.org/MOLGENIS_Privacy_Policy.pdf\\\">https://www.molgenis.org/MOLGENIS_Privacy_Policy.pdf</a>\"")
           .setDescription("This text is shown when the \"Custom\" privacy policy level is chosen.")
-          .setVisibleExpression(format("{%s} = '%s'", PRIVACY_POLICY_LEVEL, PrivacyPolicyLevel.CUSTOM.getLabel()));
+          .setVisibleExpression(
+              format("{%s} = '%s'", PRIVACY_POLICY_LEVEL, PrivacyPolicyLevel.CUSTOM.getLabel()));
     }
   }
 
