@@ -10,6 +10,7 @@ import static org.molgenis.web.PluginAttributes.KEY_AUTHENTICATION_SIGN_UP_FORM;
 import static org.molgenis.web.PluginAttributes.KEY_ENVIRONMENT;
 import static org.molgenis.web.PluginAttributes.KEY_GSON;
 import static org.molgenis.web.PluginAttributes.KEY_I18N;
+import static org.molgenis.web.PluginAttributes.KEY_PRIVACY_POLICY_ENABLED;
 import static org.molgenis.web.PluginAttributes.KEY_PRIVACY_POLICY_TEXT;
 import static org.molgenis.web.PluginAttributes.KEY_RESOURCE_FINGERPRINT_REGISTRY;
 import static org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter.DEFAULT_AUTHORIZATION_REQUEST_BASE_URI;
@@ -93,6 +94,9 @@ public class MolgenisInterceptor extends HandlerInterceptorAdapter {
               modelAndView.addObject(
                   KEY_AUTHENTICATION_OIDC_CLIENTS, runAsSystem(this::getOidcClients));
               modelAndView.addObject(
+                KEY_PRIVACY_POLICY_ENABLED, runAsSystem(this::isPrivacyPolicyEnabled)
+              );
+              modelAndView.addObject(
                   KEY_PRIVACY_POLICY_TEXT, runAsSystem(this::getPrivacyPolicyText));
               modelAndView.addObject(
                   KEY_AUTHENTICATION_SIGN_UP_FORM, authenticationSettings.getSignUpForm());
@@ -156,11 +160,17 @@ public class MolgenisInterceptor extends HandlerInterceptorAdapter {
     return stream(authenticationSettings.getOidcClients()).map(this::clientAsMap).collect(toList());
   }
 
+  private boolean isPrivacyPolicyEnabled() {
+    return authenticationSettings.getPrivacyPolicyLevel() != PrivacyPolicyLevel.DISABLED;
+  }
+
   private String getPrivacyPolicyText() {
     var level = authenticationSettings.getPrivacyPolicyLevel();
     if (level == PrivacyPolicyLevel.CUSTOM) {
       return authenticationSettings.getPrivacyPolicyCustomText();
-    } else {
+    } else if(level == PrivacyPolicyLevel.DISABLED){
+      return "";
+    }else {
       return level.getPolicy();
     }
   }

@@ -19,10 +19,13 @@
             <div class="modal-body">
                 <div class="container-fluid modal-container-padding">
                     <div id="alert-container"></div>
-                    <div class="well well-sm">
-                            <label class="checkbox-inline">
-                                <input id="privacy-policy-check" type="checkbox" value="" autocomplete="off">${privacy_policy_text}</label>
-                    </div>
+
+                    <#if privacy_policy_enabled>
+                        <div class="well well-sm">
+                                <label class="checkbox-inline">
+                                    <input id="privacy-policy-check" type="checkbox" value="" autocomplete="off">${privacy_policy_text}</label>
+                        </div>
+                    </#if>
 
                 <#if authentication_oidc_clients?has_content>
                     <div class="row">
@@ -95,8 +98,11 @@
         var submitBtn = $('#signin-button')
         var form = $('#login-form')
         var privacyPolicyCheckbox = $('#privacy-policy-check')
+        var privacyPolicyEnabled = ('${privacy_policy_enabled?c}' === 'true')
         form.validate()
 
+        console.log("enabled ja/nezze:")
+        console.log(privacyPolicyEnabled)
 
     <#-- modal events -->
         modal.on('hide.bs.modal', function (e) {
@@ -108,7 +114,7 @@
 
     <#-- form events -->
         form.submit(function (e) {
-            if(!privacyPolicyCheckbox.prop("checked")){
+            if(privacyPolicyEnabled && !privacyPolicyCheckbox.prop("checked")){
                 $(document).trigger('molgenis-privacy-policy-not-agreed');
                 e.preventDefault()
                 e.stopPropagation()
@@ -121,7 +127,7 @@
         })
 
         $('[id^="login-with-"]').click(function (e) {
-            if(!privacyPolicyCheckbox.prop("checked")){
+            if(privacyPolicyEnabled && !privacyPolicyCheckbox.prop("checked")){
                 $(document).trigger('molgenis-privacy-policy-not-agreed');
                 e.preventDefault()
                 e.stopPropagation()
@@ -133,16 +139,6 @@
                 e.preventDefault()
                 e.stopPropagation()
                 form.submit()
-            }
-        })
-
-        privacyPolicyCheckbox.change(function onChangePrivacyPolicy(){
-            if (this.checked){
-                submitBtn.prop("disabled", false)
-                $('[id^="login-with-"]').removeClass("disabled")
-            }else{
-                submitBtn.prop("disabled", true)
-                $('[id^="login-with-"]').addClass("disabled")
             }
         })
 

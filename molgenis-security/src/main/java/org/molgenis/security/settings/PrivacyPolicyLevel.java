@@ -1,6 +1,7 @@
 package org.molgenis.security.settings;
 
 public enum PrivacyPolicyLevel {
+  DISABLED("Disabled", ""),
   LEVEL_1(
       "Level 1",
       "I have read and agree to the privacy policy described at <a href=\"https://www.molgenis.org/MOLGENIS_Privacy_Policy.pdf\">https://www.molgenis.org/MOLGENIS_Privacy_Policy.pdf</a>"),
