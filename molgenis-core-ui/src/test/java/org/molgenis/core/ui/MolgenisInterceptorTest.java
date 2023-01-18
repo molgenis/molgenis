@@ -79,7 +79,7 @@ class MolgenisInterceptorTest extends AbstractMockitoTest {
   void postHandle() {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
-    when(authenticationSettings.getPrivacyPolicyLevel()).thenReturn(PrivacyPolicyLevel.LEVEL_4);
+    when(authenticationSettings.getPrivacyPolicyLevel()).thenReturn(PrivacyPolicyLevel.CUSTOM);
 
     User user = mock(User.class);
     when(user.isSuperuser()).thenReturn(true);
@@ -113,7 +113,7 @@ class MolgenisInterceptorTest extends AbstractMockitoTest {
 
     OidcClient oidcClient = mock(OidcClient.class);
     when(authenticationSettings.getOidcClients()).thenReturn(ImmutableList.of(oidcClient));
-    when(authenticationSettings.getPrivacyPolicyLevel()).thenReturn(PrivacyPolicyLevel.LEVEL_4);
+    when(authenticationSettings.getPrivacyPolicyLevel()).thenReturn(PrivacyPolicyLevel.CUSTOM);
     when(oidcClient.getRegistrationId()).thenReturn("registrationId");
     when(oidcClient.getClientName()).thenReturn("clientName");
     User user = mock(User.class);

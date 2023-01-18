@@ -113,7 +113,7 @@ public class AuthenticationSettingsImpl extends DefaultSettingsEntity
           .setParent(privacyPolicy)
           .setLabel("Privacy Policy Custom Text")
           .setDefaultValue(
-              "I have read and agree to the privacy policy described at <a href=\\\"https://www.molgenis.org/MOLGENIS_Privacy_Policy.pdf\\\">https://www.molgenis.org/MOLGENIS_Privacy_Policy.pdf</a>\"")
+              "I have read and agree to the privacy policy described at <a href=\\\"https://www.molgenis.org/MOLGENIS_Privacy_Policy.pdf\\\">https://www.molgenis.org/MOLGENIS_Privacy_Policy.pdf</a>")
           .setDescription("This text is shown when the \"Custom\" privacy policy level is chosen.")
           .setVisibleExpression(
               format("{%s} = '%s'", PRIVACY_POLICY_LEVEL, PrivacyPolicyLevel.CUSTOM.getLabel()));
