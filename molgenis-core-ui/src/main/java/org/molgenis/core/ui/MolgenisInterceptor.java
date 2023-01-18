@@ -94,8 +94,7 @@ public class MolgenisInterceptor extends HandlerInterceptorAdapter {
               modelAndView.addObject(
                   KEY_AUTHENTICATION_OIDC_CLIENTS, runAsSystem(this::getOidcClients));
               modelAndView.addObject(
-                KEY_PRIVACY_POLICY_ENABLED, runAsSystem(this::isPrivacyPolicyEnabled)
-              );
+                  KEY_PRIVACY_POLICY_ENABLED, runAsSystem(this::isPrivacyPolicyEnabled));
               modelAndView.addObject(
                   KEY_PRIVACY_POLICY_TEXT, runAsSystem(this::getPrivacyPolicyText));
               modelAndView.addObject(
@@ -168,9 +167,9 @@ public class MolgenisInterceptor extends HandlerInterceptorAdapter {
     var level = authenticationSettings.getPrivacyPolicyLevel();
     if (level == PrivacyPolicyLevel.CUSTOM) {
       return authenticationSettings.getPrivacyPolicyCustomText();
-    } else if(level == PrivacyPolicyLevel.DISABLED){
+    } else if (level == PrivacyPolicyLevel.DISABLED) {
       return "";
-    }else {
+    } else {
       return level.getPolicy();
     }
   }
