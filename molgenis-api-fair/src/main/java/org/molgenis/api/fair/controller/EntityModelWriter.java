@@ -13,6 +13,7 @@ import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.molgenis.data.Entity;
@@ -32,15 +33,14 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class EntityModelWriter {
 
   public static final String NS_DCAT = "http://www.w3.org/ns/dcat#";
-  public static final String NS_FDP = "http://rdf.biosemantics.org/ontologies/fdp-o#";
-  public static final String NS_R3D = "http://www.re3data.org/schema/3-0#";
+  public static final String NS_FDP = "https://w3id.org/fdp/fdp-o#";
   public static final String NS_DATACITE = "http://purl.org/spar/datacite/";
   public static final String NS_DCT = "http://purl.org/dc/terms/";
   public static final String NS_RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-  private static final String KEYWORD = NS_DCAT + "keyword";
+  public static final String NS_LDP = "http://www.w3.org/ns/ldp#";
   static final String DCAT_RESOURCE = NS_DCAT + "Resource";
-  static final String R3D_REPOSITORY = NS_R3D + "Repository";
-
+  static final String LDP_DIRECT_CONTAINER = NS_LDP + "DirectContainer";
+  private static final String KEYWORD = NS_DCAT + "keyword";
   private static final DatatypeFactory DATATYPE_FACTORY;
 
   static {
@@ -52,10 +52,10 @@ public class EntityModelWriter {
   }
 
   private final IRI rdfTypePredicate;
-  private final IRI r3dRepositoryIdentifier;
   private final IRI dctIdentifier;
   private final IRI dataciteIdentifier;
   private final IRI fdpMetadataIdentifier;
+  private final IRI ldpDirectContainer;
 
   private final SimpleValueFactory valueFactory;
   private final TagService<LabeledResource, LabeledResource> tagService;
@@ -65,10 +65,10 @@ public class EntityModelWriter {
     this.valueFactory = requireNonNull(valueFactory);
     this.tagService = requireNonNull(tagService);
     rdfTypePredicate = valueFactory.createIRI(NS_RDF, "type");
-    r3dRepositoryIdentifier = valueFactory.createIRI(NS_R3D, "repositoryIdentifier");
     dctIdentifier = valueFactory.createIRI(NS_DCT, "identifier");
     dataciteIdentifier = valueFactory.createIRI(NS_DATACITE, "Identifier");
     fdpMetadataIdentifier = valueFactory.createIRI(NS_FDP, "metadataIdentifier");
+    ldpDirectContainer = valueFactory.createIRI(NS_LDP, "DirectContainer");
   }
 
   private void setNamespacePrefixes(Model model) {
@@ -79,21 +79,45 @@ public class EntityModelWriter {
     model.setNamespace("owl", "http://www.w3.org/2002/07/owl#");
     model.setNamespace("dct", NS_DCT);
     model.setNamespace("lang", "http://id.loc.gov/vocabulary/iso639-1/");
-    model.setNamespace("fdp", NS_FDP);
-    model.setNamespace("ldp", "http://www.w3.org/ns/ldp#");
+    model.setNamespace("fdp-o", NS_FDP);
     model.setNamespace("foaf", "http://xmlns.com/foaf/0.1/");
     model.setNamespace("orcid", "http://orcid.org/");
-    model.setNamespace("r3d", NS_R3D);
     model.setNamespace("sio", "http://semanticscience.org/resource/");
     model.setNamespace("datacite", NS_DATACITE);
     model.setNamespace("mlga", "http://molgenis.org/audit/");
+    model.setNamespace("ldp", NS_LDP);
   }
 
   public Model createRdfModel(Entity objectEntity) {
     Model model = createEmptyModel();
     Resource subject = createResource(objectEntity);
     addEntityToModel(subject, objectEntity, model);
+    // If it contains children, the ldp navigation information are included
+    if (objectEntity.getString("hasMemberRelation") != null) {
+      createNavigationResource(objectEntity, subject, model);
+    }
     return model;
+  }
+
+  /** Creates navigation information using LDP ontology */
+  private void createNavigationResource(Entity objectEntity, Resource subject, Model model) {
+    IRI hasMemberRelation = valueFactory.createIRI(NS_LDP + "hasMemberRelation");
+    IRI membershipResource = valueFactory.createIRI(NS_LDP + "membershipResource");
+    IRI ldpContains = valueFactory.createIRI(NS_LDP + "contains");
+    IRI dctermsTitle = valueFactory.createIRI(NS_DCT + "title");
+    IRI memberRelation = valueFactory.createIRI(objectEntity.getString("hasMemberRelation"));
+
+    Resource directContainer = valueFactory.createIRI(subject + "/dc");
+    model.add(
+        directContainer,
+        dctermsTitle,
+        valueFactory.createLiteral(objectEntity.getString("directContainerTitle")));
+    model.add(directContainer, rdfTypePredicate, ldpDirectContainer);
+    model.add(directContainer, membershipResource, subject);
+    model.add(directContainer, hasMemberRelation, memberRelation);
+    for (Statement child : model.filter(subject, memberRelation, null)) {
+      model.add(directContainer, ldpContains, child.getObject());
+    }
   }
 
   public Model createEmptyModel() {
@@ -133,9 +157,6 @@ public class EntityModelWriter {
         model.add(subject, rdfTypePredicate, valueFactory.createIRI(object.getIri()));
         if (DCAT_RESOURCE.equals(object.getIri())) {
           model.add(subject, fdpMetadataIdentifier, createDataciteIdentifierNode(model, subject));
-        }
-        if (R3D_REPOSITORY.equals(object.getIri())) {
-          model.add(subject, r3dRepositoryIdentifier, createDataciteIdentifierNode(model, subject));
         }
       }
     }
@@ -251,12 +272,14 @@ public class EntityModelWriter {
    */
   private Resource createResource(Entity entity) {
     var entityType = entity.getEntityType();
-    if ("fdp_Metadata".equals(entityType.getId())) {
-      return valueFactory.createIRI(getServletUriComponentsBuilder().build().toUriString());
-    }
     if (contains(entity.getEntityType().getAttributeNames(), "IRI")) {
       return valueFactory.createIRI(entity.getString("IRI"));
     }
+
+    if ("fdp_Metadata".equals(entityType.getId())) {
+      return valueFactory.createIRI(getServletUriComponentsBuilder().build().toUriString());
+    }
+
     if (isADcatResource(entityType)) {
       var iri =
           getServletUriComponentsBuilder()
