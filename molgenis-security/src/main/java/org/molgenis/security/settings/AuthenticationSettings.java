@@ -34,4 +34,10 @@ public interface AuthenticationSettings {
    *     or mandatory, <code>disabled</code> when it is off
    */
   TwoFactorAuthenticationSetting getTwoFactorAuthentication();
+
+  /** @return the selected privacy policy level message that will be shown at login */
+  PrivacyPolicyLevel getPrivacyPolicyLevel();
+
+  /** @return the custom privacy policy message */
+  String getPrivacyPolicyCustomText();
 }
