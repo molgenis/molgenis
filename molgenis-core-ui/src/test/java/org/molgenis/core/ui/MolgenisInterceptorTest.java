@@ -31,6 +31,7 @@ import org.molgenis.data.security.auth.User;
 import org.molgenis.data.transaction.TransactionManager;
 import org.molgenis.security.oidc.model.OidcClient;
 import org.molgenis.security.settings.AuthenticationSettings;
+import org.molgenis.security.settings.PrivacyPolicyLevel;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.settings.AppSettings;
 import org.molgenis.test.AbstractMockitoTest;
@@ -78,6 +79,7 @@ class MolgenisInterceptorTest extends AbstractMockitoTest {
   void postHandle() {
     HttpServletRequest request = mock(HttpServletRequest.class);
     HttpServletResponse response = mock(HttpServletResponse.class);
+    when(authenticationSettings.getPrivacyPolicyLevel()).thenReturn(PrivacyPolicyLevel.CUSTOM);
 
     User user = mock(User.class);
     when(user.isSuperuser()).thenReturn(true);
@@ -111,6 +113,7 @@ class MolgenisInterceptorTest extends AbstractMockitoTest {
 
     OidcClient oidcClient = mock(OidcClient.class);
     when(authenticationSettings.getOidcClients()).thenReturn(ImmutableList.of(oidcClient));
+    when(authenticationSettings.getPrivacyPolicyLevel()).thenReturn(PrivacyPolicyLevel.CUSTOM);
     when(oidcClient.getRegistrationId()).thenReturn("registrationId");
     when(oidcClient.getClientName()).thenReturn("clientName");
     User user = mock(User.class);
