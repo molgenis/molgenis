@@ -11,7 +11,7 @@
                 <button type="button" class="close" onclick="location.href='/'"><span
                         aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
             <#else>
-                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+                <button type="button" class="close" data-dismiss="modal" ><span aria-hidden="true">&times;</span><span
                         class="sr-only">Close</span></button>
             </#if>
                 <h4 class="modal-title" id="login-modal-label">Sign in</h4>
@@ -19,6 +19,14 @@
             <div class="modal-body">
                 <div class="container-fluid modal-container-padding">
                     <div id="alert-container"></div>
+
+                    <#if privacy_policy_enabled>
+                        <div class="well well-sm">
+                                <label class="checkbox-inline">
+                                    <input id="privacy-policy-check" type="checkbox" value="" autocomplete="off">${privacy_policy_text}</label>
+                        </div>
+                    </#if>
+
                 <#if authentication_oidc_clients?has_content>
                     <div class="row">
                       <div class="col-md-12">
@@ -87,9 +95,14 @@
 <script type="text/javascript">
     $(function () {
         var modal = $('#login-modal')
-        var submitBtn = $('#login-btn')
+        var submitBtn = $('#signin-button')
         var form = $('#login-form')
+        var privacyPolicyCheckbox = $('#privacy-policy-check')
+        var privacyPolicyEnabled = ('${privacy_policy_enabled?c}' === 'true')
         form.validate()
+
+        console.log("enabled ja/nezze:")
+        console.log(privacyPolicyEnabled)
 
     <#-- modal events -->
         modal.on('hide.bs.modal', function (e) {
@@ -101,16 +114,24 @@
 
     <#-- form events -->
         form.submit(function (e) {
+            if(privacyPolicyEnabled && !privacyPolicyCheckbox.prop("checked")){
+                $(document).trigger('molgenis-privacy-policy-not-agreed');
+                e.preventDefault()
+                e.stopPropagation()
+            }
+
             if (!form.valid()) {
                 e.preventDefault()
                 e.stopPropagation()
             }
         })
 
-        submitBtn.click(function (e) {
-            e.preventDefault()
-            e.stopPropagation()
-            form.submit()
+        $('[id^="login-with-"]').click(function (e) {
+            if(privacyPolicyEnabled && !privacyPolicyCheckbox.prop("checked")){
+                $(document).trigger('molgenis-privacy-policy-not-agreed');
+                e.preventDefault()
+                e.stopPropagation()
+            }
         })
 
         $('input', form).add(submitBtn).keydown(function (e) { <#-- use keydown, because keypress doesn't work cross-browser -->
@@ -121,6 +142,8 @@
             }
         })
 
+        privacyPolicyCheckbox.blur()
+
     <#-- submodal events -->
         $(document).on('molgenis-registered', function (e, msg) {
             $('#alert-container', modal).empty()
@@ -130,6 +153,16 @@
             $('#alert-container', modal).empty()
             $('#alert-container', modal).html($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> ' + msg + '</div>'))
         })
+        $(document).on('molgenis-privacy-policy-not-agreed', function (e) {
+            $('#alert-container', modal).empty()
+            $('#alert-container', modal).html($('<div class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">&times;</button>You need to agree to the privacy policy before you can sign in.</div>'))
+        })
+        $(document).on("tap click", 'label a', function( event, data ){
+            event.stopPropagation();
+            event.preventDefault();
+            window.open($(this).attr('href'), $(this).attr('target'));
+            return false;
+        });
 
     })
 </script>
