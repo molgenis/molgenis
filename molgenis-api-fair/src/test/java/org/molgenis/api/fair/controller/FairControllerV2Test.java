@@ -34,7 +34,7 @@ class FairControllerV2Test extends AbstractMockitoSpringContextTests {
 
   @Mock private DataService dataService;
   @Mock private MetaDataService metaDataService;
-  @Mock private EntityModelWriter entityModelWriter;
+  @Mock private EntityModelWriterV2 entityModelWriter;
   @Mock private EntityType catalogMeta;
 
   private MockMvc mockMvc;

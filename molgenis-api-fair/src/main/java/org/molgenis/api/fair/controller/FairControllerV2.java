@@ -33,12 +33,12 @@ public class FairControllerV2 {
 
   private final DataService dataService;
   private final MetaDataService metaDataService;
-  private final EntityModelWriter entityModelWriter;
+  private final EntityModelWriterV2 entityModelWriter;
 
   FairControllerV2(
       DataService dataService,
       MetaDataService metaDataService,
-      EntityModelWriter entityModelWriter) {
+      EntityModelWriterV2 entityModelWriter) {
     this.dataService = requireNonNull(dataService);
     this.metaDataService = requireNonNull(metaDataService);
     this.entityModelWriter = requireNonNull(entityModelWriter);
