@@ -1,3 +1,6 @@
+# THIS MOLGENIS VERSION IS IN ARCHIVE MODE. PLEASE USE NEXT GENERATION AT [MOLGENIS-EMX2](http://github.com/molgenis/molgenis-emx2)
+
+
 [![Build status](https://circleci.com/gh/molgenis/molgenis.svg?style=svg)](https://circleci.com/gh/molgenis/molgenis)
 [![Quality Status](https://sonarcloud.io/api/project_badges/measure?project=org.molgenis%3Amolgenis&metric=alert_status)](https://sonarcloud.io/dashboard?id=org.molgenis%3Amolgenis)
 # Welcome to MOLGENIS
