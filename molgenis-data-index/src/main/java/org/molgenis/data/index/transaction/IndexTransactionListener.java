@@ -3,7 +3,7 @@ package org.molgenis.data.index.transaction;
 import static java.util.Objects.requireNonNull;
 
 import org.molgenis.data.index.IndexActionRegisterService;
-import org.molgenis.data.index.job.IndexJobScheduler;
+import org.molgenis.data.index.IndexActionScheduler;
 import org.molgenis.data.transaction.TransactionListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,12 +11,13 @@ import org.slf4j.LoggerFactory;
 public class IndexTransactionListener implements TransactionListener {
   private static final Logger LOG = LoggerFactory.getLogger(IndexTransactionListener.class);
 
-  private IndexJobScheduler indexJobScheduler;
+  private IndexActionScheduler indexActionScheduler;
   private IndexActionRegisterService indexActionRegisterService;
 
   public IndexTransactionListener(
-      IndexJobScheduler indexJobScheduler, IndexActionRegisterService indexActionRegisterService) {
-    this.indexJobScheduler = requireNonNull(indexJobScheduler);
+      IndexActionScheduler indexActionScheduler,
+      IndexActionRegisterService indexActionRegisterService) {
+    this.indexActionScheduler = requireNonNull(indexActionScheduler);
     this.indexActionRegisterService = requireNonNull(indexActionRegisterService);
   }
 
@@ -42,7 +43,7 @@ public class IndexTransactionListener implements TransactionListener {
   public void doCleanupAfterCompletion(String transactionId) {
     try {
       if (indexActionRegisterService.forgetIndexActions(transactionId)) {
-        indexJobScheduler.scheduleIndexJob(transactionId);
+        indexActionScheduler.scheduleIndexActions(transactionId);
       }
     } catch (Exception ex) {
       LOG.error("Error during cleanupAfterCompletion", ex);

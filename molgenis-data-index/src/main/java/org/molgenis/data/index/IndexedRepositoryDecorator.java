@@ -25,7 +25,6 @@ import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.index.exception.UnknownIndexException;
-import org.molgenis.data.index.job.IndexJobScheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +38,7 @@ class IndexedRepositoryDecorator extends AbstractRepositoryDecorator<Entity> {
   private static final String DECORATED_REPOSITORY = "Decorated Repository";
 
   private final SearchService searchService;
-  private final IndexJobScheduler indexJobScheduler;
+  private final IndexActionScheduler indexActionScheduler;
 
   /** Operators NOT supported by the decorated repository. */
   private final Set<Operator> unsupportedOperators;
@@ -47,10 +46,10 @@ class IndexedRepositoryDecorator extends AbstractRepositoryDecorator<Entity> {
   IndexedRepositoryDecorator(
       Repository<Entity> delegateRepository,
       SearchService searchService,
-      IndexJobScheduler indexJobScheduler) {
+      IndexActionScheduler indexActionScheduler) {
     super(delegateRepository);
     this.searchService = requireNonNull(searchService);
-    this.indexJobScheduler = requireNonNull(indexJobScheduler);
+    this.indexActionScheduler = requireNonNull(indexActionScheduler);
     Set<Operator> operators = getQueryOperators();
     operators.removeAll(delegate().getQueryOperators());
     unsupportedOperators = Collections.unmodifiableSet(operators);
@@ -181,7 +180,7 @@ class IndexedRepositoryDecorator extends AbstractRepositoryDecorator<Entity> {
 
   private void waitForIndexToBeStable() {
     try {
-      indexJobScheduler.waitForIndexToBeStableIncludingReferences(getEntityType());
+      indexActionScheduler.waitForIndexToBeStableIncludingReferences(getEntityType());
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
     }

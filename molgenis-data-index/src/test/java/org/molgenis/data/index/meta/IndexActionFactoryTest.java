@@ -11,7 +11,6 @@ import org.springframework.test.context.ContextConfiguration;
       EntityBaseTestConfig.class,
       IndexActionMetadata.class,
       IndexActionFactory.class,
-      IndexActionGroupMetadata.class,
       IndexPackage.class
     })
 public class IndexActionFactoryTest extends AbstractEntityFactoryTest {

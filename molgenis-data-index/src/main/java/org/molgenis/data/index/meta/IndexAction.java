@@ -1,13 +1,19 @@
 package org.molgenis.data.index.meta;
 
-import static org.molgenis.data.index.meta.IndexActionMetadata.ACTION_ORDER;
+import static org.molgenis.data.index.meta.IndexActionMetadata.CREATION_DATE_TIME;
+import static org.molgenis.data.index.meta.IndexActionMetadata.END_DATE_TIME;
 import static org.molgenis.data.index.meta.IndexActionMetadata.ENTITY_ID;
 import static org.molgenis.data.index.meta.IndexActionMetadata.ENTITY_TYPE_ID;
 import static org.molgenis.data.index.meta.IndexActionMetadata.ID;
-import static org.molgenis.data.index.meta.IndexActionMetadata.INDEX_ACTION_GROUP_ATTR;
 import static org.molgenis.data.index.meta.IndexActionMetadata.INDEX_STATUS;
 import static org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus;
+import static org.molgenis.data.index.meta.IndexActionMetadata.START_DATE_TIME;
+import static org.molgenis.data.index.meta.IndexActionMetadata.TRANSACTION_ID;
 
+import java.time.Instant;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
@@ -38,23 +44,36 @@ public class IndexAction extends StaticEntity {
     return this;
   }
 
-  @Nullable
-  @CheckForNull
-  public IndexActionGroup getIndexActionGroup() {
-    return getEntity(INDEX_ACTION_GROUP_ATTR, IndexActionGroup.class);
+  public Instant getCreationDateTime() {
+    return getInstant(CREATION_DATE_TIME);
   }
 
-  public IndexAction setIndexActionGroup(IndexActionGroup indexActionGroup) {
-    set(INDEX_ACTION_GROUP_ATTR, indexActionGroup);
-    return this;
+  public void setCreationDateTime(Instant value) {
+    set(CREATION_DATE_TIME, value);
   }
 
-  public int getActionOrder() {
-    return getInt(ACTION_ORDER);
+  public Instant getStartDateTime() {
+    return getInstant(START_DATE_TIME);
   }
 
-  public IndexAction setActionOrder(int actionOrder) {
-    set(ACTION_ORDER, actionOrder);
+  public void setStartDateTime(Instant value) {
+    set(START_DATE_TIME, value);
+  }
+
+  public Instant getEndDateTime() {
+    return getInstant(CREATION_DATE_TIME);
+  }
+
+  public void setEndDateTime(Instant value) {
+    set(END_DATE_TIME, value);
+  }
+
+  public String getTransactionId() {
+    return getString(TRANSACTION_ID);
+  }
+
+  public IndexAction setTransactionId(String transactionId) {
+    set(TRANSACTION_ID, transactionId);
     return this;
   }
 
@@ -124,5 +143,12 @@ public class IndexAction extends StaticEntity {
 
   public boolean isWholeRepository() {
     return getEntityId() == null;
+  }
+
+  @Override
+  public String toString() {
+    return Stream.of(getEntityTypeId(), getEntityId())
+        .filter(Objects::nonNull)
+        .collect(Collectors.joining("."));
   }
 }

@@ -33,7 +33,8 @@ public interface IndexActionRegisterService {
   void storeIndexActions(String transactionId);
 
   /**
-   * Removes all index actions registered for a transaction.
+   * Removes all index actions registered for a transaction. The index actions are not removed from
+   * the repository.
    *
    * @param transactionId ID for the transaction the index actions were registered under
    * @return boolean indicating if any work was present

@@ -1,6 +1,8 @@
 package org.molgenis.data.index.meta;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.molgenis.data.config.EntityBaseTestConfig;
@@ -15,7 +17,6 @@ import org.springframework.test.context.ContextConfiguration;
       EntityBaseTestConfig.class,
       IndexActionMetadata.class,
       IndexActionFactory.class,
-      IndexActionGroupMetadata.class,
       IndexPackage.class
     })
 public class IndexActionTest extends AbstractSystemEntityTest {
@@ -33,6 +34,14 @@ public class IndexActionTest extends AbstractSystemEntityTest {
     map.put(IndexActionMetadata.INDEX_STATUS, status);
 
     return map;
+  }
+
+  @Override
+  protected List<String> getExcludedAttrs() {
+    List<String> attrs = new ArrayList<>();
+    attrs.add(IndexActionMetadata.END_DATE_TIME);
+    attrs.add(IndexActionMetadata.CREATION_DATE_TIME);
+    return attrs;
   }
 
   @SuppressWarnings("java:S2699") // Tests should include assertions
