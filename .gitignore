@@ -36,3 +36,4 @@ molgenis-platform-integration-tests/integ-test-env/.env
 audit.log
 
 cargo.out
+.smarttomcat
