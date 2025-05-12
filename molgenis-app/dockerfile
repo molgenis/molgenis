@@ -1,0 +1,27 @@
+FROM docker.io/molgenis/molgenis-base:1.3.0
+
+# Set environment variables
+ENV \
+  elasticsearch_cluster_name=molgenis \
+  elasticsearch_hosts=host.docker.internal:9200 \
+  opencpu_uri_scheme=http \
+  opencpu_uri_host=host.docker.internal \
+  opencpu_uri_port=8004 \
+  opencpu_uri_path=/ocpu/ \
+  db_uri=jdbc:postgresql://host.docker.internal/molgenis \
+  db_user=molgenis \
+  db_password=molgenis \
+  admin_password=admin \
+  molgenis_home=/home/molgenis \
+  MINIO_BUCKET_NAME=molgenis \
+  MINIO_ENDPOINT=http://host.docker.internal:9000 \
+  MINIO_ACCESS_KEY=molgenis \
+  MINIO_SECRET_KEY=molgenis \
+  python_script_executable=/usr/bin/python3
+
+# Copy your application to the appropriate directory
+COPY ./target/molgenis-app-10.2.1-SNAPSHOT /usr/local/tomcat/webapps/ROOT/
+
+EXPOSE 8080
+
+CMD ["catalina.sh", "run"]

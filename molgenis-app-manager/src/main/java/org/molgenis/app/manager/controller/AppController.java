@@ -14,6 +14,7 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.molgenis.app.manager.exception.AppIsInactiveException;
 import org.molgenis.app.manager.model.AppResponse;
 import org.molgenis.app.manager.service.AppManagerService;

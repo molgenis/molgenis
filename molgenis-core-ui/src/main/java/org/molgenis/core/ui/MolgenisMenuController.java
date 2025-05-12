@@ -14,6 +14,8 @@ import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+
+import com.github.jknack.handlebars.internal.text.StringEscapeUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownPluginException;
 import org.molgenis.data.plugin.model.Plugin;
@@ -194,7 +196,7 @@ public class MolgenisMenuController {
     // get plugin path with elevated permissions because the anonymous user can also request plugins
     Plugin plugin = runAsSystem(() -> dataService.findOneById(PLUGIN, pluginId, Plugin.class));
     if (plugin == null) {
-      throw new UnknownPluginException(pluginId);
+      throw new UnknownPluginException(StringEscapeUtils.escapeHtml4(pluginId));
     }
 
     StringBuilder strBuilder = new StringBuilder("forward:");
