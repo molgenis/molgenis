@@ -23,6 +23,7 @@ public class MailSenderImpl implements MailSender {
   @Override
   public void send(SimpleMailMessage simpleMessage) {
     LOG.trace("Sending message...");
+    simpleMessage.setFrom(mailSettings.getFromAddress());
     createMailSender().send(simpleMessage);
     LOG.debug("Sent message.");
   }
