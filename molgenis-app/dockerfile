@@ -20,7 +20,7 @@ ENV \
   python_script_executable=/usr/bin/python3
 
 # Copy your application to the appropriate directory
-COPY ./target/molgenis-app-10.2.2 /usr/local/tomcat/webapps/ROOT/
+COPY ./target/molgenis-app-10.2.3 /usr/local/tomcat/webapps/ROOT/
 
 EXPOSE 8080
 
