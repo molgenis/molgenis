@@ -19,7 +19,6 @@ import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.settings.AuthenticationSettings;
 import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.settings.AppSettings;
-import org.molgenis.util.mail.MailSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mail.MailException;
