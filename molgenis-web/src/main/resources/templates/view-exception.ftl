@@ -11,13 +11,13 @@
 <body>
 <h1>${httpStatusCode}</h1><br/>
         <#list errorMessageResponse.errors as error>
-            <h2>${error.message}<#if error.code??> (${error.code})</#if></h2>
+            <h2>${error.message?html}<#if error.code??> (${error.code?html})</#if></h2>
         </#list>
         <#if stackTrace??>
         <br>
             Stacktrace: <br>
             <#list stackTrace as stackTraceElement>
-                ${stackTraceElement}<br>
+                ${stackTraceElement?html}<br>
             </#list>
         </#if>
 </body>
