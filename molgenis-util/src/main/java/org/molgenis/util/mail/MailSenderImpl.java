@@ -23,8 +23,11 @@ public class MailSenderImpl implements MailSender {
   @Override
   public void send(SimpleMailMessage simpleMessage) {
     LOG.trace("Sending message...");
-    if(simpleMessage.getFrom() == null) {
+    if (simpleMessage.getFrom() == null) {
       LOG.trace("Message does not have a from address, using default from address from mail settings.");
+      if (mailSettings.getFromAddress() == null) {
+        LOG.warn("Mail settings does not have a from address configured, message will be sent without from address.");
+      }
       simpleMessage.setFrom(mailSettings.getFromAddress());
     }
     createMailSender().send(simpleMessage);
