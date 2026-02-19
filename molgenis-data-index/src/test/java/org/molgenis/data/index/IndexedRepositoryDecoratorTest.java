@@ -47,7 +47,6 @@ import org.molgenis.data.Sort;
 import org.molgenis.data.aggregation.AggregateQuery;
 import org.molgenis.data.aggregation.AggregateResult;
 import org.molgenis.data.index.exception.UnknownIndexException;
-import org.molgenis.data.index.job.IndexJobScheduler;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.AggregateQueryImpl;
@@ -80,9 +79,9 @@ class IndexedRepositoryDecoratorTest {
     when(delegateRepository.getCapabilities())
         .thenReturn(EnumSet.of(QUERYABLE, MANAGABLE, VALIDATE_NOTNULL_CONSTRAINT));
     when(delegateRepository.getQueryOperators()).thenReturn(EnumSet.of(IN, LESS, EQUALS, AND, OR));
-    IndexJobScheduler indexJobScheduler = mock(IndexJobScheduler.class);
+    IndexActionScheduler indexActionScheduler = mock(IndexActionScheduler.class);
     indexedRepositoryDecorator =
-        new IndexedRepositoryDecorator(delegateRepository, searchService, indexJobScheduler);
+        new IndexedRepositoryDecorator(delegateRepository, searchService, indexActionScheduler);
 
     when(repositoryEntityType.getAtomicAttributes()).thenReturn(newArrayList(idAttr));
 

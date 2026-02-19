@@ -1,8 +1,6 @@
 package org.molgenis.data.platform.decorators;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.index.job.IndexJobExecutionMetadata.INDEX_JOB_EXECUTION;
-import static org.molgenis.data.index.meta.IndexActionGroupMetadata.INDEX_ACTION_GROUP;
 import static org.molgenis.data.index.meta.IndexActionMetadata.INDEX_ACTION;
 import static org.molgenis.security.audit.AuditSettingsImpl.AUDIT_SETTINGS;
 
@@ -127,9 +125,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 
     dynamicRepositoryDecoratorRegistry.excludeEntityType(AUDIT_SETTINGS);
 
-    auditingRepositoryDecoratorFactory.excludeEntityType(INDEX_JOB_EXECUTION);
     auditingRepositoryDecoratorFactory.excludeEntityType(INDEX_ACTION);
-    auditingRepositoryDecoratorFactory.excludeEntityType(INDEX_ACTION_GROUP);
   }
 
   @Override

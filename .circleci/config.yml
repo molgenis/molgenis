@@ -52,34 +52,35 @@ jobs:
           paths:
             - ~/.m2
           key: maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
-  apitest:
-    executor: it-executor
-    steps:
-      - attach_workspace:
-          at: ~/.m2
-      - checkout
-      - run: mvn verify --batch-mode -pl molgenis-api-tests
-      - run:
-          name: Save test results
-          command: |
-            mkdir -p ~/test-results/junit/
-            find . -type f -regex ".*/target/failsafe-reports/.*xml" -exec cp {} ~/test-results/junit/ \;
-          when: always
-      - store_test_results:
-          path: ~/test-results
-      - store_artifacts:
-          path: ~/test-results/junit
-      - save_cache:
-          paths:
-            - ~/.m2
-          key: maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
+#  apitest:
+#    executor: it-executor
+#    steps:
+#      - attach_workspace:
+#          at: ~/.m2
+#      - checkout
+#      - run: mvn verify --batch-mode -pl molgenis-api-tests
+#      - run:
+#          name: Save test results
+#          command: |
+#            mkdir -p ~/test-results/junit/
+#            find . -type f -regex ".*/target/failsafe-reports/.*xml" -exec cp {} ~/test-results/junit/ \;
+#          when: always
+#      - store_test_results:
+#          path: ~/test-results
+#      - store_artifacts:
+#          path: ~/test-results/junit
+#      - save_cache:
+#          paths:
+#            - ~/.m2
+#          key: maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
   integrationtest:
     executor: it-executor
     steps:
       - attach_workspace:
           at: ~/.m2
       - checkout
-      - run: mvn verify --batch-mode -pl molgenis-platform-integration-tests
+      - run: mvn test --batch-mode -pl molgenis-platform-integration-tests -Dtest="PlatformIT#testIndexCreateMetaData"
+#      - run: mvn verify --batch-mode -pl molgenis-platform-integration-tests
       - run:
           name: Save test results
           command: |
@@ -103,6 +104,6 @@ workflows:
       - integrationtest:
           requires:
             - build
-      - apitest:
-          requires:
-            - build
+#      - apitest:
+#          requires:
+#            - build

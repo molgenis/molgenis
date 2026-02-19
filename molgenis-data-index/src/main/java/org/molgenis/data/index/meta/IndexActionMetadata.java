@@ -3,9 +3,7 @@ package org.molgenis.data.index.meta;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.index.meta.IndexPackage.PACKAGE_INDEX;
 import static org.molgenis.data.meta.AttributeType.ENUM;
-import static org.molgenis.data.meta.AttributeType.INT;
 import static org.molgenis.data.meta.AttributeType.TEXT;
-import static org.molgenis.data.meta.AttributeType.XREF;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
@@ -29,11 +27,14 @@ public class IndexActionMetadata extends SystemEntityType {
   /** The creation time of the index action. */
   public static final String CREATION_DATE_TIME = "creationDateTime";
 
-  /** The group that this index action belongs to. */
-  public static final String INDEX_ACTION_GROUP_ATTR = "indexActionGroup";
+  /** The time at which this index action was finished (for whichever reason) */
+  public static final String END_DATE_TIME = "endDateTime";
 
-  /** The order in which the action is registered within its IndexActionJob */
-  public static final String ACTION_ORDER = "actionOrder";
+  /** The time at which this index action started */
+  public static final String START_DATE_TIME = "startDateTime";
+
+  /** The transaction that caused this index action. */
+  public static final String TRANSACTION_ID = "transactionId";
 
   /** The name of the entity type ID that needs to be indexed */
   public static final String ENTITY_TYPE_ID = "entityTypeId";
@@ -49,13 +50,10 @@ public class IndexActionMetadata extends SystemEntityType {
   public static final String INDEX_STATUS = "indexStatus";
 
   private final IndexPackage indexPackage;
-  private IndexActionGroupMetadata indexActionGroupMetaData;
 
-  public IndexActionMetadata(
-      IndexPackage indexPackage, IndexActionGroupMetadata indexActionGroupMetaData) {
+  public IndexActionMetadata(IndexPackage indexPackage) {
     super(SIMPLE_NAME, PACKAGE_INDEX);
     this.indexPackage = requireNonNull(indexPackage);
-    this.indexActionGroupMetaData = requireNonNull(indexActionGroupMetaData);
   }
 
   @Override
@@ -65,14 +63,10 @@ public class IndexActionMetadata extends SystemEntityType {
 
     addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false);
     addAttribute(CREATION_DATE_TIME, ROLE_LABEL).setDataType(AttributeType.DATE_TIME).setAuto(true);
-    addAttribute(INDEX_ACTION_GROUP_ATTR)
-        .setDescription("The group that this index action belongs to")
-        .setDataType(XREF)
-        .setRefEntity(indexActionGroupMetaData);
-    addAttribute(ACTION_ORDER)
-        .setDataType(INT)
-        .setDescription("The order in which the action is registered within its IndexActionJob")
-        .setNillable(false);
+    addAttribute(START_DATE_TIME).setDataType(AttributeType.DATE_TIME).setNillable(true);
+    addAttribute(END_DATE_TIME).setDataType(AttributeType.DATE_TIME).setNillable(true);
+    addAttribute(TRANSACTION_ID)
+        .setDescription("The id of the transaction that caused this index action");
     addAttribute(ENTITY_TYPE_ID)
         .setDescription("The id of the entity type that needs to be indexed (e.g. myEntityType).")
         .setNillable(false);
@@ -93,6 +87,8 @@ public class IndexActionMetadata extends SystemEntityType {
     FINISHED,
     /** index action is canceled */
     CANCELED,
+    /** index action is skipped (because it is not necessary) */
+    SKIPPED,
     /** index action failed */
     FAILED,
     /** index action is started */

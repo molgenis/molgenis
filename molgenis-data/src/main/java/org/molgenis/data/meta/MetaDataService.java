@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
@@ -23,6 +24,9 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.Tag;
 
 public interface MetaDataService extends Iterable<RepositoryCollection> {
+  // TODO remove me
+  DataService getDataService();
+
   /**
    * Returns the repository for the given entity type identifier.
    *

@@ -2,15 +2,12 @@ package org.molgenis.data.index;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Multimaps.synchronizedSetMultimap;
-import static com.google.common.collect.Streams.mapWithIndex;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.molgenis.data.index.Impact.createSingleEntityImpact;
 import static org.molgenis.data.index.IndexDependencyModel.ENTITY_TYPE_FETCH;
-import static org.molgenis.data.index.meta.IndexActionGroupMetadata.INDEX_ACTION_GROUP;
 import static org.molgenis.data.index.meta.IndexActionMetadata.INDEX_ACTION;
 import static org.molgenis.data.index.meta.IndexActionMetadata.IndexStatus.PENDING;
 import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
@@ -24,14 +21,11 @@ import com.google.common.collect.Sets;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityKey;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionFactory;
-import org.molgenis.data.index.meta.IndexActionGroup;
-import org.molgenis.data.index.meta.IndexActionGroupFactory;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.transaction.TransactionInformation;
@@ -49,6 +43,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 @Component
 public class IndexActionRegisterServiceImpl
     implements TransactionInformation, IndexActionRegisterService {
+
   private static final Logger LOG = LoggerFactory.getLogger(IndexActionRegisterServiceImpl.class);
   private static final int LOG_EVERY = 1000;
   private static final int ENTITY_FETCH_PAGE_SIZE = 1000;
@@ -58,7 +53,6 @@ public class IndexActionRegisterServiceImpl
 
   private final DataService dataService;
   private final IndexActionFactory indexActionFactory;
-  private final IndexActionGroupFactory indexActionGroupFactory;
   private final IndexingStrategy indexingStrategy;
 
   private final Set<String> excludedEntities = Sets.newConcurrentHashSet();
@@ -66,14 +60,11 @@ public class IndexActionRegisterServiceImpl
   IndexActionRegisterServiceImpl(
       DataService dataService,
       IndexActionFactory indexActionFactory,
-      IndexActionGroupFactory indexActionGroupFactory,
       IndexingStrategy indexingStrategy) {
     this.dataService = requireNonNull(dataService);
     this.indexActionFactory = requireNonNull(indexActionFactory);
-    this.indexActionGroupFactory = requireNonNull(indexActionGroupFactory);
     this.indexingStrategy = requireNonNull(indexingStrategy);
 
-    addExcludedEntity(INDEX_ACTION_GROUP);
     addExcludedEntity(INDEX_ACTION);
   }
 
@@ -120,23 +111,16 @@ public class IndexActionRegisterServiceImpl
       return;
     }
 
-    IndexActionGroup indexActionGroup = indexActionGroupFactory.create(transactionId);
     IndexDependencyModel dependencyModel = createIndexDependencyModel(changes);
-    Stream<Impact> impactStream =
-        indexingStrategy.determineImpact(changes, dependencyModel).stream()
-            .filter(key -> !excludedEntities.contains(key.getEntityTypeId()));
     List<IndexAction> indexActions =
-        mapWithIndex(
-                impactStream,
-                (key, actionOrder) -> createIndexAction(indexActionGroup, key, (int) actionOrder))
-            .collect(toList());
+        indexingStrategy.determineImpact(changes, dependencyModel).stream()
+            .filter(key -> !excludedEntities.contains(key.getEntityTypeId()))
+            .map(impact -> createIndexAction(transactionId, impact))
+            .toList();
     if (indexActions.isEmpty()) {
       return;
     }
     LOG.debug("Store index actions for transaction {}", transactionId);
-    dataService.add(
-        INDEX_ACTION_GROUP,
-        indexActionGroupFactory.create(transactionId).setCount(indexActions.size()));
     dataService.add(INDEX_ACTION, indexActions.stream());
   }
 
@@ -151,8 +135,7 @@ public class IndexActionRegisterServiceImpl
     }
   }
 
-  private IndexAction createIndexAction(
-      IndexActionGroup indexActionGroup, Impact key, int actionOrder) {
+  private IndexAction createIndexAction(String transactionId, Impact key) {
     IndexAction indexAction = indexActionFactory.create();
     indexAction.setIndexStatus(PENDING);
     Object entityId = key.getId();
@@ -160,8 +143,7 @@ public class IndexActionRegisterServiceImpl
       indexAction.setEntityId(entityId.toString());
     }
     indexAction.setEntityTypeId(key.getEntityTypeId());
-    indexAction.setIndexActionGroup(indexActionGroup);
-    indexAction.setActionOrder(actionOrder);
+    indexAction.setTransactionId(transactionId);
     return indexAction;
   }
 
@@ -187,7 +169,9 @@ public class IndexActionRegisterServiceImpl
 
   @Override
   public boolean forgetIndexActions(String transactionId) {
-    LOG.debug("Forget index actions for transaction {}", transactionId);
+    if (LOG.isTraceEnabled()) {
+      LOG.trace("Forget index actions for transaction {}", transactionId);
+    }
     return !changesPerTransaction.removeAll(transactionId).stream()
         .map(Impact::getEntityTypeId)
         .allMatch(excludedEntities::contains);

@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityTestHarness;
-import org.molgenis.data.index.job.IndexJobScheduler;
+import org.molgenis.data.index.IndexActionScheduler;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
@@ -83,7 +83,7 @@ class CopyServiceIT extends AbstractMockitoSpringContextTests {
   @Autowired private PackageFactory packageFactory;
   @Autowired private EntityTestHarness testHarness;
   @Autowired private MetaDataService metadataService;
-  @Autowired private IndexJobScheduler indexService;
+  @Autowired private IndexActionScheduler indexService;
   @Autowired private PermissionService testPermissionService;
 
   private EntityType entityTypeB;
