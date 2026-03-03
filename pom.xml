@@ -98,7 +98,7 @@
     <swagger-annotations.version>1.5.16</swagger-annotations.version>
     <org.everit.json.schema.version>1.5.1</org.everit.json.schema.version>
     <picard.version>1.102.0</picard.version>
-    <json.version>20141113</json.version>
+    <json.version>20230227</json.version>
     <rsql-parser.version>2.0.0</rsql-parser.version>
     <UserAgentUtils.version>1.17</UserAgentUtils.version>
     <freemarker-java8.version>1.1.2</freemarker-java8.version>
