@@ -7,6 +7,7 @@ import static org.molgenis.data.plugin.model.PluginMetadata.PLUGIN;
 import static org.molgenis.security.core.runas.RunAsSystemAspect.runAsSystem;
 import static org.molgenis.web.PluginAttributes.KEY_CONTEXT_URL;
 
+import com.github.jknack.handlebars.internal.text.StringEscapeUtils;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import javax.annotation.CheckForNull;
@@ -14,8 +15,6 @@ import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-
-import com.github.jknack.handlebars.internal.text.StringEscapeUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownPluginException;
 import org.molgenis.data.plugin.model.Plugin;
