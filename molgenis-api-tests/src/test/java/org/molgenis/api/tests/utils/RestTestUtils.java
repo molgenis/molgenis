@@ -309,7 +309,7 @@ public class RestTestUtils {
     return given()
         .contentType(APPLICATION_JSON)
         .header(X_MOLGENIS_TOKEN, adminToken)
-        .get("/api/data/sys_job_IndexJobExecution?q=status=in=(RUNNING,PENDING)")
+        .get("/api/data/sys_idx_IndexAction?q=indexStatus=in=(STARTED,PENDING)")
         .then()
         .statusCode(OKE)
         .extract()

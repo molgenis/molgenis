@@ -13,8 +13,8 @@ import org.molgenis.data.Query;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.UnknownEntityTypeException;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
+import org.molgenis.data.index.IndexActionScheduler;
 import org.molgenis.data.index.SearchService;
-import org.molgenis.data.index.job.IndexJobScheduler;
 import org.molgenis.data.meta.AttributeType;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class IndexMetadataCUDOperationsPlatformIT {
+
   private static final Logger LOG =
       LoggerFactory.getLogger(IndexMetadataCUDOperationsPlatformIT.class);
 
@@ -35,29 +36,46 @@ public class IndexMetadataCUDOperationsPlatformIT {
       EntityType entityTypeStatic,
       EntityType entityTypeDynamic,
       MetaDataService metaDataService) {
+    System.out.println("START - testIndexCreateMetaData");
+
+    System.out.println(
+        "entityTypeStatic id: "
+            + entityTypeStatic.getId()
+            + " package: "
+            + entityTypeStatic.getPackage());
+
     Query<Entity> q1 = new QueryImpl<>();
     q1.eq(EntityTypeMetadata.ID, entityTypeStatic.getId())
         .and()
         .eq(EntityTypeMetadata.PACKAGE, entityTypeStatic.getPackage());
-    assertEquals(
-        1,
+    var count =
         searchService.count(
             metaDataService
                 .getEntityType(ENTITY_TYPE_META_DATA)
                 .orElseThrow(() -> new UnknownEntityTypeException(entityTypeStatic.getId())),
-            q1));
+            q1);
 
+    System.out.println("COUNT - entityTypeStatic with package: " + count);
+    assertEquals(1, count);
+
+    System.out.println(
+        "entityTypeDynamic id: "
+            + entityTypeDynamic.getId()
+            + " package: "
+            + entityTypeDynamic.getPackage());
     Query<Entity> q2 = new QueryImpl<>();
     q2.eq(EntityTypeMetadata.ID, entityTypeDynamic.getId())
         .and()
         .eq(EntityTypeMetadata.PACKAGE, entityTypeDynamic.getPackage());
-    assertEquals(
-        1,
+    var count2 =
         searchService.count(
             metaDataService
                 .getEntityType(ENTITY_TYPE_META_DATA)
                 .orElseThrow(() -> new UnknownEntityTypeException(entityTypeDynamic.getId())),
-            q2));
+            q2);
+
+    System.out.println("COUNT - entityTypeDynamic with package: " + count2);
+    assertEquals(1, count2);
   }
 
   public static void testIndexUpdateMetaDataRemoveCompoundAttribute(
@@ -65,7 +83,7 @@ public class IndexMetadataCUDOperationsPlatformIT {
       AttributeFactory attributeFactory,
       ElasticsearchService searchService,
       MetaDataService metaDataService,
-      IndexJobScheduler indexService) {
+      IndexActionScheduler indexService) {
     // 1. Create new compound to test delete
     Attribute compound = attributeFactory.create();
     compound.setName("test_compound");
