@@ -1,3 +1,5 @@
+# DEPRECATED please use [MOLGENIS EMX2](http://github.com/molgenis/molgenis-emx2)
+
 # What is MOLGENIS?
 MOLGENIS is a modular web application for scientific data. MOLGENIS was born from molecular genetics research (and was called 'molecular genetics information system') but has grown, thanks too many sponsors and contributors, to be used in many scientifc areas such as biobanking, rare disease research, patient registries and even energy research. MOLGENIS provides researchers with user friendly and scalable software infrastructures to capture, exchange, and exploit the large amounts of data that is being produced by scientific organisations all around the world. To get an idea of what the software can do, visit our [MOLGENIS YouTube channel](https://www.youtube.com/channel/UCiVR-YZFcBQe0i6RUwE9kyg).
 
