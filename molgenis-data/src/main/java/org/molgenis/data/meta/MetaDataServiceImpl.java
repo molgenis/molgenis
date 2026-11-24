@@ -80,6 +80,11 @@ public class MetaDataServiceImpl implements MetaDataService {
     this.packagePersister = requireNonNull(packagePersister);
   }
 
+  // TODO remove me
+  public DataService getDataService() {
+    return dataService;
+  }
+
   @Override
   public Optional<Repository<Entity>> getRepository(String entityTypeId) {
     EntityType entityType =

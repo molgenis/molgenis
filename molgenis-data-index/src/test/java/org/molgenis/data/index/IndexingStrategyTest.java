@@ -26,7 +26,7 @@ class IndexingStrategyTest extends AbstractMockitoTest {
   IndexingStrategy indexingStrategy;
 
   @BeforeEach
-  private void beforeMethod() {
+  void beforeMethod() {
     indexingStrategy = new IndexingStrategy();
     reset(dependencyModel);
   }
